@@ -1,0 +1,24 @@
+{
+  "components": {
+    "ui": [
+      {
+        "name": "Button",
+        "description": "A reusable button component."
+      },
+      {
+        "name": "Input",
+        "description": "A reusable input field component."
+      }
+    ],
+    "shared": [
+      {
+        "name": "Header",
+        "description": "A shared header component for the application."
+      },
+      {
+        "name": "Footer",
+        "description": "A shared footer component for the application."
+      }
+    ]
+  }
+}
