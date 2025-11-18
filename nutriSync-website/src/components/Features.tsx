@@ -43,12 +43,12 @@ export const Features = () => {
             >
               <div className="w-24 h-24 mx-auto mb-6 rounded-xl overflow-hidden">
                 <img 
-                  src={feature.image} 
+                  src={feature.image.src} 
                   alt={feature.title}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <feature.icon className="w-12 h-12 text-primary mx-auto mb-4" />
+              <feature.icon stroke="#27b07d" className="w-12 h-12 text-primary mx-auto mb-4" />
               <h3 className="text-2xl font-semibold mb-3 text-center">{feature.title}</h3>
               <p className="text-muted-foreground text-center leading-relaxed">
                 {feature.description}

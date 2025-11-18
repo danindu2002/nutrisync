@@ -6,7 +6,7 @@ export const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className="font-bold text-lg mb-4">MealPlan</h3>
+            <h3 className="font-bold text-lg mb-4">NutriSync</h3>
             <p className="text-muted-foreground text-sm">
               Making healthy eating simple, delicious, and accessible for everyone.
             </p>
@@ -52,7 +52,7 @@ export const Footer = () => {
         </div>
         
         <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 MealPlan. All rights reserved. | Privacy Policy | Terms of Service</p>
+          <p>&copy; 2025 NutriSync. All rights reserved. | Privacy Policy | Terms of Service</p>
         </div>
       </div>
     </footer>

@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
             <HowItWorks/>
             <Pricing/>
             <Footer/>
-            <FooterSection />
+            {/* <FooterSection /> */}
         </main>
     );
 };

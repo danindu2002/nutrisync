@@ -64,12 +64,12 @@ export const Pricing = () => {
               key={index}
               className={`bg-card rounded-2xl p-8 border-2 transition-all duration-300 hover:shadow-xl ${
                 plan.popular
-                  ? "border-primary shadow-lg scale-105"
+                  ? "border-[#27b07d] shadow-lg scale-105"
                   : "border-border hover:border-primary/30"
               }`}
             >
               {plan.popular && (
-                <div className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-1 rounded-full inline-block mb-4">
+                <div className="bg-[#27b07d] text-primary-foreground text-sm font-semibold px-4 py-1 rounded-full inline-block mb-4">
                   Most Popular
                 </div>
               )}
@@ -81,7 +81,7 @@ export const Pricing = () => {
               </div>
               <Button 
                 variant={plan.popular ? "hero" : "outline"} 
-                className="w-full mb-6"
+                className={plan.popular ? "bg-[#27b07d] w-full mb-6" : "w-full mb-6"}
                 size="lg"
               >
                 Start Free Trial
@@ -89,7 +89,7 @@ export const Pricing = () => {
               <ul className="space-y-3">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <Check stroke="#27b07d" className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <span className="text-sm">{feature}</span>
                   </li>
                 ))}
