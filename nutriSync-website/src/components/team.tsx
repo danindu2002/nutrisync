@@ -1,0 +1,61 @@
+const members = [
+  {
+    name: "Méschac Irung",
+    avatar: "https://avatars.githubusercontent.com/u/47919550?v=4",
+  },
+  {
+    name: "Théo Balick",
+    avatar: "https://avatars.githubusercontent.com/u/68236786?v=4",
+  },
+  {
+    name: "Glodie Lukose",
+    avatar: "https://avatars.githubusercontent.com/u/99137927?v=4",
+  },
+  {
+    name: "Méschac Irung",
+    avatar: "https://avatars.githubusercontent.com/u/47919550?v=4",
+  },
+  {
+    name: "Théo Balick",
+    avatar: "https://avatars.githubusercontent.com/u/68236786?v=4",
+  },
+  {
+    name: "Bernard Ngandu",
+    avatar: "https://avatars.githubusercontent.com/u/31113941?v=4",
+  },
+];
+
+export default function TeamSection() {
+  return (
+    <div className="mx-auto max-w-7xl px-8 lg:px-0 mb-20">
+      <h2 className="mb-8 text-4xl font-bold md:mb-16 lg:text-5xl">Our team</h2>
+
+      <div>
+        <h3 className="mb-6 text-lg font-low">
+          Meet the brilliant minds driving our mission forward. A team powered
+          by passion, innovation, and relentless dedication.
+        </h3>
+
+        <div className="overflow-x-auto">
+          <div className="flex justify-between gap-6 py-6 min-w-max">
+            {members.map((member, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <div className="size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5">
+                  <img
+                    className="aspect-square rounded-full object-cover"
+                    src={member.avatar}
+                    alt={member.name}
+                    height="200"
+                    width="200"
+                    loading="lazy"
+                  />
+                </div>
+                <span className="mt-2 text-sm text-center">{member.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

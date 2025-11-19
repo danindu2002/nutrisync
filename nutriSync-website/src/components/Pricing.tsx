@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 const plans = [
   {
     name: "Basic",
-    price: "$9",
+    price: "Free",
     period: "/month",
     description: "Perfect for getting started",
     features: [
@@ -17,7 +17,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "$19",
+    price: "$9",
     period: "/month",
     description: "Most popular choice",
     features: [
@@ -32,7 +32,7 @@ const plans = [
   },
   {
     name: "Family",
-    price: "$29",
+    price: "$19",
     period: "/month",
     description: "Best for families",
     features: [
@@ -79,13 +79,13 @@ export const Pricing = () => {
                 <span className="text-5xl font-bold">{plan.price}</span>
                 <span className="text-muted-foreground text-lg">{plan.period}</span>
               </div>
-              <Button 
+              {/* <Button 
                 variant={plan.popular ? "hero" : "outline"} 
                 className={plan.popular ? "bg-[#27b07d] w-full mb-6" : "w-full mb-6"}
                 size="lg"
               >
                 Start Free Trial
-              </Button>
+              </Button> */}
               <ul className="space-y-3">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start gap-3">
