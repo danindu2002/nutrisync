@@ -12,7 +12,7 @@ import FooterSection from "@/components/Footer";
 
 const HomePage: React.FC = () => {
   return (
-    <main className="flex flex-col items-center justify-center">
+    <main>
       {/* <main className="flex flex-col items-center justify-center min-h-screen"> */}
       {/* <Features /> */}
       {/* <DetailsSection /> */}

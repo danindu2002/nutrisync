@@ -27,7 +27,7 @@ const members = [
 
 export default function TeamSection() {
   return (
-    <div id="team" className="mx-auto max-w-7xl px-8 lg:px-0 mb-15">
+    <div id="team" className="mx-auto max-w-6xl px-4 lg:px-4 mb-15">
       <h2 className="mb-8 text-4xl font-bold md:mb-16 lg:text-5xl">Our team</h2>
 
       <div>
@@ -40,7 +40,7 @@ export default function TeamSection() {
           <div className="flex justify-between gap-6 py-6 min-w-max">
             {members.map((member, index) => (
               <div key={index} className="flex flex-col items-center">
-                <div className="size-20 rounded-full border p-0.5 shadow shadow-zinc-950/5">
+                <div className="size-40 rounded-full border p-0.5 shadow shadow-zinc-950/5">
                   <img
                     className="aspect-square rounded-full object-cover"
                     src={member.avatar}

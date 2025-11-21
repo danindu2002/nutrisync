@@ -88,6 +88,8 @@ export default function FeaturesSection() {
       id="features"
       style={{
         marginTop: "100px",
+        marginLeft: "120px",
+        marginRight: "120px",
         position: "relative",
         zIndex: 1,
         background: "#12131A",
