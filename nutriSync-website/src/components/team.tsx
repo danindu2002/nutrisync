@@ -27,7 +27,7 @@ const members = [
 
 export default function TeamSection() {
   return (
-    <div id="team" className="mx-auto max-w-7xl px-8 lg:px-0 mb-20">
+    <div id="team" className="mx-auto max-w-7xl px-8 lg:px-0 mb-15">
       <h2 className="mb-8 text-4xl font-bold md:mb-16 lg:text-5xl">Our team</h2>
 
       <div>

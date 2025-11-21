@@ -1,6 +1,6 @@
 "use client";
 
-import featureImg from "@/assets/feature-mobile.png";
+import featureImg from "@/assets/figma-screen-01.png";
 import { IconButton } from "@mui/material";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
 import { useRef, useState, useEffect } from "react";
@@ -134,7 +134,7 @@ export default function FeaturesSection() {
       {/* Key Feature Badge */}
       <div
         style={{
-          background: "#3B40F4",
+          background: "#EF4444",
           display: "inline-block",
           padding: "8px 20px",
           borderRadius: "30px",
@@ -188,7 +188,8 @@ export default function FeaturesSection() {
             <h3
               style={{
                 fontSize: "22px",
-                color: "#282dc5",
+                color: "#EF4444",
+                fontWeight: 600,
                 marginBottom: "12px",
               }}
             >
@@ -211,7 +212,7 @@ export default function FeaturesSection() {
               alt={feature.title}
               style={{
                 width: "100%",
-                height: "400px", // fixed image height so all images match
+                height: "580px", // fixed image height so all images match
                 marginTop: "auto",
               }}
             />

@@ -3,6 +3,7 @@
 import { Github } from "lucide-react";
 import { useEffect, useState } from "react";
 import Button from "./Button";
+import Link from "next/link";
 
 const Navbar = () => {
   const links = [
@@ -90,18 +91,19 @@ const Navbar = () => {
 
           {/* CTA Button */}
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden sm:flex text-sm"
+            <Link
+              href="https://github.com/danindu2002/nutrisync"
+              target="_blank"
             >
-              <Github className="mr-2 h-4 w-4" />
-              GitHub
-            </Button>
-            {/* <Button size="sm">
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button> */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden sm:flex text-sm"
+              >
+                <Github className="mr-2 h-4 w-4" />
+                GitHub
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

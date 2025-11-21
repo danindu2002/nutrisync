@@ -47,10 +47,10 @@ export const HowItWorks = () => {
             <div key={index} color="red" className="text-center relative">
               <div className="bg-primary/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 relative">
                 <step.icon
-                  stroke="#27b07d"
+                  stroke="#EF4444"
                   className="w-10 h-10 text-primary"
                 />
-                <span className="absolute -top-2 -right-2 bg-amber-500 text-secondary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                <span className="absolute -top-2 -right-2 bg-[#7e7c7c] text-secondary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                   {step.step}
                 </span>
               </div>
