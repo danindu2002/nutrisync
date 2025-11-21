@@ -6,32 +6,21 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { Pricing } from "@/components/Pricing";
 import { Footer } from "@/components/Footer";
 import FeaturesSection from "@/components/FeaturesSection";
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
-import TeamSection from "@/components/team";
+import DetailsSection from "@/components/DetailsSection";
+import Navbar from "@/components/Navbar";
+import TeamSection from "@/components/Team";
 
 const HomePage: React.FC = () => {
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen">
-      <HeroGeometric />
-      <ContainerScroll
-        titleComponent={
-          <>
-            <h1 className="text-4xl font-semibold text-black dark:text-white">
-              Unleash the power of <br />
-              <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
-                Scroll Animations
-              </span>
-            </h1>
-          </>
-        }
-      >
-        <></>
-      </ContainerScroll>
+    <main className="flex flex-col items-center justify-center">
+      {/* <main className="flex flex-col items-center justify-center min-h-screen"> */}
       {/* <Features /> */}
+      {/* <DetailsSection /> */}
+      <Navbar />
+      <HeroGeometric />
       <FeaturesSection />
       <HowItWorks />
       <TeamSection />
-      {/* <Pricing /> */}
       <Footer />
       {/* <FooterSection /> */}
     </main>

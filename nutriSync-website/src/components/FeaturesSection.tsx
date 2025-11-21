@@ -68,31 +68,38 @@ export default function FeaturesSection() {
   }, [index]);
 
   const scrollLeft = () => {
-    setIndex((prev) => Math.max(0, prev - 1));
+    if (features.length <= VISIBLE) {
+      setIndex(0);
+      return;
+    }
+    setIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   };
 
   const scrollRight = () => {
-    setIndex((prev) => Math.min(maxIndex, prev + 1));
+    if (features.length <= VISIBLE) {
+      setIndex(0);
+      return;
+    }
+    setIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
   };
 
   return (
     <section
+      id="features"
       style={{
-        // marginTop: "100px",
+        marginTop: "100px",
         position: "relative",
         zIndex: 1,
         background: "#12131A",
         borderRadius: "40px",
-        padding: "80px 100px",
+        padding: "40px 100px",
         textAlign: "center",
         color: "#fff",
       }}
     >
-      {/* Left corner arrow (centered vertically) */}
       <IconButton
         aria-label="scroll left"
         onClick={scrollLeft}
-        disabled={index <= 0}
         style={{
           position: "absolute",
           left: 24,
@@ -107,11 +114,9 @@ export default function FeaturesSection() {
         <ArrowBackIosNew sx={{ fontSize: "small" }} />
       </IconButton>
 
-      {/* Right corner arrow (centered vertically) */}
       <IconButton
         aria-label="scroll right"
         onClick={scrollRight}
-        disabled={index >= maxIndex}
         style={{
           position: "absolute",
           right: 24,

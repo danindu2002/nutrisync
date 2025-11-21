@@ -1,33 +1,33 @@
 const members = [
   {
-    name: "Méschac Irung",
+    name: "Danindu Srinath",
     avatar: "https://avatars.githubusercontent.com/u/47919550?v=4",
   },
   {
-    name: "Théo Balick",
+    name: "Charin Fernando",
     avatar: "https://avatars.githubusercontent.com/u/68236786?v=4",
   },
   {
-    name: "Glodie Lukose",
+    name: "Dilshan Peiris",
     avatar: "https://avatars.githubusercontent.com/u/99137927?v=4",
   },
   {
-    name: "Méschac Irung",
+    name: "Nirmal Dabarera",
     avatar: "https://avatars.githubusercontent.com/u/47919550?v=4",
   },
   {
-    name: "Théo Balick",
+    name: "Raveesha Cooray",
     avatar: "https://avatars.githubusercontent.com/u/68236786?v=4",
   },
   {
-    name: "Bernard Ngandu",
+    name: "Seniru Ranjula",
     avatar: "https://avatars.githubusercontent.com/u/31113941?v=4",
   },
 ];
 
 export default function TeamSection() {
   return (
-    <div className="mx-auto max-w-7xl px-8 lg:px-0 mb-20">
+    <div id="team" className="mx-auto max-w-7xl px-8 lg:px-0 mb-20">
       <h2 className="mb-8 text-4xl font-bold md:mb-16 lg:text-5xl">Our team</h2>
 
       <div>
