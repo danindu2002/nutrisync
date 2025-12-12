@@ -1,27 +1,34 @@
+import RaveeshaImg from "../assets/team/raveesha.png";
+import NirmalImg from "../assets/team/nirmal.png";
+import DaninduImg from "../assets/team/danindu.png";
+import CharinImg from "../assets/team/charin.png";
+import SeniruImg from "../assets/team/seniru.jpg";
+import DilshanImg from "../assets/team/dilshan.jpg";
+
 const members = [
   {
     name: "Danindu Srinath",
-    avatar: "https://avatars.githubusercontent.com/u/47919550?v=4",
+    avatar: DaninduImg,
   },
   {
     name: "Charin Fernando",
-    avatar: "https://avatars.githubusercontent.com/u/68236786?v=4",
+    avatar: CharinImg,
   },
   {
     name: "Dilshan Peiris",
-    avatar: "https://avatars.githubusercontent.com/u/99137927?v=4",
+    avatar: DilshanImg,
   },
   {
     name: "Nirmal Dabarera",
-    avatar: "https://avatars.githubusercontent.com/u/47919550?v=4",
+    avatar: NirmalImg,
   },
   {
     name: "Raveesha Cooray",
-    avatar: "https://avatars.githubusercontent.com/u/68236786?v=4",
+    avatar: RaveeshaImg,
   },
   {
     name: "Seniru Ranjula",
-    avatar: "https://avatars.githubusercontent.com/u/31113941?v=4",
+    avatar: SeniruImg,
   },
 ];
 
@@ -40,10 +47,14 @@ export default function TeamSection() {
           <div className="flex justify-between gap-6 py-6 min-w-max">
             {members.map((member, index) => (
               <div key={index} className="flex flex-col items-center">
-                <div className="size-40 rounded-full border p-0.5 shadow shadow-zinc-950/5">
+                <div className="size-40 rounded-full border border-[#aaa] p-0.5 shadow shadow-zinc-950/5">
                   <img
                     className="aspect-square rounded-full object-cover"
-                    src={member.avatar}
+                    src={
+                      typeof member.avatar === "string"
+                        ? member.avatar
+                        : member.avatar.src
+                    }
                     alt={member.name}
                     height="200"
                     width="200"
