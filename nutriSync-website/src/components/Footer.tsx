@@ -100,7 +100,7 @@ function FooterSection() {
   return (
     <div className="w-full">
       <Footer
-        logo={<Hexagon className="h-10 w-10" />}
+        // logo={<Hexagon className="h-10 w-10" />}
         brandName="NutriSync"
         socialLinks={[
           {

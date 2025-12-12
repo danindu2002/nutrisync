@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 
 interface FooterProps {
-  logo: React.ReactNode
+  logo?: React.ReactNode
   brandName: string
   socialLinks: Array<{
     icon: React.ReactNode
@@ -39,7 +39,7 @@ export function Footer({
             className="flex items-center gap-x-2"
             aria-label={brandName}
           >
-            {logo}
+            {/* {logo} */}
             <span className="font-bold text-xl">{brandName}</span>
           </a>
           <ul className="flex list-none mt-6 md:mt-0 space-x-3">

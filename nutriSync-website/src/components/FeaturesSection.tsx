@@ -4,43 +4,49 @@ import featureImg from "@/assets/figma-screen-01.png";
 import { IconButton } from "@mui/material";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
 import { useRef, useState, useEffect } from "react";
+import mealLogImg from "@/assets/features/meal-log-ui.png";
+import foodScanImg from "@/assets/features/food-scan-ui.png";
+import gameChallengesImg from "@/assets/features/gamified-challenges-ui.png";
+import mealGenerationImg from "@/assets/features/meal-generation-ui.png";
+import healthAwareImg from "@/assets/features/health-condition-aware-ui.png";
+import riskPridictionImg from "@/assets/features/risk-predictor-ui.png";
 
 const features = [
   {
-    title: "AI-based Diet Plan Generation",
+    title: "AI-based Daily Meal Logging & Tracking",
     description:
-      "Automatically generates personalized meal plans using age, BMI, goals, and dietary preferences.",
-    image: featureImg,
+      "Easily log meals with AI assistance, track calories, macros, and nutrients automatically.",
+    image: mealLogImg,
   },
   {
     title: "Food Recognition via Photos & Voice",
     description:
       "Identify meals from photos or voice input, estimate portion size, and show nutritional values.",
-    image: featureImg,
+    image: foodScanImg,
   },
   {
     title: "Gamified Challenges & Rewards",
     description:
       "Daily and weekly health challenges that motivate users with points, badges, and rewards.",
-    image: featureImg,
+    image: gameChallengesImg,
   },
   {
     title: "AI Food Substitution Suggestions",
     description:
       "Recommends healthier alternatives while keeping familiar taste and cultural preference.",
-    image: featureImg,
+    image: mealGenerationImg,
   },
   {
     title: "Health Condition Aware Recommendations",
     description:
       "Provides meal suggestions suitable for conditions like diabetes or hypertension to help them manage their health",
-    image: featureImg,
+    image: healthAwareImg,
   },
   {
     title: "Health Risk Predictions",
     description:
       "Predicts future health risks such as obesity or high cholesterol based on user trends and offer preventive and advising solutions accordingly to mitigate those risks",
-    image: featureImg,
+    image: riskPridictionImg,
   },
   {
     title: "Health Impact Simulation",
@@ -152,7 +158,7 @@ export default function FeaturesSection() {
         style={{
           fontSize: "48px",
           fontWeight: 700,
-          marginBottom: "60px",
+          marginBottom: "20px",
         }}
       >
         Powerful features
@@ -179,7 +185,7 @@ export default function FeaturesSection() {
             style={{
               width: `${CARD_WIDTH}px`,
               background: "#ffffff",
-              padding: "40px 20px",
+              padding: "30px 15px",
               borderRadius: "20px",
               flex: "0 0 auto",
               display: "flex",
@@ -213,9 +219,9 @@ export default function FeaturesSection() {
               src={feature.image.src}
               alt={feature.title}
               style={{
-                width: "100%",
-                height: "580px", // fixed image height so all images match
-                marginTop: "auto",
+                margin: "auto",
+                width: "85%",
+                height: "510px", // fixed image height so all images match
               }}
             />
           </div>
