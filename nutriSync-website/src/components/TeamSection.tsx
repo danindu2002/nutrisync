@@ -35,7 +35,7 @@ const members = [
 export default function TeamSection() {
   return (
     <div id="team" className="mx-auto max-w-6xl px-4 lg:px-4 mb-15">
-      <h2 className="mb-8 text-4xl font-bold md:mb-16 lg:text-5xl">Our team</h2>
+      <h2 className="mb-8 text-4xl font-bold md:mb-8 lg:text-5xl">Our team</h2>
 
       <div>
         <h3 className="mb-6 text-lg font-low">

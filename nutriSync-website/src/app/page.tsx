@@ -1,8 +1,8 @@
 import FeaturesSection from "@/components/FeaturesSection";
 import FooterSection from "@/components/Footer";
-import { HeroGeometric } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import Navbar from "@/components/Navbar";
+import NutritionHero from "@/components/NutritionHero";
 import TeamSection from "@/components/TeamSection";
 import React from "react";
 
@@ -11,7 +11,8 @@ const HomePage: React.FC = () => {
     <main>
       {/* <main className="flex flex-col items-center justify-center min-h-screen"> */}
       <Navbar />
-      <HeroGeometric />
+      {/* <HeroGeometric /> */}
+      <NutritionHero />
       <FeaturesSection />
       <HowItWorks />
       <TeamSection />

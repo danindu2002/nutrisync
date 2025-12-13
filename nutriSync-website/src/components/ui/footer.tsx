@@ -59,7 +59,7 @@ export function Footer({
             ))}
           </ul>
         </div>
-        <div className="border-t mt-6 pt-6 md:mt-4 md:pt-8 lg:grid lg:grid-cols-10">
+        <div className="border-t-1 border-[#bbb] mt-6 pt-6 md:mt-4 md:pt-8 lg:grid lg:grid-cols-10">
           <nav className="lg:mt-0 lg:col-[4/11]">
             <ul className="list-none flex flex-wrap -my-1 -mx-2 lg:justify-end">
               {mainLinks.map((link, i) => (

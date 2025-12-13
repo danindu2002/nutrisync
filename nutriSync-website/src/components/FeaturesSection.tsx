@@ -1,6 +1,7 @@
 "use client";
 
-import featureImg from "@/assets/figma-screen-01.png";
+import featureImg from "@/assets/otherImages/figma-screen-01.png";
+import backgroundImg from "@/assets/otherImages/features-bg.jpg";
 import { IconButton } from "@mui/material";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
 import { useRef, useState, useEffect } from "react";
@@ -98,7 +99,11 @@ export default function FeaturesSection() {
         marginRight: "120px",
         position: "relative",
         zIndex: 1,
-        background: "#12131A",
+        // background: "#12131A",
+        backgroundImage: `linear-gradient(rgba(31, 34, 37, 0.85) 0%, rgba(40, 11, 11, 0.85)), url(${backgroundImg.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         borderRadius: "40px",
         padding: "40px 100px",
         textAlign: "center",
