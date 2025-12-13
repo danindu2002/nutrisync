@@ -1,4 +1,3 @@
-import { Button } from "@/components/items/button";
 import { Check } from "lucide-react";
 
 const plans = [

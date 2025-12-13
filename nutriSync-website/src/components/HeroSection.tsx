@@ -1,4 +1,4 @@
-export default function HeroSectiion() {
+export default function HeroSection() {
   return (
     <header
       id="home"

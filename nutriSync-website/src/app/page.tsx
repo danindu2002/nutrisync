@@ -9,7 +9,6 @@ import { HeroGeometric } from "@/components/HeroGeometric";
 const HomePage: React.FC = () => {
   return (
     <main>
-      {/* <main className="flex flex-col items-center justify-center min-h-screen"> */}
       <Navbar />
       {/* <HeroGeometric /> */}
       <HeroSection />

@@ -1,8 +1,6 @@
 "use client";
-import Image from "next/image";
-import { useEffect, useState } from "react";
 import mobileScreen1Img from "@/assets/screen-01.png";
-import mobileScreen2Img from "@/assets/screen-02.png";
+import Image from "next/image";
 
 export default function DetailsSection() {
   return (
