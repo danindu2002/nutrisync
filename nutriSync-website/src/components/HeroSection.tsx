@@ -1,18 +1,14 @@
-export default function NutritionHero() {
+export default function HeroSectiion() {
   return (
     <header
       id="home"
       className={`min-h-screen relative w-full flex items-center overflow-hidden`}
       aria-label="Nutrition app hero"
     >
-      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-no-repeat bg-top"
         style={{ backgroundImage: "url('/images/main-bg.png')" }}
       />
-
-      {/* Gradient */}
-      {/* <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/70 to-transparent" /> */}
 
       <div className="relative container mx-auto px-6 lg:px-12 py-20">
         <div className="max-w-xl">
@@ -22,11 +18,12 @@ export default function NutritionHero() {
             Shape Your Life.
           </h1>
           <p className="mt-4 text-gray-700 text-lg drop-shadow">
-            Personalised meal plans, AI food recognition, and daily nutrition
-            insights - all in one app.
+            Turn healthy living into a game! NutriSync uses AI to track meals,
+            recommend smarter swaps, and reward your progress. Every healthy
+            choice gets you closer to your goals.
           </p>
         </div>
-        {/* small feature bullets */}
+
         <div>
           <ul className="mt-8 grid grid-cols-1 sm:grid-cols-1 gap-2 text-sm text-gray-600">
             <li className="flex items-center gap-3">

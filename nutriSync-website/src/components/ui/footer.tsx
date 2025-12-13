@@ -1,25 +1,25 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 interface FooterProps {
-  logo?: React.ReactNode
-  brandName: string
+  logo?: React.ReactNode;
+  brandName: string;
   socialLinks: Array<{
-    icon: React.ReactNode
-    href: string
-    label: string
-  }>
+    icon: React.ReactNode;
+    href: string;
+    label: string;
+  }>;
   mainLinks: Array<{
-    href: string
-    label: string
-  }>
+    href: string;
+    label: string;
+  }>;
   legalLinks: Array<{
-    href: string
-    label: string
-  }>
+    href: string;
+    label: string;
+  }>;
   copyright: {
-    text: string
-    license?: string
-  }
+    text: string;
+    license?: string;
+  };
 }
 
 export function Footer({
@@ -49,7 +49,6 @@ export function Footer({
                   variant="secondary"
                   size="icon"
                   className="h-10 w-10 rounded-full"
-                  asChild
                 >
                   <a href={link.href} target="_blank" aria-label={link.label}>
                     {link.icon}
@@ -95,5 +94,5 @@ export function Footer({
         </div>
       </div>
     </footer>
-  )
+  );
 }

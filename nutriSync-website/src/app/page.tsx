@@ -2,9 +2,9 @@ import FeaturesSection from "@/components/FeaturesSection";
 import FooterSection from "@/components/Footer";
 import { HowItWorks } from "@/components/HowItWorks";
 import Navbar from "@/components/Navbar";
-import NutritionHero from "@/components/NutritionHero";
 import TeamSection from "@/components/TeamSection";
-import React from "react";
+import HeroSection from "@/components/HeroSection";
+import { HeroGeometric } from "@/components/HeroGeometric";
 
 const HomePage: React.FC = () => {
   return (
@@ -12,7 +12,7 @@ const HomePage: React.FC = () => {
       {/* <main className="flex flex-col items-center justify-center min-h-screen"> */}
       <Navbar />
       {/* <HeroGeometric /> */}
-      <NutritionHero />
+      <HeroSection />
       <FeaturesSection />
       <HowItWorks />
       <TeamSection />
