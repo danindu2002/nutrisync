@@ -5,12 +5,14 @@ import backgroundImg from "@/assets/otherImages/features-bg.jpg";
 import { IconButton } from "@mui/material";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
 import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import mealLogImg from "@/assets/features/meal-log-ui.png";
 import foodScanImg from "@/assets/features/food-scan-ui.png";
 import gameChallengesImg from "@/assets/features/gamified-challenges-ui.png";
 import mealGenerationImg from "@/assets/features/meal-generation-ui.png";
 import healthAwareImg from "@/assets/features/health-condition-aware-ui.png";
 import riskPridictionImg from "@/assets/features/risk-predictor-ui.png";
+import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 
 const features = [
   {
@@ -18,6 +20,18 @@ const features = [
     description:
       "Easily log meals with AI assistance, track calories, macros, and nutrients automatically.",
     image: mealLogImg,
+  },
+  {
+    title: "Health Risk Predictions",
+    description:
+      "Predicts future health risks such as obesity or high cholesterol based on user trends and offer preventive and advising solutions accordingly to mitigate those risks",
+    image: riskPridictionImg,
+  },
+  {
+    title: "AI Food Substitution Suggestions",
+    description:
+      "Recommends healthier alternatives while keeping familiar taste and cultural preference.",
+    image: mealGenerationImg,
   },
   {
     title: "Food Recognition via Photos & Voice",
@@ -32,22 +46,10 @@ const features = [
     image: gameChallengesImg,
   },
   {
-    title: "AI Food Substitution Suggestions",
-    description:
-      "Recommends healthier alternatives while keeping familiar taste and cultural preference.",
-    image: mealGenerationImg,
-  },
-  {
     title: "Health Condition Aware Recommendations",
     description:
       "Provides meal suggestions suitable for conditions like diabetes or hypertension to help them manage their health",
     image: healthAwareImg,
-  },
-  {
-    title: "Health Risk Predictions",
-    description:
-      "Predicts future health risks such as obesity or high cholesterol based on user trends and offer preventive and advising solutions accordingly to mitigate those risks",
-    image: riskPridictionImg,
   },
   {
     title: "Health Impact Simulation",
@@ -68,17 +70,31 @@ export default function FeaturesSection() {
   const VISIBLE = 3;
   const maxIndex = Math.max(0, features.length - VISIBLE);
 
+  const words = [
+    {
+      text: "Powerful",
+      className: "text-white",
+    },
+    {
+      text: "Features.",
+      className: "text-red-500 dark:text-blue-500",
+    },
+  ];
+
   useEffect(() => {
     // scroll to the proper position when index changes
     const left = index * STEP;
     scrollRef.current?.scrollTo({ left, behavior: "smooth" });
   }, [index]);
 
+  const [scrollDirection, setScrollDirection] = useState<"left" | "right">("right");
+
   const scrollLeft = () => {
     if (features.length <= VISIBLE) {
       setIndex(0);
       return;
     }
+    setScrollDirection("left");
     setIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   };
 
@@ -87,19 +103,21 @@ export default function FeaturesSection() {
       setIndex(0);
       return;
     }
+    setScrollDirection("right");
     setIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
   };
 
+
   return (
+
     <section
       id="features"
       style={{
-        marginTop: "100px",
+        marginTop: "60px",
         marginLeft: "120px",
         marginRight: "120px",
         position: "relative",
         zIndex: 1,
-        // background: "#12131A",
         backgroundImage: `linear-gradient(rgba(31, 34, 37, 0.85) 0%, rgba(40, 11, 11, 0.85)), url(${backgroundImg.src})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -108,6 +126,7 @@ export default function FeaturesSection() {
         padding: "40px 100px",
         textAlign: "center",
         color: "#fff",
+        overflow: "hidden",
       }}
     >
       <IconButton
@@ -144,30 +163,19 @@ export default function FeaturesSection() {
         <ArrowForwardIos sx={{ fontSize: "small" }} />
       </IconButton>
 
-      {/* Key Feature Badge */}
-      <div
-        style={{
-          background: "#EF4444",
-          display: "inline-block",
-          padding: "8px 20px",
-          borderRadius: "30px",
-          marginBottom: "20px",
-          fontWeight: 600,
-        }}
-      >
-        Key Feature
-      </div>
+<h2
+  style={{
+    fontSize: "48px",
+    fontWeight: 700,
+    marginBottom: "25px",
+    display: "flex",
+    justifyContent: "center",
+    textAlign: "center",
+  }}
+>
+  <TypewriterEffectSmooth words={words} />
+</h2>
 
-      {/* Main Title */}
-      <h2
-        style={{
-          fontSize: "48px",
-          fontWeight: 700,
-          marginBottom: "20px",
-        }}
-      >
-        Powerful features
-      </h2>
 
       {/* Features scroll container */}
       <div
@@ -184,53 +192,84 @@ export default function FeaturesSection() {
           margin: "0 auto",
         }}
       >
-        {features.map((feature, idx) => (
-          <div
-            key={idx}
-            style={{
-              width: `${CARD_WIDTH}px`,
-              background: "#ffffff",
-              padding: "30px 15px",
-              borderRadius: "20px",
-              flex: "0 0 auto",
-              display: "flex",
-              flexDirection: "column",
-              minHeight: "420px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "22px",
-                color: "#EF4444",
-                fontWeight: 600,
-                marginBottom: "12px",
-              }}
-            >
-              {feature.title}
-            </h3>
+        {features.map((feature, idx) => {
+          const enteringIndex = scrollDirection === "right" ? index + VISIBLE - 1 : index;
+          const isEnteringCard = idx === enteringIndex;
 
-            <p
+          return (
+            <motion.div
+              key={isEnteringCard ? `entering-${idx}` : `card-${idx}`}
+              initial={isEnteringCard ? { opacity: 0, scale: 0.96 } : false}
+              animate={isEnteringCard ? { opacity: 1, scale: 1 } : false}
+              transition={{
+                duration: 0.35,
+                ease: "linear",
+              }}
               style={{
-                fontSize: "15px",
-                color: "#111",
-                lineHeight: 1.6,
-                marginBottom: "25px",
-                flex: "1 0 auto",
+                width: `${CARD_WIDTH}px`,
+                background: "#ffffffff",
+                padding: "30px 15px",
+                borderRadius: "20px",
+                flex: "0 0 auto",
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "420px",
+                transformOrigin: "center center",
               }}
             >
-              {feature.description}
-            </p>
-            <img
-              src={feature.image.src}
-              alt={feature.title}
-              style={{
-                margin: "auto",
-                width: "85%",
-                height: "510px", // fixed image height so all images match
-              }}
-            />
-          </div>
-        ))}
+              <h3
+                style={{
+                  fontSize: "22px",
+                  color: "#EF4444",
+                  fontWeight: 600,
+                  marginBottom: "12px",
+                }}
+              >
+                {feature.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: "15px",
+                  color: "#424242ff",
+                  lineHeight: 1.5,
+                  marginBottom: "25px",
+                  flex: "1 0 auto",
+                }}
+              >
+                {feature.description}
+              </p>
+              <motion.div
+                whileHover={{
+                  scale: 1.01,
+                  y: -6,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 180,
+                  damping: 18,
+                  mass: 0.6,
+                }}
+                style={{
+                  margin: "auto",
+                  width: "85%",
+                }}
+              >
+                <motion.img
+                  src={feature.image.src}
+                  alt={feature.title}
+                  style={{
+                    width: "100%",
+                    height: "510px",
+                    objectFit: "contain",
+                    willChange: "transform",
+                  }}
+                  draggable={false}
+                />
+              </motion.div>
+            </motion.div>
+          );
+        })}
+
       </div>
     </section>
   );

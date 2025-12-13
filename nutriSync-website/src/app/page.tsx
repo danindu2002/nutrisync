@@ -3,15 +3,13 @@ import FooterSection from "@/components/Footer";
 import { HowItWorks } from "@/components/HowItWorks";
 import Navbar from "@/components/Navbar";
 import TeamSection from "@/components/TeamSection";
-import HeroSection from "@/components/HeroSection";
-import { HeroGeometric } from "@/components/HeroGeometric";
+import NewHero from "@/components/NewHero";
 
 const HomePage: React.FC = () => {
   return (
     <main>
       <Navbar />
-      {/* <HeroGeometric /> */}
-      <HeroSection />
+      <NewHero/>
       <FeaturesSection />
       <HowItWorks />
       <TeamSection />

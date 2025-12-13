@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-/* @import "tw-animate-css"; */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,6 +41,23 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-border-beam: border-beam calc(var(--duration)*1s) infinite linear;
+  @keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+    }
+  }
+  @keyframes shine-pulse {
+  0% {
+    background-position: 0% 0%;
+    }
+  50% {
+    background-position: 100% 100%;
+    }
+  to {
+    background-position: 0% 0%;
+    }
+  }
 }
 
 :root {
@@ -75,8 +91,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
+  --background: #FAFAFA;
   --foreground: oklch(0.145 0 0);
+  --app-primary: #EF4444;
 }
 
 .dark {
@@ -114,10 +131,32 @@
 }
 
 @layer base {
+   :root {
+    --white: #ffffff;
+    --black: #000000;
+    --transparent: transparent;
+
+    --blue-300: #93c5fd;
+    --blue-400: #60a5fa;
+    --blue-500: #3b82f6;
+
+    --indigo-300: #a5b4fc;
+    --violet-200: #ddd6fe;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@keyframes aurora {
+  0% {
+    background-position: 50% 50%, 50% 50%;
+  }
+  100% {
+    background-position: 350% 50%, 350% 50%;
   }
 }
