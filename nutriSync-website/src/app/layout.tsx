@@ -7,9 +7,7 @@ const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <head>
         <title>NutriSync</title>
       </head>
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 };
