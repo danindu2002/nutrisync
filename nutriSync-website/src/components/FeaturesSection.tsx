@@ -76,7 +76,7 @@ export default function FeaturesSection() {
       className: "text-white",
     },
     {
-      text: "Features.",
+      text: "Features",
       className: "text-red-500 dark:text-blue-500",
     },
   ];

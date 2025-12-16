@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { cubicBezier, motion, Variants } from "framer-motion";
 import { UserCircle, Target, UserPlus, Sparkles } from "lucide-react";
 
 const steps = [
@@ -36,7 +36,7 @@ const cardVariants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { delay: i * 0.2, duration: 0.7, ease: "easeOut" },
+    transition: { delay: i * 0.2, duration: 0.7, ease: cubicBezier(0.25, 0.4, 0.25, 1) },
   }),
 };
 
