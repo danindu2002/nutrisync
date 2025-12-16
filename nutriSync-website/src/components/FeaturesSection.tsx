@@ -63,7 +63,7 @@ export default function FeaturesSection() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [index, setIndex] = useState(0);
 
-  // card width + gap must match the card styles below
+  
   const CARD_WIDTH = 330;
   const GAP = 40;
   const STEP = CARD_WIDTH + GAP;
