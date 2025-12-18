@@ -3,7 +3,7 @@ import './globals.css';
 
 const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <title>NutriSync</title>
       </head>

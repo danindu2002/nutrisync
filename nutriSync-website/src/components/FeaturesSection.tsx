@@ -1,6 +1,5 @@
 "use client";
 
-import featureImg from "@/assets/otherImages/figma-screen-01.png";
 import backgroundImg from "@/assets/otherImages/features-bg.jpg";
 import { IconButton } from "@mui/material";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
@@ -8,10 +7,12 @@ import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import mealLogImg from "@/assets/features/meal-log-ui.png";
 import foodScanImg from "@/assets/features/food-scan-ui.png";
+import simulationImg from "@/assets/features/impact-simulation-ui.png";
 import gameChallengesImg from "@/assets/features/gamified-challenges-ui.png";
 import mealGenerationImg from "@/assets/features/meal-generation-ui.png";
 import healthAwareImg from "@/assets/features/health-condition-aware-ui.png";
 import riskPridictionImg from "@/assets/features/risk-predictor-ui.png";
+import dashboardImg from "@/assets/features/dashboard.png";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 
 const features = [
@@ -20,6 +21,24 @@ const features = [
     description:
       "Easily log meals with AI assistance, track calories, macros, and nutrients automatically.",
     image: mealLogImg,
+  },
+  {
+    title: "Food Recognition via Photos & Voice",
+    description:
+      "Identify meals from photos or voice input, estimate portion size, and show nutritional values.",
+    image: foodScanImg,
+  },
+  {
+    title: "Personalized Dashboard & Insights",
+    description:
+      "A centralized dashboard that presents daily progress, nutrition summaries, goal tracking and AI-driven insights in a clear and smart format.",
+    image: dashboardImg,
+  },
+  {
+    title: "Health Impact Simulation",
+    description:
+      "Visualizes long-term effects of a user's diet, including changes in weight and health risk levels comparing their current diet to motivate healthier choices.",
+    image: simulationImg,
   },
   {
     title: "Health Risk Predictions",
@@ -34,12 +53,6 @@ const features = [
     image: mealGenerationImg,
   },
   {
-    title: "Food Recognition via Photos & Voice",
-    description:
-      "Identify meals from photos or voice input, estimate portion size, and show nutritional values.",
-    image: foodScanImg,
-  },
-  {
     title: "Gamified Challenges & Rewards",
     description:
       "Daily and weekly health challenges that motivate users with points, badges, and rewards.",
@@ -51,19 +64,14 @@ const features = [
       "Provides meal suggestions suitable for conditions like diabetes or hypertension to help them manage their health",
     image: healthAwareImg,
   },
-  {
-    title: "Health Impact Simulation",
-    description:
-      "Visualizes long-term effects of a user's diet, including changes in weight and health risk levels comparing their current diet to motivate healthier choices.",
-    image: featureImg,
-  },
+
 ];
 
 export default function FeaturesSection() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [index, setIndex] = useState(0);
 
-  
+
   const CARD_WIDTH = 330;
   const GAP = 40;
   const STEP = CARD_WIDTH + GAP;
@@ -163,18 +171,18 @@ export default function FeaturesSection() {
         <ArrowForwardIos sx={{ fontSize: "small" }} />
       </IconButton>
 
-<h2
-  style={{
-    fontSize: "48px",
-    fontWeight: 700,
-    marginBottom: "25px",
-    display: "flex",
-    justifyContent: "center",
-    textAlign: "center",
-  }}
->
-  <TypewriterEffectSmooth words={words} />
-</h2>
+      <h2
+        style={{
+          fontSize: "48px",
+          fontWeight: 700,
+          marginBottom: "25px",
+          display: "flex",
+          justifyContent: "center",
+          textAlign: "center",
+        }}
+      >
+        <TypewriterEffectSmooth words={words} />
+      </h2>
 
 
       {/* Features scroll container */}
