@@ -35,13 +35,13 @@ const features = [
     image: dashboardImg,
   },
   {
-    title: "Health Impact Simulation",
+    title: "Personilzed Health Impact Simulation",
     description:
       "Visualizes long-term effects of a user's diet, including changes in weight and health risk levels comparing their current diet to motivate healthier choices.",
     image: simulationImg,
   },
   {
-    title: "Health Risk Predictions",
+    title: "View Early Health Risk Predictions",
     description:
       "Predicts future health risks such as obesity or high cholesterol based on user trends and offer preventive and advising solutions accordingly to mitigate those risks",
     image: riskPridictionImg,
