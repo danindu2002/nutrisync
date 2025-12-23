@@ -1,24 +1,22 @@
 {
-  "components": {
-    "ui": [
-      {
-        "name": "Button",
-        "description": "A reusable button component."
-      },
-      {
-        "name": "Input",
-        "description": "A reusable input field component."
-      }
-    ],
-    "shared": [
-      {
-        "name": "Header",
-        "description": "A shared header component for the application."
-      },
-      {
-        "name": "Footer",
-        "description": "A shared footer component for the application."
-      }
-    ]
-  }
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {}
 }
