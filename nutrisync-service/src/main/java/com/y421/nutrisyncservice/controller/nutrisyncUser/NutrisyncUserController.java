@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/v1/user")
 public interface NutrisyncUserController {
 
-    @PostMapping("/createUser")
-    ResponseEntity<Object> createSupportRole(@RequestBody NutrisyncUserRequestDto nutrisyncUserRequestDto);
+    @PostMapping("/register")
+    ResponseEntity<Object> register(@RequestBody NutrisyncUserRequestDto nutrisyncUserRequestDto);
 }

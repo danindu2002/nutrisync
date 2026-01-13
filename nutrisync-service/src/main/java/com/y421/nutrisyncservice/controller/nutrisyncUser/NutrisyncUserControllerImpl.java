@@ -16,7 +16,7 @@ public class NutrisyncUserControllerImpl implements NutrisyncUserController {
     private final NutrisyncUserService nutrisyncUserService;
 
     @Override
-    public ResponseEntity<Object> createSupportRole(NutrisyncUserRequestDto nutrisyncUserRequestDto) {
+    public ResponseEntity<Object> register(NutrisyncUserRequestDto nutrisyncUserRequestDto) {
         try {
             ResponseEntity<Object> response = nutrisyncUserService.register(nutrisyncUserRequestDto);
             if (response.getStatusCode().isSameCodeAs(HttpStatus.CREATED)) {
