@@ -64,5 +64,8 @@ public class NutrisyncUser extends AuditModel implements Serializable {
     @Column(name = "REG_DATE", nullable = false)
     private Date regDate;// user registered date
 
+    @Column(name = "IS_DELETED", nullable = false)
+    private Boolean isDeleted = false;
+
     // todo: add other fields as necessary
 }

@@ -48,6 +48,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/webjars/**",
             "/swagger-ui.html",
+            "/api/v1/user/**",
     };
 
     private static final String[] PROTECTED_LIST_URL = {
