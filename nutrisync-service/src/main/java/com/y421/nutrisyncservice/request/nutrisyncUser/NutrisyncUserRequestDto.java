@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -18,10 +19,18 @@ public class NutrisyncUserRequestDto {
     private Date dateOfBirth;
     private String gender;
     private Integer age;
-    private Float height;
-    private Float weight;
+    private Float heightCm;
+    private Float weightKg;
     private Float bmi;
     private String activityLevel;
+    private String goalSpeed;
     private List<String> dietaryPreferences;
+    private Map<String, String> mealTimes;
+    private List<String> allergies;
+    private List<String> medicalConditions;
+    private Integer dailyCalorieGoal;
+    private String sleepQuality;
+    private String fitnessGoal;
+    private String goalMotivation;
     private Date regDate;
 }
