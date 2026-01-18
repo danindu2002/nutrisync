@@ -151,6 +151,45 @@ class OptionCardOld extends StatelessWidget {
   }
 }
 
+// Extracted Widget for the Red Dot Indicator
+class SelectionIndicator extends StatelessWidget {
+  final bool isSelected;
+  final Color activeColor;
+
+  const SelectionIndicator({
+    super.key,
+    required this.isSelected,
+    required this.activeColor
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 24,
+      width: 24,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected ? activeColor : Colors.grey.shade400,
+          width: 2,
+        ),
+      ),
+      child: isSelected
+          ? Center(
+        child: Container(
+          height: 10,
+          width: 10,
+          decoration: BoxDecoration(
+            color: activeColor,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      )
+          : null,
+    );
+  }
+}
+
 // Selectable Option Card (Redesigned)
 class OptionCard extends StatelessWidget {
   final String title;
@@ -391,7 +430,7 @@ class UnitSwitch extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: activeColor.withOpacity(0.3),
-                    blurRadius: 8,
+                    blurRadius: 1,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -579,6 +618,365 @@ class ImageOptionCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// Weight ruler
+class WeightRuler extends StatefulWidget {
+  final double initialWeight;
+  final double minWeight;
+  final double maxWeight;
+  final ValueChanged<double> onChanged;
+
+  const WeightRuler({
+    super.key,
+    required this.initialWeight,
+    required this.minWeight,
+    required this.maxWeight,
+    required this.onChanged,
+  });
+
+  @override
+  State<WeightRuler> createState() => _WeightRulerState();
+}
+
+class _WeightRulerState extends State<WeightRuler> {
+  late ScrollController _scrollController;
+  final double tickWidth = 12.0;
+
+  @override
+  void initState() {
+    super.initState();
+    double offset = (widget.initialWeight - widget.minWeight) * 10 * tickWidth;
+    _scrollController = ScrollController(initialScrollOffset: offset);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int totalTicks = ((widget.maxWeight - widget.minWeight) * 10).round();
+    double paddingOffset = MediaQuery.of(context).size.width / 2 - (tickWidth / 2);
+
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        // --- Layer 1: Ruler Content ---
+        ShaderMask(
+          shaderCallback: (Rect bounds) {
+            return LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.0),
+                Colors.white,
+                Colors.white,
+                Colors.white.withOpacity(0.0),
+              ],
+              stops: const [0.0, 0.2, 0.8, 1.0],
+            ).createShader(bounds);
+          },
+          blendMode: BlendMode.dstIn,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollUpdateNotification) {
+                double offset = _scrollController.offset;
+                double index = offset / tickWidth;
+                double value = widget.minWeight + (index / 10);
+
+                value = double.parse(value.clamp(widget.minWeight, widget.maxWeight).toStringAsFixed(1));
+
+                if (value != widget.initialWeight) {
+                  widget.onChanged(value);
+                }
+              }
+              return true;
+            },
+            child: ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              itemExtent: tickWidth,
+              itemCount: totalTicks + 10,
+
+              padding: EdgeInsets.symmetric(horizontal: paddingOffset),
+              physics: _SnapScrollPhysics(itemSize: tickWidth),
+              itemBuilder: (context, index) {
+                double value = widget.minWeight + (index / 10);
+                bool isInteger = (value % 1).abs() < 0.05;
+                bool isHalf = (value % 0.5).abs() < 0.05 && !isInteger;
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 70,
+                      child: Center(
+                        child: Container(
+                          width: isInteger ? 3.5 : 2.5,
+                          height: isInteger ? 60 : (isHalf ? 45 : 35),
+                          decoration: BoxDecoration(
+                            color: isInteger
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    SizedBox(
+                      height: 20,
+                      child: isInteger
+                          ? OverflowBox(
+                        maxWidth: 60,
+                        minWidth: 40,
+                        child: Text(
+                          value.toInt().toString(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      )
+                          : null,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+
+        // --- Layer 2: Red Center Indicator ---
+        Positioned(
+          top: 0,
+          child: Container(
+            width: 10,
+            height: 90,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFFF4B4B), Color(0xFFFF6B6B)],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF4B4B).withOpacity(0.4),
+                  blurRadius: 3,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Custom Physics Class to snap the indicator to nearest value
+class _SnapScrollPhysics extends ScrollPhysics {
+  final double itemSize;
+
+  const _SnapScrollPhysics({required this.itemSize, super.parent});
+
+  @override
+  _SnapScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _SnapScrollPhysics(itemSize: itemSize, parent: buildParent(ancestor));
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+      ScrollMetrics position, double velocity) {
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+
+    final Tolerance tolerance = this.tolerance;
+    final double target = _getTargetPixels(position, tolerance, velocity);
+
+    if (target != position.pixels) {
+      return ScrollSpringSimulation(
+        spring,
+        position.pixels,
+        target,
+        velocity,
+        tolerance: tolerance,
+      );
+    }
+    return null;
+  }
+
+  double _getTargetPixels(
+      ScrollMetrics position, Tolerance tolerance, double velocity) {
+    double page = position.pixels / itemSize;
+    if (velocity < -tolerance.velocity) {
+      page -= 0.5;
+    } else if (velocity > tolerance.velocity) {
+      page += 0.5;
+    }
+    return page.roundToDouble() * itemSize;
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
+}
+
+// TODO : height ruler
+class HeightRuler extends StatefulWidget {
+  final double initialHeight;
+  final double minHeight;
+  final double maxHeight;
+  final bool isCm;
+  final ValueChanged<double> onChanged;
+
+  const HeightRuler({
+    super.key,
+    required this.initialHeight,
+    required this.minHeight,
+    required this.maxHeight,
+    required this.isCm,
+    required this.onChanged,
+  });
+
+  @override
+  State<HeightRuler> createState() => _HeightRulerState();
+}
+
+class _HeightRulerState extends State<HeightRuler> {
+  late ScrollController _scrollController;
+  final double tickHeight = 15.0; // Pixel distance between values
+
+  @override
+  void initState() {
+    super.initState();
+    double offset = (widget.initialHeight - widget.minHeight) * tickHeight;
+    _scrollController = ScrollController(initialScrollOffset: offset);
+  }
+
+  @override
+  void didUpdateWidget(HeightRuler oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialHeight != widget.initialHeight || oldWidget.isCm != widget.isCm) {
+      double offset = (widget.initialHeight - widget.minHeight) * tickHeight;
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(offset);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int totalTicks = (widget.maxHeight - widget.minHeight).round();
+
+    return LayoutBuilder(
+        builder: (context, constraints) {
+          // Fix: Use exact half-height padding to ensure the selected value is in the center
+          double paddingOffset = constraints.maxHeight / 2;
+
+          return Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              // --- Layer 1: The Scrolling Ruler ---
+              Padding(
+                padding: const EdgeInsets.only(left: 40), // Move ruler away from left edge
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withOpacity(0.0),
+                        Colors.white,
+                        Colors.white,
+                        Colors.white.withOpacity(0.0),
+                      ],
+                      stops: const [0.0, 0.2, 0.8, 1.0],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollUpdateNotification) {
+                        double offset = _scrollController.offset;
+                        double value = widget.minHeight + (offset / tickHeight);
+                        value = value.clamp(widget.minHeight, widget.maxHeight);
+
+                        if ((value - widget.initialHeight).abs() > 0.05) {
+                          widget.onChanged(value);
+                        }
+                      }
+                      return true;
+                    },
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      scrollDirection: Axis.vertical,
+                      reverse: true, // Lower numbers at bottom
+                      itemExtent: tickHeight,
+                      itemCount: totalTicks + 1,
+                      padding: EdgeInsets.symmetric(vertical: paddingOffset),
+                      physics: _SnapScrollPhysics(itemSize: tickHeight),
+                      itemBuilder: (context, index) {
+                        double value = widget.minHeight + index;
+
+                        bool isMajor;
+                        if (widget.isCm) {
+                          isMajor = value % 10 == 0;
+                        } else {
+                          isMajor = value % 12 == 0;
+                        }
+                        bool isMedium = value % 5 == 0;
+
+                        return Row(
+                          children: [
+                            Container(
+                              height: isMajor ? 3 : 2,
+                              width: isMajor ? 50 : (isMedium ? 35 : 20),
+                              color: isMajor ? Colors.grey.shade600 : Colors.grey.shade300,
+                              margin: const EdgeInsets.only(right: 10),
+                            ),
+                            if (isMajor)
+                              Text(
+                                widget.isCm
+                                    ? "${value.toInt()}"
+                                    : "${(value/12).round()}'",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
+              // --- Layer 2: Red Indicator Line ---
+              Positioned(
+                left: 40, // Aligned with the ruler padding
+                child: Container(
+                  width: 70,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF4B4B),
+                    borderRadius: BorderRadius.circular(2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF4B4B).withOpacity(0.5),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
     );
   }
 }

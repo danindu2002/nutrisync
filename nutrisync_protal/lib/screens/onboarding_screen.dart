@@ -22,6 +22,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final int _totalSteps = 15;
   bool _showWelcome = true;
   bool _isKcal = true;
+  bool _isKg = true;
+  bool _isCm = true;
+
+  final Map<String, TimeOfDay?> _mealTimes = {
+    "Breakfast": null,
+    "Lunch": null,
+    "Dinner": null,
+  };
 
   void _hapticLight() {
     HapticFeedback.lightImpact();
@@ -297,14 +305,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         final image = opt["image"] as String;
         final icon = opt["icon"] as IconData;
 
-        return SizedBox(
-          height: 230,
-          child: ImageOptionCard(
-            title: title,
-            imagePath: image,
-            icon: icon,
-            isSelected: _data.gender == title,
-            onTap: () => setState(() => _data.gender = title),
+        return Padding(
+          padding: const EdgeInsets.only(top: 10.0),
+          child: SizedBox(
+            height: 230,
+            child: ImageOptionCard(
+              title: title,
+              imagePath: image,
+              icon: icon,
+              isSelected: _data.gender == title,
+              onTap: () => setState(() => _data.gender = title),
+            ),
           ),
         );
       }).toList(),
@@ -373,116 +384,198 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // --- Screen 5: Height (Ruler Style) ---
+// --- TODO : Screen 5: Height ---
   Widget _buildHeightScreen() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    double currentCm = _data.heightCm ?? 170.0;
+
+    // Bounds
+    double minCm = 100.0;
+    double maxCm = 250.0;
+
+    double minVal = _isCm ? minCm : minCm / 2.54;
+    double maxVal = _isCm ? maxCm : maxCm / 2.54;
+    double displayVal = _isCm ? currentCm : (currentCm / 2.54);
+
+    return Column(
       children: [
-        const Icon(Icons.person, size: 200, color: Colors.black),
-        const SizedBox(width: 40),
-        SizedBox(
-          width: 80,
-          height: 400,
-          child: ListWheelScrollView.useDelegate(
-            itemExtent: 50,
-            perspective: 0.005,
-            onSelectedItemChanged: (index) {
-              setState(() => _data.heightCm = 100.00 + index);
-            },
-            childDelegate: ListWheelChildBuilderDelegate(
-              builder: (context, index) {
-                final cm = 100 + index;
-                final isSelected = _data.heightCm == cm;
-                return Center(
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 2,
-                        width: isSelected ? 40 : 20,
-                        color: isSelected ? AppColors.primary : Colors.grey,
+        const SizedBox(height: 10),
+
+        UnitSwitch(
+          isLeftSelected: _isCm,
+          leftLabel: "cm",
+          rightLabel: "ft",
+          onLeftTap: () => setState(() => _isCm = true),
+          onRightTap: () => setState(() => _isCm = false),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Main Content Area
+        Expanded(
+          child: Stack(
+            children: [
+              Row(
+                children: [
+                  // --- Left: Interactive Ruler ---
+                  Expanded(
+                    flex: 3,
+                    child: HeightRuler(
+                      isCm: _isCm,
+                      initialHeight: displayVal,
+                      minHeight: minVal,
+                      maxHeight: maxVal,
+                      onChanged: (val) {
+                        setState(() {
+                          if (_isCm) {
+                            _data.heightCm = val;
+                          } else {
+                            _data.heightCm = val * 2.54;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+
+                  // --- Right: Static Image ---
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 20, bottom: 50),
+                      alignment: Alignment.center,
+                      child: Image.asset(
+                        'assets/images/height.png',
+                        fit: BoxFit.contain,
+                        height: 400,
                       ),
-                      const SizedBox(width: 10),
-                      if (index % 5 == 0)
+                    ),
+                  ),
+                ],
+              ),
+
+              // --- Center: Selected Value Display ---
+              // Using Align ensures it stays vertically centered with the red line
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 110), // Push slightly right of the ruler ticks
+                  child: IgnorePointer(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
                         Text(
-                          "$cm",
-                          style: TextStyle(
-                            color: isSelected ? AppColors.primary : Colors.grey,
+                          _isCm
+                              ? displayVal.toStringAsFixed(0)
+                              : _formatInchesToFeet(displayVal),
+                          style: const TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                            height: 1.0,
                           ),
                         ),
-                    ],
-                  ),
-                );
-              },
-              childCount: 150, // 100cm to 250cm
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --- Screen 6: Weight ---
-  Widget _buildWeightScreen() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 200,
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "kg",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                        const SizedBox(width: 5),
+                        Text(
+                          _isCm ? "cm" : "",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              const Expanded(child: Center(child: Text("lbs"))),
             ],
           ),
         ),
-        const SizedBox(height: 40),
-        Text(
-          "${_data.weightKg!.toInt()}",
-          style: const TextStyle(
-            fontSize: 80,
-            fontWeight: FontWeight.bold,
-            color: AppColors.secondary,
-          ),
+
+        const SizedBox(height: 30),
+      ],
+    );
+  }
+
+// Helper to format feet
+  String _formatInchesToFeet(double totalInches) {
+    int feet = totalInches ~/ 12;
+    int inches = (totalInches % 12).round();
+    return "$feet' $inches\"";
+  }
+
+  // --- Screen 6: Weight ---
+  Widget _buildWeightScreen() {
+    double currentKg = _data.weightKg ?? 70.0;
+
+    // Bounds and Conversions
+    double minVal = _isKg ? 20.0 : 44.0;
+    double maxVal = _isKg ? 200.0 : 440.0;
+    double displayVal = _isKg ? currentKg : (currentKg * 2.20462);
+    String weightString = (displayVal % 1 == 0)
+        ? displayVal.toStringAsFixed(0)
+        : displayVal.toStringAsFixed(1);
+
+    return Column(
+      children: [
+        const SizedBox(height: 30),
+        UnitSwitch(
+          isLeftSelected: _isKg,
+          leftLabel: "kg",
+          rightLabel: "lbs",
+          onLeftTap: () => setState(() => _isKg = true),
+          onRightTap: () => setState(() => _isKg = false),
         ),
-        const Text("kg", style: TextStyle(fontSize: 20, color: Colors.grey)),
-        const SizedBox(height: 20),
+
+        const SizedBox(height: 60), // Spacing before the number
+
+        // Large Weight Value
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              weightString,
+              style: const TextStyle(
+                fontSize: 100,
+                fontWeight: FontWeight.w900,
+                color: AppColors.secondary,
+                letterSpacing: -2,
+                height: 1.0,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _isKg ? "kg" : "lbs",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 60),
+
+        // Ruler Area
         SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 200,
-            itemBuilder: (context, index) {
-              return Container(
-                width: 10,
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  width: 2,
-                  height: index % 10 == 0 ? 40 : 20,
-                  color: Colors.grey,
-                ),
-              );
+          height: 130, // Defined height for the scale area
+          child: WeightRuler(
+            key: ValueKey(_isKg),
+            initialWeight: displayVal,
+            minWeight: minVal,
+            maxWeight: maxVal,
+            onChanged: (val) {
+              setState(() {
+                if (_isKg) {
+                  _data.weightKg = val;
+                } else {
+                  _data.weightKg = val / 2.20462;
+                }
+              });
             },
           ),
         ),
@@ -536,7 +629,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-// --- Screen 8: Goal Speed ---
+  // --- Screen 8: Goal Speed ---
   Widget _buildSpeedScreen() {
     final List<Map<String, dynamic>> speedOptions = [
       {"label": "Gradual", "icon": Icons.directions_walk},
@@ -678,39 +771,179 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // --- Screen 11: Meal Times ---
   Widget _buildMealTimeScreen() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       child: Column(
-        children: ["Breakfast", "Lunch", "Dinner"].map((meal) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildMealCard(
+              label: "Breakfast Time",
+              icon: Icons.sunny,
+              mealKey: "Breakfast"
+          ),
+          _buildMealCard(
+              label: "Lunch Time",
+              icon: Icons.restaurant_rounded,
+              mealKey: "Lunch"
+          ),
+          _buildMealCard(
+              label: "Dinner Time",
+              icon: Icons.bedtime_rounded,
+              mealKey: "Dinner"
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealCard({
+    required String label,
+    required IconData icon,
+    required String mealKey
+  }) {
+    bool isSelected = _mealTimes[mealKey] != null;
+    TimeOfDay displayTime = _mealTimes[mealKey] ?? const TimeOfDay(hour: 8, minute: 0);
+
+    String hourStr = displayTime.hour.toString().padLeft(2, '0');
+    String minuteStr = displayTime.minute.toString().padLeft(2, '0');
+
+    Color activeColor = const Color(0xFFFF4B4B);
+    Color activeBg = const Color(0xFFFFE5E5);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            _mealTimes[mealKey] = null;
+          } else {
+            _mealTimes[mealKey] = const TimeOfDay(hour: 8, minute: 00);
+          }
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 25),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: isSelected ? activeBg : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? activeColor : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Header: Icon + Label + Selection Indicator
+            Row(
               children: [
-                Text(meal, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                Icon(
+                  icon,
+                  color: isSelected ? activeColor : Colors.grey.shade600,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? AppColors.primary : Colors.grey.shade600,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text("12:00", style: TextStyle(fontSize: 18)),
+                ),
+                const Spacer(),
+
+                SelectionIndicator(
+                    isSelected: isSelected,
+                    activeColor: activeColor
                 ),
               ],
             ),
-          );
-        }).toList(),
+
+            const SizedBox(height: 10),
+
+            // Time Picker Area
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildTimeBox(hourStr, isSelected, () => _pickTime(context, mealKey, displayTime)),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Text(
+                    ":",
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: isSelected ? Colors.grey.shade800 : Colors.grey.shade400,
+                    ),
+                  ),
+                ),
+
+                _buildTimeBox(minuteStr, isSelected, () => _pickTime(context, mealKey, displayTime)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildTimeBox(String text, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: isActive ? onTap : null,
+      child: Container(
+        width: 100,
+        height: 60,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive ? Colors.transparent : Colors.transparent,
+          ),
+          boxShadow: isActive
+              ? [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 4))]
+              : [],
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.w600,
+            color: isActive ? Colors.grey.shade800 : Colors.grey.shade400,
+            letterSpacing: 1,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickTime(BuildContext context, String key, TimeOfDay initial) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFFFF4B4B), // Header background & Active dial
+              onPrimary: Colors.white,    // Header text
+              onSurface: Colors.black,    // Unselected text
+              outline: Colors.transparent, // outlines
+              tertiaryContainer: Color(0xFFFF4B4B),
+              onTertiaryContainer: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _mealTimes[key] = picked;
+      });
+    }
   }
 
   // --- Screen 12: Medical Conditions ---
@@ -828,22 +1061,64 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildSleepQualityScreen() {
-    final options = ["Excellent", "Good", "Fair", "Poor"];
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      children: options
-          .map(
-            (opt) => OptionCard(
-              title: opt,
-              icon: Icons.nightlight_round,
-              isSelected:
-                  false, // Or bind to a variable like _data.sleepQuality
-              onTap: () {
-                // setState(() => _data.sleepQuality = opt);
-              },
+    final List<Map<String, dynamic>> speedOptions = [
+      {"label": "Excellent", "icon": Icons.sentiment_very_satisfied_rounded},
+      {"label": "Good", "icon": Icons.sentiment_satisfied_rounded},
+      {"label": "Fair", "icon": Icons.sentiment_neutral_rounded},
+      {"label": "Poor", "icon": Icons.sentiment_dissatisfied_rounded},
+    ];
+
+    return GridView.count(
+      crossAxisCount: 2,
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      children: speedOptions.map((opt) {
+        final String label = opt["label"];
+        final IconData icon = opt["icon"];
+        final isSelected = _data.sleepQuality == label;
+
+        return GestureDetector(
+          onTap: () => setState(() => _data.sleepQuality = label),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : AppColors.cardBg,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.4),
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+              border: Border.all(
+                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  width: 2
+              ),
             ),
-          )
-          .toList(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 48,
+                  color: isSelected ? Colors.white : Colors.grey.shade400,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : Colors.grey.shade800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
