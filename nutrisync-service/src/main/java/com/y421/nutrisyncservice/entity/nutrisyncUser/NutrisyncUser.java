@@ -94,5 +94,8 @@ public class NutrisyncUser extends AuditModel implements Serializable {
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
 
+    @Column(name = "KEYCLOAK_USER_ID", nullable = false)
+    private String keycloakUserId;
+
     // todo: add other fields as necessary
 }
