@@ -207,7 +207,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset('assets/images/welcome.jpg', fit: BoxFit.cover),
+        Image.asset('assets/images/questionnaire/welcome.jpg', fit: BoxFit.cover),
         Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -300,12 +300,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final List<Map<String, dynamic>> dietOptions = [
       {
         "title": "Male",
-        "image": "assets/images/male.jpg",
+        "image": "assets/images/questionnaire/male.jpg",
         "icon": Icons.male_rounded,
       },
       {
         "title": "Female",
-        "image": "assets/images/female.jpg",
+        "image": "assets/images/questionnaire/female.jpg",
         "icon": Icons.female_rounded,
       },
     ];
@@ -455,7 +455,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       margin: const EdgeInsets.only(right: 20, bottom: 50),
                       alignment: Alignment.center,
                       child: Image.asset(
-                        'assets/images/height.png',
+                        'assets/images/questionnaire/height.png',
                         fit: BoxFit.contain,
                         height: 400,
                       ),
@@ -709,12 +709,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final List<Map<String, dynamic>> dietOptions = [
       {
         "title": "Vegetarian",
-        "image": "assets/images/veg.jpg",
+        "image": "assets/images/questionnaire/veg.jpg",
         "icon": Icons.eco_rounded,
       },
       {
         "title": "Non-vegetarian",
-        "image": "assets/images/nonveg.jpg",
+        "image": "assets/images/questionnaire/nonveg.jpg",
         "icon": Icons.local_fire_department_rounded,
       },
     ];
