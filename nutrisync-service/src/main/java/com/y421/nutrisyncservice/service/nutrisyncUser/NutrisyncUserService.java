@@ -9,6 +9,7 @@ public interface NutrisyncUserService {
     ResponseEntity<Object> register(NutrisyncUserRequestDto dto);
     ResponseEntity<Object> login(LoginDto dto);
     ResponseEntity<Object> updateProfile();
+    ResponseEntity<Object> getProfile(Long userId);
     ResponseEntity<Object> deleteAccount();
     ResponseEntity<Object> calculateBMI();
     ResponseEntity<Object> updateMetrics();
