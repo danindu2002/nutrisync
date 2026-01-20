@@ -3,8 +3,9 @@ class OnboardingDTO {
   String? goalMotivation;
   String? gender;
   int? age;
-  double? heightCm; // Storing as CM for consistency
+  double? heightCm;
   double? weightKg;
+  double? bmi;
   String? activityLevel;
   String? goalSpeed;
   String? dietaryPreference;
@@ -21,6 +22,7 @@ class OnboardingDTO {
     this.age = 25,
     this.heightCm = 170,
     this.weightKg = 70,
+    this.bmi,
     this.activityLevel,
     this.goalSpeed,
     this.dietaryPreference,
@@ -39,6 +41,7 @@ class OnboardingDTO {
       'age': age,
       'heightCm': heightCm,
       'weightKg': weightKg,
+      'bmi': bmi ?? 0.0,
       'activityLevel': activityLevel,
       'goalSpeed': goalSpeed,
       'dietaryPreference': dietaryPreference,

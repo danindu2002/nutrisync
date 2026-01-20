@@ -85,25 +85,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
 
     bool success = await ApiService.submitOnboardingData(_data);
+    if (!mounted) return;
     Navigator.pop(context);
 
     if (success) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Profile Created!")));
+      showCustomSnackBar(
+          context,
+          "Profile created successfully!",
+          type: 'success'
+      );
 
       // Replace onboarding with dashboard
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Failed to save data.")));
-
-      // Replace onboarding with dashboard
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      showCustomSnackBar(
+          context,
+          "Failed to save data. Please try again.",
+          type: 'error'
       );
     }
   }
@@ -587,6 +587,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 } else {
                   _data.weightKg = val / 2.20462;
                 }
+
+                double h = _data.heightCm ?? 1.0;
+                // BMI Formula: weight (kg) / height (m)^2
+                _data.bmi = val / (h * h * 0.0001);
               });
             },
           ),

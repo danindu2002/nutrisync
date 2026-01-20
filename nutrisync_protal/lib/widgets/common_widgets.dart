@@ -980,3 +980,96 @@ class _HeightRulerState extends State<HeightRuler> {
     );
   }
 }
+
+// Helper for Modern SnackBars
+void showCustomSnackBar(BuildContext context, String message, {String type = 'info'}) {
+  Color backgroundColor;
+  IconData icon;
+  Color iconColor;
+
+  // 1. Define styles based on type
+  switch (type) {
+    case 'success':
+      backgroundColor = Colors.green.shade50;
+      icon = Icons.check_circle;
+      iconColor = Colors.green;
+      break;
+    case 'error':
+      backgroundColor = Colors.red.shade50;
+      icon = Icons.error;
+      iconColor = Colors.red;
+      break;
+    case 'warning':
+      backgroundColor = Colors.orange.shade50;
+      icon = Icons.warning_amber_rounded;
+      iconColor = Colors.orange;
+      break;
+    default: // info
+      backgroundColor = Colors.blue.shade50;
+      icon = Icons.info;
+      iconColor = Colors.blue;
+  }
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      backgroundColor: Colors.transparent, // Transparent to let our Container show
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      content: Container(
+        padding: const EdgeInsets.all(16),
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          // Left colored border for accent
+          border: Border(
+            left: BorderSide(color: iconColor, width: 6),
+          ),
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Icon(icon, color: iconColor, size: 28),
+            const SizedBox(width: 16),
+
+            // Text
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    type.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: iconColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
