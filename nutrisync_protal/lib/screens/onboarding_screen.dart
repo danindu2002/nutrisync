@@ -7,6 +7,8 @@ import '../services/api_service.dart';
 import '../widgets/common_widgets.dart';
 import 'package:flutter/services.dart';
 
+import 'dashboard_screen.dart';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -89,10 +91,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Profile Created!")));
+
+      // Replace onboarding with dashboard
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      );
     } else {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Failed to save data.")));
+
+      // Replace onboarding with dashboard
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      );
     }
   }
 
@@ -730,29 +742,55 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // --- Screen 10: Allergies ---
   Widget _buildAllergiesScreen() {
-    final common = ["Peanut", "Mushroom", "Pork", "Beef", "Milk"];
+
+    List<String> commonAllergies = [
+      "Milk",
+      "Eggs",
+      "Peanuts",
+      "Wheat",
+      "Fish",
+      "Shellfish",
+      "Mustard",
+      "Corn",
+      "Pork",
+      "Beef",
+      "Chicken",
+      "Mushrooms",
+      "Tomatoes",
+    ];
+
+    const maxItems = 10;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// Common allergy chips
           Wrap(
             spacing: 10,
-            children: common.map((allergy) {
+            runSpacing: 10,
+            children: commonAllergies.map((allergy) {
               final isSelected = _data.allergies.contains(allergy);
               return FilterChip(
                 label: Text(allergy),
                 selected: isSelected,
                 onSelected: (val) {
                   setState(() {
-                    val
-                        ? _data.allergies.add(allergy)
-                        : _data.allergies.remove(allergy);
+                    if (val) {
+                      if (!_data.allergies.contains(allergy) &&
+                          _data.allergies.length < maxItems) {
+                        _data.allergies.add(allergy);
+                      }
+                    } else {
+                      _data.allergies.remove(allergy);
+                    }
                   });
                 },
-                backgroundColor: Colors.white,
-                selectedColor: AppColors.primary.withOpacity(0.2),
+                backgroundColor: Colors.grey.shade100,
+                selectedColor: AppColors.primary,
                 labelStyle: TextStyle(
-                  color: isSelected ? AppColors.primary : Colors.black,
+                  color: isSelected ? AppColors.primary : Colors.black87,
                 ),
                 shape: StadiumBorder(
                   side: BorderSide(
@@ -764,10 +802,86 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               );
             }).toList(),
           ),
+
+          const SizedBox(height: 40),
+
+          /// Input-like container with selected chips
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (_data.allergies.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      "No allergies selected. Tap chips above to add.",
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  )
+                else
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _data.allergies.map((item) {
+                    return Chip(
+                      label: Text(item),
+                      deleteIcon: const Icon(Icons.close, size: 16),
+                      onDeleted: () {
+                        setState(() {
+                          _data.allergies.remove(item);
+                        });
+                      },
+                      backgroundColor:
+                      AppColors.primary.withOpacity(0.15),
+                      labelStyle: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 50),
+
+                /// Counter
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.edit_note,
+                        size: 16,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        "${_data.allergies.length}/$maxItems",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
+
 
   // --- Screen 11: Meal Times ---
   Widget _buildMealTimeScreen() {
@@ -948,41 +1062,140 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // --- Screen 12: Medical Conditions ---
   Widget _buildMedicalConditionScreen() {
-    final conditions = [
+    final List<String> conditions = [
       "Diabetes",
-      "High Cholesterol",
       "Hypertension",
+      "High Cholesterol",
+      "Heart Disease",
+      "Asthma",
+      "Arthritis",
+      "Thyroid Disorder",
       "Fatty Liver",
+      "Anemia",
+      "Kidney Disease",
+      "Gastritis",
+      "Migraine",
     ];
+
+    const maxItems = 10;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: conditions.map((cond) {
-          final isSelected = _data.medicalConditions.contains(cond);
-          return FilterChip(
-            label: Text(cond),
-            selected: isSelected,
-            onSelected: (val) {
-              setState(() {
-                val
-                    ? _data.medicalConditions.add(cond)
-                    : _data.medicalConditions.remove(cond);
-              });
-            },
-            backgroundColor: Colors.white,
-            selectedColor: AppColors.primary.withOpacity(0.2),
-            labelStyle: TextStyle(
-              color: isSelected ? AppColors.primary : Colors.black,
-            ),
-            shape: StadiumBorder(
-              side: BorderSide(
-                color: isSelected ? AppColors.primary : Colors.grey.shade300,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// Common allergy chips
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: conditions.map((allergy) {
+              final isSelected = _data.medicalConditions.contains(allergy);
+              return FilterChip(
+                label: Text(allergy),
+                selected: isSelected,
+                onSelected: (val) {
+                  setState(() {
+                    if (val) {
+                      if (!_data.medicalConditions.contains(allergy) &&
+                          _data.medicalConditions.length < maxItems) {
+                        _data.medicalConditions.add(allergy);
+                      }
+                    } else {
+                      _data.medicalConditions.remove(allergy);
+                    }
+                  });
+                },
+                backgroundColor: Colors.grey.shade100,
+                selectedColor: AppColors.primary,
+                labelStyle: TextStyle(
+                  color: isSelected ? AppColors.primary : Colors.black87,
+                ),
+                shape: StadiumBorder(
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.shade300,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 40),
+
+          /// Input-like container with selected chips
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.primary,
+                width: 1.5,
               ),
             ),
-          );
-        }).toList(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (_data.medicalConditions.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      "No medical conditions selected. Tap chips above to add.",
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _data.medicalConditions.map((item) {
+                      return Chip(
+                        label: Text(item),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () {
+                          setState(() {
+                            _data.medicalConditions.remove(item);
+                          });
+                        },
+                        backgroundColor:
+                        AppColors.primary.withOpacity(0.15),
+                        labelStyle: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                const SizedBox(height: 50),
+
+                /// Counter
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.edit_note,
+                        size: 16,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        "${_data.medicalConditions.length}/$maxItems",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

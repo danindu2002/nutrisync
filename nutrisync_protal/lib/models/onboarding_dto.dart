@@ -8,9 +8,9 @@ class OnboardingDTO {
   String? activityLevel;
   String? goalSpeed;
   String? dietaryPreference;
-  List<String> allergies;
+  List<String> allergies = [];
   Map<String, String> mealTimes; // e.g. {"breakfast": "08:00"}
-  List<String> medicalConditions;
+  List<String> medicalConditions = [];
   int? dailyCalorieGoal;
   String? sleepQuality;
 
