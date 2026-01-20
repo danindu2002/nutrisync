@@ -62,14 +62,14 @@ class _Header extends StatelessWidget {
         ),
       ),
       child: SafeArea(
-        bottom: false, // 👈 only top safe area
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
           child: Row(
             children: [
               const CircleAvatar(
                 radius: 26,
-                backgroundImage: AssetImage("assets/images/avatar.png"),
+                backgroundImage: AssetImage("assets/images/dashboard/avatar.png"),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -240,7 +240,7 @@ class _WorkoutCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         image: const DecorationImage(
-          image: AssetImage("assets/images/workout.png"), // dummy
+          image: AssetImage("assets/images/dashboard/workout.png"),
           fit: BoxFit.cover,
         ),
       ),
@@ -291,13 +291,13 @@ class _NutritionRow extends StatelessWidget {
         _NutritionCard(
           title: "Salad & Eggs",
           calories: "347 kcal",
-          imagePath: "assets/images/salad_eggs.png",
+          imagePath: "assets/images/dashboard/salad_eggs.png",
         ),
         SizedBox(width: 12),
         _NutritionCard(
           title: "Chicken Bowl",
           calories: "762 kcal",
-          imagePath: "assets/images/salad_eggs.png",
+          imagePath: "assets/images/dashboard/salad_eggs.png",
         ),
       ],
     );
@@ -307,7 +307,7 @@ class _NutritionRow extends StatelessWidget {
 class _NutritionCard extends StatelessWidget {
   final String title;
   final String calories;
-  final String imagePath; // 👈 image
+  final String imagePath;
 
   const _NutritionCard({
     required this.title,
