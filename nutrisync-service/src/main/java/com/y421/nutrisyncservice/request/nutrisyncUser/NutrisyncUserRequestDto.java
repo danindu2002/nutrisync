@@ -24,7 +24,7 @@ public class NutrisyncUserRequestDto {
     private Float bmi;
     private String activityLevel;
     private String goalSpeed;
-    private List<String> dietaryPreferences;
+    private String dietaryPreferences;
     private Map<String, String> mealTimes;
     private List<String> allergies;
     private List<String> medicalConditions;

@@ -64,7 +64,7 @@ public class NutrisyncUser extends AuditModel implements Serializable {
     private String goalSpeed;
 
     @Column(name = "DIETARY_PREFERENCES", nullable = true)
-    private List<String> dietaryPreferences;
+    private String dietaryPreferences;
 
     @Column(name = "MEAL_TIMES", nullable = true, columnDefinition = "JSON")
     @Convert(converter = MealTimesConverter.class)

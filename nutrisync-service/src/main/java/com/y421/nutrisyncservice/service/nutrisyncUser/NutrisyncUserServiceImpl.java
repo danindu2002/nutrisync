@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 @RequiredArgsConstructor
 public class NutrisyncUserServiceImpl implements NutrisyncUserService {
@@ -23,7 +25,15 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
             if (nutrisyncUserRepository.existsByEmailAndIsDeletedFalse(dto.getEmail())) {
                 return new ResponseEntity<>("User already exist with given E-mail", HttpStatus.CONFLICT);
             }
-            nutrisyncUserRepository.save(nutrisyncUserMapper.toEntity(dto));
+            NutrisyncUser user = nutrisyncUserMapper.toEntity(dto);
+            if (user.getFirstName() == null) user.setFirstName("");
+            if (user.getLastName() == null) user.setLastName("");
+            if (user.getPassword() == null) user.setPassword("");
+            if (user.getEmail() == null) user.setEmail("");
+            if (user.getDateOfBirth() == null) user.setDateOfBirth(new Date());
+            user.setRegDate(new Date());
+
+            nutrisyncUserRepository.save(user);
 
             return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
         } catch (Exception e) {
