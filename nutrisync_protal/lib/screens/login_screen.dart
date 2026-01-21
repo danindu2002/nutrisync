@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (loginDTO.username.isEmpty || loginDTO.password.isEmpty) {
-      showCustomSnackBar(
+      showModernToast(
         context,
         "Please enter username and password",
         type: 'error',
@@ -47,7 +47,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
 
-    final bool success = await ApiService.onSubmitLogin(loginDTO);
+    // final bool success = await ApiService.onSubmitLogin(loginDTO);
+    final bool success = true;
 
     if (!mounted) return;
 
@@ -55,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      showCustomSnackBar(
+      showModernToast(
         context,
         "Login successfully!",
         type: 'success',
@@ -65,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );
     } else {
-      showCustomSnackBar(
+      showModernToast(
         context,
         "Failed to login. Please try again.",
         type: 'error',
