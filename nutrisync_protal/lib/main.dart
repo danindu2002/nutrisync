@@ -1,6 +1,6 @@
+import 'package:NutriSync/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'screens/onboarding_screen.dart';
 import 'core/constants.dart';
 
 void main() {
@@ -22,7 +22,7 @@ class NutriSyncApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
-      home: const OnboardingScreen(),
+      home: const LoginScreen(),
     );
   }
 }
