@@ -41,6 +41,34 @@ class _AddMealScreenState extends State<AddMealScreen> {
                   const SizedBox(height: 12),
                   _buildMealTypeSelector(),
                   const SizedBox(height: 24),
+                  _buildSlider(
+                    "Total Protein",
+                    protein,
+                    (v) => setState(() => protein = v),
+                  ),
+                  _buildSlider(
+                    "Total Carbs",
+                    carbs,
+                    (v) => setState(() => carbs = v),
+                  ),
+                  _buildSlider(
+                    "Total Calories",
+                    calories,
+                    (v) => setState(() => calories = v),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildLabel("Meal Thumbnail"),
+                  const SizedBox(height: 12),
+                  _buildImagePickerPlaceholder(),
+                  const SizedBox(height: 24),
+                  _buildLabel("Additional Note"),
+                  const SizedBox(height: 12),
+                  _buildTextField("What would you like AI to know", null),
+                  const SizedBox(height: 24),
+                  _buildSwitch(),
+                  const SizedBox(height: 32),
+                  PrimaryButton(onTap: () {}, text: "Continue", isRed: true),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -224,6 +252,64 @@ class _AddMealScreenState extends State<AddMealScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildSlider(
+    String label,
+    double value,
+    ValueChanged<double> onChanged,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: AppColors.primary,
+            inactiveTrackColor: Colors.grey.shade200,
+            thumbColor: AppColors.primary,
+            overlayColor: AppColors.primary.withOpacity(0.2),
+            trackHeight: 6,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+          ),
+          child: Slider(value: value, min: 0, max: 100, onChanged: onChanged),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImagePickerPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 120,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: AppColors.primary,
+          width: 2,
+          style: BorderStyle.solid,
+        ), // In Flutter, dashed is harder, solid for now or custom painter
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+      ),
+      child: Center(child: Icon(Icons.add, color: AppColors.primary, size: 40)),
+    );
+  }
+
+  Widget _buildSwitch() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          "Suggest Recommendations",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Switch(
+          value: suggestRecommendations,
+          activeColor: AppColors.primary,
+          onChanged: (v) => setState(() => suggestRecommendations = v),
+        ),
+      ],
     );
   }
 }
