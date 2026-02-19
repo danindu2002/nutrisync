@@ -1,3 +1,4 @@
+import 'package:NutriSync/screens/rewards_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../widgets/common_widgets.dart';
@@ -46,6 +47,22 @@ class DashboardScreen extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => const ChallengesScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    /// GO TO REWARDS BUTTON
+                    PrimaryButton(
+                      text: "Go to Rewards",
+                      isRed: true,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RewardScreen(),
                           ),
                         );
                       },
