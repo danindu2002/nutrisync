@@ -39,25 +39,25 @@ public class NutrisyncUser extends AuditModel implements Serializable {
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
-    @Column(name = "DATE_OF_BIRTH", nullable = false)
+    @Column(name = "DATE_OF_BIRTH", nullable = true)
     private Date dateOfBirth;
 
-    @Column(name = "GENDER", nullable = false)
+    @Column(name = "GENDER", nullable = true)
     private String gender;
 
-    @Column(name = "AGE", nullable = false)
+    @Column(name = "AGE", nullable = true)
     private Integer age;
 
-    @Column(name = "HEIGHT_CM", nullable = false)
+    @Column(name = "HEIGHT_CM", nullable = true)
     private Float heightCm;
 
-    @Column(name = "WEIGHT_KG", nullable = false)
+    @Column(name = "WEIGHT_KG", nullable = true)
     private Float weightKg;
 
-    @Column(name = "BMI", nullable = false)
+    @Column(name = "BMI", nullable = true)
     private Float bmi;
 
-    @Column(name = "ACTIVITY_LEVEL", nullable = false)
+    @Column(name = "ACTIVITY_LEVEL", nullable = true)
     private String activityLevel;
 
     @Column(name = "GOAL_SPEED", nullable = true)

@@ -135,10 +135,10 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
         userKeycloak.setEmailVerified(true);
 
         CredentialRepresentation passwordCredentials = new CredentialRepresentation();
-        passwordCredentials.setTemporary(true);
+        passwordCredentials.setTemporary(false);
         passwordCredentials.setType(CredentialRepresentation.PASSWORD);
-        String password = RandomStringUtils.random(newLoginPwdLength, newLoginPwdLetters, newLoginPwdNumbers);
-        passwordCredentials.setValue(password);
+//        String password = RandomStringUtils.random(newLoginPwdLength, newLoginPwdLetters, newLoginPwdNumbers);
+        passwordCredentials.setValue(userCreateDTO.getPassword());
 
         userKeycloak.setCredentials(List.of(passwordCredentials));
         userKeycloak.setRequiredActions(Collections.emptyList());
