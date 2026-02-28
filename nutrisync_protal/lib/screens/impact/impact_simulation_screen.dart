@@ -10,13 +10,10 @@ class ImpactSimulationScreen extends StatefulWidget {
 }
 
 class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
-  double _simulatedWeight = 85.0; // Current weight
-  final double _targetWeight = 72.0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -27,19 +24,14 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 24),
-                      _buildHeader(),
                       const SizedBox(height: 32),
                       _buildBodyComparison(),
-                      const SizedBox(height: 40),
-                      _buildSimulationSlider(),
                       const SizedBox(height: 32),
-                      _buildImpactStats(),
-                      const SizedBox(height: 40),
+                      _buildDetailsPanel(),
+                      const SizedBox(height: 48),
                       _buildActionButton(),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -58,259 +50,209 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: AppTheme.textPrimary,
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Impact Simulation',
+              style: GoogleFonts.workSans(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF333333),
               ),
             ),
           ),
-          const SizedBox(width: 14),
-          Text(
-            'Impact Simulation',
-            style: GoogleFonts.poppins(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF9C4),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.info_rounded,
+                  color: Color(0xFFFFD600),
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Attention!',
+                  style: GoogleFonts.workSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFFFD600),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Visualize Your Progress',
-          style: GoogleFonts.poppins(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.textPrimary,
-            height: 1.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'See how your body transformation would look like based on your target weight.',
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-      ],
     );
   }
 
   Widget _buildBodyComparison() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildBodyCard(
-          label: 'Current',
-          weight: '85 kg',
-          bmi: '32.1',
-          scale: 1.0,
-          opacity: 0.6,
-        ),
-        Container(height: 120, width: 2, color: AppTheme.surface),
-        _buildBodyCard(
-          label: 'Target',
-          weight: '${_simulatedWeight.toStringAsFixed(1)} kg',
-          bmi: '24.2',
-          scale:
-              0.85 +
-              (0.15 *
-                  ((_simulatedWeight - _targetWeight) / (85 - _targetWeight))),
-          opacity: 1.0,
-          isTarget: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBodyCard({
-    required String label,
-    required String weight,
-    required String bmi,
-    required double scale,
-    required double opacity,
-    bool isTarget = false,
-  }) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 200,
-          width: 100,
-          alignment: Alignment.bottomCenter,
-          child: Transform.scale(
-            scale: scale,
-            child: Opacity(
-              opacity: opacity,
-              child: Icon(
-                Icons.person, // Placeholder for silhouette
-                size: 180,
-                color: isTarget ? AppTheme.primary : AppTheme.textLight,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          weight,
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        Text(
-          'BMI $bmi',
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSimulationSlider() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // Now Column
+        Expanded(
+          child: Column(
             children: [
               Text(
-                'Simulation',
-                style: GoogleFonts.poppins(
+                'Now',
+                style: GoogleFonts.workSans(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF333333),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Image.asset(
+                'assets/images/now image.png',
+                height: 200,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'BMI',
+                style: GoogleFonts.workSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF757575),
                 ),
               ),
               Text(
-                '${_simulatedWeight.toStringAsFixed(1)} kg',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
+                '32.1',
+                style: GoogleFonts.workSans(
+                  fontSize: 32,
                   fontWeight: FontWeight.w700,
-                  color: AppTheme.primary,
+                  color: const Color(0xFFEE3638),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppTheme.primary,
-              inactiveTrackColor: AppTheme.textLight.withValues(alpha: 0.3),
-              thumbColor: Colors.white,
-              overlayColor: AppTheme.primary.withValues(alpha: 0.1),
-              trackHeight: 6,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-            ),
-            child: Slider(
-              value: _simulatedWeight,
-              min: _targetWeight,
-              max: 85.0,
-              onChanged: (val) => setState(() => _simulatedWeight = val),
-            ),
+        ),
+        // Arrow
+        Padding(
+          padding: const EdgeInsets.only(bottom: 60),
+          child: Icon(
+            Icons.chevron_right_rounded,
+            size: 48,
+            color: const Color(0xFFEE3638).withValues(alpha: 0.8),
           ),
+        ),
+        // After Column
+        Expanded(
+          child: Column(
+            children: [
+              Column(
+                children: [
+                  Text(
+                    'After',
+                    style: GoogleFonts.workSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF757575),
+                    ),
+                  ),
+                  Text(
+                    '6 Months',
+                    style: GoogleFonts.workSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF333333),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Image.asset(
+                'assets/images/after image.png',
+                height: 200,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'BMI',
+                style: GoogleFonts.workSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF757575),
+                ),
+              ),
+              Text(
+                '24.0',
+                style: GoogleFonts.workSans(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF4CAF50),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailsPanel() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F8F1),
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Column(
+        children: [
+          _buildDetailRow('Average body fat', '21%'),
+          _buildDetailRow('Waist-to-hip ratio', '0.8'),
+          _buildDetailRow('Body weight', '65kg'),
+          _buildDetailRow('Expected consistency level', 'High'),
+          const SizedBox(height: 16),
+          _buildDetailRow('BMI Change', '8.1'),
+          _buildDetailRow('Body weight change', '16kg'),
+          _buildDetailRow('Average body fat change', '6%'),
         ],
       ),
     );
   }
 
-  Widget _buildImpactStats() {
-    return Row(
-      children: [
-        _buildStatCard(
-          icon: Icons.favorite_rounded,
-          label: 'Health Rate',
-          value: '+15%',
-          color: Colors.pinkAccent,
-        ),
-        const SizedBox(width: 16),
-        _buildStatCard(
-          icon: Icons.flash_on_rounded,
-          label: 'Energy level',
-          value: '+28%',
-          color: Colors.orangeAccent,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(height: 16),
-            Text(
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
               label,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
+              style: GoogleFonts.workSans(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF424242),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              ': $value',
+              style: GoogleFonts.workSans(
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppTheme.textSecondary,
+                color: const Color(0xFF616161),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -318,27 +260,36 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
   Widget _buildActionButton() {
     return Container(
       width: double.infinity,
-      height: 60,
+      height: 64,
       decoration: BoxDecoration(
-        color: AppTheme.primary,
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFFEE3638),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: const Color(0xFFEE3638).withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Center(
-        child: Text(
-          'Plan Transition',
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Impact Overview',
+            style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: Colors.white,
+            size: 24,
+          ),
+        ],
       ),
     );
   }
