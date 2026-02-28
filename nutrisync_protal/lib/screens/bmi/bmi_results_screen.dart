@@ -12,7 +12,7 @@ class BmiResultsScreen extends StatefulWidget {
 
 class _BmiResultsScreenState extends State<BmiResultsScreen>
     with SingleTickerProviderStateMixin {
-  int _selectedTab = 0; // 0 = Analogue Meter, 1 = Histogram
+  int _selectedTab = 0;
   static const double _bmiValue = 32.1;
 
   late AnimationController _needleController;
@@ -43,57 +43,53 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 24),
-                      _buildTabSwitcher(),
-                      const SizedBox(height: 24),
-                      if (_selectedTab == 0) ...[
-                        _buildGaugeCard(),
-                        const SizedBox(height: 16),
-                        _buildFootnote(),
-                        const SizedBox(height: 24),
-                        _buildBmiRangeList(),
-                      ] else ...[
-                        _buildHistogramPlaceholder(),
-                      ],
-                      const SizedBox(height: 32),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAppBar(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildTabSwitcher(),
+                    const SizedBox(height: 20),
+                    if (_selectedTab == 0) ...[
+                      _buildGaugeCard(),
+                      const SizedBox(height: 14),
+                      _buildFootnote(),
+                      const SizedBox(height: 20),
+                      _buildCategoryCard(),
+                      const SizedBox(height: 20),
+                      _buildBannerCard(),
+                    ] else ...[
+                      _buildHistogramPlaceholder(),
                     ],
-                  ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ─── App Bar ────────────────────────────────────────
+  // ─── App Bar ─────────────────────────────────────────
   Widget _buildAppBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(12),
-            ),
+          GestureDetector(
+            onTap: () {},
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
-              size: 18,
+              size: 22,
               color: AppTheme.textPrimary,
             ),
           ),
@@ -108,44 +104,33 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               ),
             ),
           ),
-          _buildStatusPill(
-            label: 'Critical!',
-            dotColor: AppTheme.primary,
-            bgColor: AppTheme.statusCriticalBg,
-            textColor: AppTheme.statusCriticalText,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusPill({
-    required String label,
-    required Color dotColor,
-    required Color bgColor,
-    required Color textColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
           Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: textColor,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: AppTheme.statusCriticalBg,
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Critical!',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.statusCriticalText,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -153,7 +138,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     );
   }
 
-  // ─── Tab Switcher ───────────────────────────────────
+  // ─── Tab Switcher ────────────────────────────────────
   Widget _buildTabSwitcher() {
     return Container(
       height: 50,
@@ -163,7 +148,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       ),
       child: Row(
         children: [
-          _buildTab(index: 0, label: 'Analogue Meter'),
+          _buildTab(index: 0, label: 'Analouge Meter'),
           _buildTab(index: 1, label: 'Histogram'),
         ],
       ),
@@ -205,11 +190,11 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     );
   }
 
-  // ─── Gauge Card ─────────────────────────────────────
+  // ─── Gauge Card ──────────────────────────────────────
   Widget _buildGaugeCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(28),
@@ -217,7 +202,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       child: Column(
         children: [
           SizedBox(
-            height: 210,
+            height: 200,
             width: double.infinity,
             child: AnimatedBuilder(
               animation: _needleAnimation,
@@ -235,19 +220,10 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
           Text(
             _bmiValue.toString(),
             style: GoogleFonts.poppins(
-              fontSize: 52,
+              fontSize: 48,
               fontWeight: FontWeight.w700,
               color: AppTheme.primary,
               height: 1.0,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Obese Class I',
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.textSecondary,
             ),
           ),
         ],
@@ -255,7 +231,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     );
   }
 
-  // ─── Footnote ───────────────────────────────────────
+  // ─── Footnote ────────────────────────────────────────
   Widget _buildFootnote() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,9 +239,9 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
         Container(
           width: 6,
           height: 6,
-          margin: const EdgeInsets.only(top: 5),
+          margin: const EdgeInsets.only(top: 7),
           decoration: const BoxDecoration(
-            color: AppTheme.primary,
+            color: Color(0xFF4FC3F7),
             shape: BoxShape.circle,
           ),
         ),
@@ -276,7 +252,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             style: GoogleFonts.poppins(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: AppTheme.primary,
+              color: AppTheme.textSecondary,
               height: 1.5,
             ),
           ),
@@ -285,101 +261,178 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     );
   }
 
-  // ─── BMI Range List ─────────────────────────────────
-  Widget _buildBmiRangeList() {
-    final ranges = [
-      _BmiRange('Underweight', '< 18.5', AppTheme.bmiUnderweight),
-      _BmiRange('Normal Weight', '18.5 – 24.9', AppTheme.bmiNormal),
-      _BmiRange('Overweight', '25 – 29.9', AppTheme.bmiOverweight),
-      _BmiRange('Obese', '30 – 34.9', AppTheme.bmiObese, isActive: true),
-      _BmiRange('Extremely Obese', '≥ 35.0', AppTheme.bmiExtreme),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'BMI Ranges',
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ...ranges.map((r) => _buildRangeRow(r)),
-      ],
-    );
-  }
-
-  Widget _buildRangeRow(_BmiRange range) {
+  // ─── Category Card ───────────────────────────────────
+  Widget _buildCategoryCard() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: range.isActive
-            ? range.color.withValues(alpha: 0.12)
-            : AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: range.isActive
-            ? Border.all(color: range.color.withValues(alpha: 0.4), width: 1.5)
-            : null,
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
-          Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              color: range.color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
+          // Left side: text content
           Expanded(
-            child: Text(
-              range.label,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: range.isActive ? FontWeight.w600 : FontWeight.w500,
-                color: range.isActive
-                    ? AppTheme.textPrimary
-                    : AppTheme.textSecondary,
-              ),
-            ),
-          ),
-          Text(
-            range.range,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: range.color,
-            ),
-          ),
-          if (range.isActive) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: range.color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                'You',
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: range.color,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Category',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  'Obese Class I',
+                  style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 16,
+                      color: AppTheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Attention Required!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
+          // Right side: sad face emoji in red rounded square
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppTheme.primary,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Center(
+              child: Text('😞', style: TextStyle(fontSize: 26)),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // ─── Histogram Placeholder ──────────────────────────
+  // ─── Banner Card with Image ──────────────────────────
+  Widget _buildBannerCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 200,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background image
+            Image.asset('assets/images/overview image.png', fit: BoxFit.cover),
+            // Dark gradient overlay
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.75),
+                    Colors.black.withValues(alpha: 0.20),
+                  ],
+                ),
+              ),
+            ),
+            // Text content
+            Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Heading
+                  Text(
+                    'Shed the weight,\nTake Less\nBreaks!',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      height: 1.25,
+                    ),
+                  ),
+                  // Bottom row: subtitle + Dive In button
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Subtitle
+                      Expanded(
+                        child: Text(
+                          'You can Reshape your life\nwith NutriSync Diet plan',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withValues(alpha: 0.85),
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                      // Dive In button
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Dive In',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Histogram Placeholder ───────────────────────────
   Widget _buildHistogramPlaceholder() {
     return Container(
       width: double.infinity,
@@ -409,7 +462,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-// ─── BMI Gauge Custom Painter ─────────────────────────────
+// ─── BMI Gauge Custom Painter ──────────────────────────────
 class _BmiGaugePainter extends CustomPainter {
   final double bmiValue;
   final double animationValue;
@@ -554,12 +607,4 @@ class _BmiGaugePainter extends CustomPainter {
   @override
   bool shouldRepaint(_BmiGaugePainter old) =>
       old.bmiValue != bmiValue || old.animationValue != animationValue;
-}
-
-class _BmiRange {
-  final String label;
-  final String range;
-  final Color color;
-  final bool isActive;
-  const _BmiRange(this.label, this.range, this.color, {this.isActive = false});
 }
