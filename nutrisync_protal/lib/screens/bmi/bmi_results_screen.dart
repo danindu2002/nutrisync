@@ -54,21 +54,21 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     _buildTabSwitcher(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     if (_selectedTab == 0) ...[
                       _buildGaugeCard(),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       _buildFootnote(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
                       _buildCategoryCard(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
                       _buildBannerCard(),
                     ] else ...[
                       _buildHistogramPlaceholder(),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -141,10 +141,10 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   // ─── Tab Switcher ────────────────────────────────────
   Widget _buildTabSwitcher() {
     return Container(
-      height: 50,
+      height: 52,
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -196,22 +196,29 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       width: double.infinity,
       alignment: Alignment.center,
       child: Container(
-        width: 320, // Enough to contain the labels
-        padding: const EdgeInsets.all(16),
+        width: 340,
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(28),
+          color: const Color(0xFFF8FAFC), // Subtle light background for gauge
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           children: [
             SizedBox(
-              width: 300,
-              height: 150, // Arc only area
+              width: 360,
+              height: 300, // Expanded height for clearance
               child: AnimatedBuilder(
                 animation: _needleAnimation,
                 builder: (context, _) {
                   return CustomPaint(
-                    painter: _BmiDoubleArcPainter(
+                    painter: _BmiDualArcPillPainter(
                       bmiValue: _bmiValue,
                       animationValue: _needleAnimation.value,
                     ),
@@ -219,59 +226,8 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 },
               ),
             ),
-            const SizedBox(height: 10),
-            // Bottom Labels Row
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildBmiLabel('Under Weight', '<18.5', isStart: true),
-                  _buildBmiLabel('Normal Weight', '18.5-24.9'),
-                  _buildBmiLabel('Over Weight', '25-29.9'),
-                  _buildBmiLabel('Obese', '30-34.9'),
-                  _buildBmiLabel('Extremely Obese', '>35.0', isEnd: true),
-                ],
-              ),
-            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBmiLabel(
-    String title,
-    String range, {
-    bool isStart = false,
-    bool isEnd = false,
-  }) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: isStart
-            ? CrossAxisAlignment.start
-            : (isEnd ? CrossAxisAlignment.end : CrossAxisAlignment.center),
-        children: [
-          Text(
-            title,
-            textAlign: isStart
-                ? TextAlign.start
-                : (isEnd ? TextAlign.end : TextAlign.center),
-            style: GoogleFonts.workSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF757575),
-            ),
-          ),
-          Text(
-            range,
-            style: GoogleFonts.workSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF757575),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -330,24 +286,24 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                     color: AppTheme.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   'Obese Class I',
                   style: GoogleFonts.poppins(
-                    fontSize: 22,
+                    fontSize: 24,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(
                       Icons.warning_amber_rounded,
-                      size: 16,
+                      size: 18,
                       color: AppTheme.primary,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text(
                       'Attention Required!',
                       style: GoogleFonts.poppins(
@@ -363,14 +319,14 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
           ),
           // Right side: sad face emoji in pale red rounded square
           Container(
-            width: 50,
-            height: 50,
+            width: 54,
+            height: 54,
             decoration: BoxDecoration(
               color: AppTheme.statusCriticalBg,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Center(
-              child: Text('😞', style: TextStyle(fontSize: 26)),
+              child: Text('😞', style: TextStyle(fontSize: 28)),
             ),
           ),
         ],
@@ -516,87 +472,232 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-// ─── Double Multi-Layer BMI Arc Painter ───────────────────
-class _BmiDoubleArcPainter extends CustomPainter {
+// ─── Dual-Arc Colored Pill BMI Gauge Painter ──────────
+class _BmiDualArcPillPainter extends CustomPainter {
   final double bmiValue;
   final double animationValue;
 
-  _BmiDoubleArcPainter({required this.bmiValue, required this.animationValue});
+  _BmiDualArcPillPainter({
+    required this.bmiValue,
+    required this.animationValue,
+  });
 
-  // Color selection based on BMI value
-  Color _getActiveColor(double value) {
-    if (value < 18.5) return const Color(0xFFEE3638);
-    if (value < 25.0) return const Color(0xFF4CAF50);
-    if (value < 30.0) return const Color(0xFFFFC107);
-    if (value < 35.0) return const Color(0xFFFF9800);
-    return const Color(0xFFF44336);
-  }
+  static const List<Map<String, dynamic>> _zones = [
+    {'category': 'Under\nWeight', 'range': '<18.5', 'color': Color(0xFF00B0F0)},
+    {
+      'category': 'Normal\nWeight',
+      'range': '18.5-24.9',
+      'color': Color(0xFF32CD32),
+    },
+    {
+      'category': 'Over\nweight',
+      'range': '25-29.9',
+      'color': Color(0xFFFFD700),
+    },
+    {'category': 'Obese', 'range': '30-34.9', 'color': Color(0xFFFFA500)},
+    {
+      'category': 'Extremely\nObese',
+      'range': '>35.0',
+      'color': Color(0xFFFF0000),
+    },
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height - 10);
-    const thickness = 20.0;
+    final center = Offset(size.width / 2, size.height - 70);
+    const outerRadius = 130.0; // Pivot for outer pills
+    const innerRadius = 80.0; // Pivot for inner pills
+    const outerThickness = 50.0;
+    const innerThickness = 35.0;
+    const segmentSweep = math.pi / 5;
+    const gap = 0.08;
 
-    // New specs: Outer radius 120, Inner radius 100
-    // Paint draws at the center of the stroke, so for a 20px thickness:
-    // Outer arc (100 to 120 radius) should be at center radius 110.
-    // Inner arc (80 to 100 radius) should be at center radius 90.
-    const outerRadius = 110.0;
-    const innerRadius = 90.0;
+    for (int i = 0; i < _zones.length; i++) {
+      final zone = _zones[i];
+      final startAngle = math.pi + (i * segmentSweep);
+      final midAngle = startAngle + (segmentSweep / 2);
 
-    // 1. Draw First Layer (Background Track) - Outer
-    final trackPaint = Paint()
-      ..color = const Color(0xFFE0E0E0).withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = thickness
-      ..strokeCap = StrokeCap.round;
+      // --- Outer Arc Pills (Categories) ---
+      final outerPaint = Paint()
+        ..color = zone['color'] as Color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = outerThickness
+        ..strokeCap = StrokeCap.round
+        ..isAntiAlias = true;
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: outerRadius),
-      math.pi,
-      math.pi,
-      false,
-      trackPaint,
-    );
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: outerRadius),
+        startAngle + gap,
+        segmentSweep - (gap * 2),
+        false,
+        outerPaint,
+      );
 
-    // 2. Draw Second Layer (Colored Progress Arc) - Inner
-    // Map BMI 0-40 into 0-180 degrees (PI)
-    // Clamp bmiValue to max 40 for calculation to prevent over-sweeping
-    final clampedBmiValue = bmiValue.clamp(0.0, 40.0);
-    final sweepAngle = (clampedBmiValue / 40.0) * math.pi;
-    final progressSweep = sweepAngle * animationValue;
+      // Category Text
+      _drawTextOnArc(
+        canvas,
+        center,
+        outerRadius - 15, // Slightly tighter radius for category text
+        midAngle,
+        zone['category'] as String,
+        13,
+        FontWeight.w600,
+        Colors.black.withValues(alpha: 0.8),
+      );
 
-    final progressPaint = Paint()
-      ..color = _getActiveColor(bmiValue)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = thickness
-      ..strokeCap = StrokeCap.round;
+      // --- Inner Arc Pills (Ranges) ---
+      final innerPaint = Paint()
+        ..color = zone['color'] as Color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = innerThickness
+        ..strokeCap = StrokeCap.round
+        ..isAntiAlias = true;
 
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: innerRadius),
-      math.pi,
-      progressSweep,
-      false,
-      progressPaint,
-    );
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: innerRadius),
+        startAngle + gap,
+        segmentSweep - (gap * 2),
+        false,
+        innerPaint,
+      );
 
-    // 3. Center Value Text
-    final TextPainter tp = TextPainter(
+      // Range Text
+      _drawTextOnArc(
+        canvas,
+        center,
+        innerRadius,
+        midAngle,
+        zone['range'] as String,
+        11,
+        FontWeight.w500,
+        Colors.black.withValues(alpha: 0.7),
+      );
+    }
+
+    // --- Center Value (32.1 in Red with White Box) ---
+    final valTP = TextPainter(
       text: TextSpan(
         text: bmiValue.toStringAsFixed(1),
         style: GoogleFonts.workSans(
           fontSize: 40,
-          fontWeight: FontWeight.w600,
-          color: _getActiveColor(bmiValue),
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFFEE3638),
         ),
       ),
       textDirection: TextDirection.ltr,
     );
+    valTP.layout();
+
+    final boxRect = Rect.fromCenter(
+      center: center + const Offset(0, 40),
+      width: valTP.width + 32,
+      height: valTP.height + 12,
+    );
+    final boxRRect = RRect.fromRectAndRadius(
+      boxRect,
+      const Radius.circular(12),
+    );
+
+    // Draw box shadow
+    canvas.drawRRect(
+      boxRRect.shift(const Offset(0, 4)),
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.05)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+    );
+
+    // Draw white box
+    canvas.drawRRect(boxRRect, Paint()..color = Colors.white);
+
+    valTP.paint(
+      canvas,
+      center + Offset(-valTP.width / 2, 40 - valTP.height / 2),
+    );
+
+    // --- Black Needle Pointer ---
+    final clampedBmiValue = bmiValue.clamp(0.0, 40.0);
+    final targetAngle = math.pi + (clampedBmiValue / 40.0) * math.pi;
+    final animatedAngle = math.pi + (targetAngle - math.pi) * animationValue;
+
+    _drawNeedle(
+      canvas,
+      center,
+      outerRadius + (outerThickness / 2) - 5,
+      animatedAngle,
+    );
+  }
+
+  void _drawTextOnArc(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    double angle,
+    String text,
+    double size,
+    FontWeight weight,
+    Color color,
+  ) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: GoogleFonts.roboto(
+          fontSize: size,
+          fontWeight: weight,
+          color: color,
+          height: 1.1,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
     tp.layout();
-    tp.paint(canvas, center - Offset(tp.width / 2, tp.height * 0.95));
+
+    final offset = Offset(
+      center.dx + radius * math.cos(angle),
+      center.dy + radius * math.sin(angle),
+    );
+
+    canvas.save();
+    canvas.translate(offset.dx, offset.dy);
+    // Rotate text to follow the curve as in the original image
+    // Adding 90 degrees (pi/2) because 0 degrees is horizontal-right
+    canvas.rotate(angle + math.pi / 2);
+    tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
+    canvas.restore();
+  }
+
+  void _drawNeedle(Canvas canvas, Offset center, double length, double angle) {
+    final tip = Offset(
+      center.dx + length * math.cos(angle),
+      center.dy + length * math.sin(angle),
+    );
+
+    final needlePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    // Needle body (thin triangle)
+    final path = Path()
+      ..moveTo(center.dx, center.dy)
+      ..lineTo(
+        center.dx + 2 * math.cos(angle + math.pi / 2),
+        center.dy + 2 * math.sin(angle + math.pi / 2),
+      )
+      ..lineTo(tip.dx, tip.dy)
+      ..lineTo(
+        center.dx + 2 * math.cos(angle - math.pi / 2),
+        center.dy + 2 * math.sin(angle - math.pi / 2),
+      )
+      ..close();
+
+    canvas.drawPath(path, needlePaint);
+
+    // Bulbous base as in the image
+    canvas.drawCircle(center, 12, needlePaint);
   }
 
   @override
-  bool shouldRepaint(_BmiDoubleArcPainter old) =>
+  bool shouldRepaint(_BmiDualArcPillPainter old) =>
       old.bmiValue != bmiValue || old.animationValue != animationValue;
 }
