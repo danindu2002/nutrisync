@@ -194,53 +194,81 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   Widget _buildGaugeCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Background Gauge Image
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/BMI Cal.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                // Dynamic Needle
-                AnimatedBuilder(
-                  animation: _needleAnimation,
-                  builder: (context, _) {
-                    return CustomPaint(
-                      size: const Size(double.infinity, 200),
-                      painter: _BmiNeedlePainter(
-                        bmiValue: _bmiValue,
-                        animationValue: _needleAnimation.value,
-                      ),
-                    );
-                  },
-                ),
-                // 32.1 Value centered inside Gauge
-                Positioned(
-                  bottom: 30,
-                  child: Text(
-                    _bmiValue.toString(),
-                    style: GoogleFonts.poppins(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 1.0,
+      alignment: Alignment.center,
+      child: Container(
+        width: 320, // Enough to contain the labels
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              width: 300,
+              height: 150, // Arc only area
+              child: AnimatedBuilder(
+                animation: _needleAnimation,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: _BmiDoubleArcPainter(
+                      bmiValue: _bmiValue,
+                      animationValue: _needleAnimation.value,
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Bottom Labels Row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildBmiLabel('Under Weight', '<18.5', isStart: true),
+                  _buildBmiLabel('Normal Weight', '18.5-24.9'),
+                  _buildBmiLabel('Over Weight', '25-29.9'),
+                  _buildBmiLabel('Obese', '30-34.9'),
+                  _buildBmiLabel('Extremely Obese', '>35.0', isEnd: true),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBmiLabel(
+    String title,
+    String range, {
+    bool isStart = false,
+    bool isEnd = false,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: isStart
+            ? CrossAxisAlignment.start
+            : (isEnd ? CrossAxisAlignment.end : CrossAxisAlignment.center),
+        children: [
+          Text(
+            title,
+            textAlign: isStart
+                ? TextAlign.start
+                : (isEnd ? TextAlign.end : TextAlign.center),
+            style: GoogleFonts.workSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF757575),
+            ),
+          ),
+          Text(
+            range,
+            style: GoogleFonts.workSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF757575),
             ),
           ),
         ],
@@ -333,7 +361,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               ],
             ),
           ),
-          // Right side: sad face emoji in red rounded square
+          // Right side: sad face emoji in pale red rounded square
           Container(
             width: 50,
             height: 50,
@@ -488,68 +516,87 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-// ─── BMI Needle Painter (Only draws the needle and pivot) ──
-class _BmiNeedlePainter extends CustomPainter {
+// ─── Double Multi-Layer BMI Arc Painter ───────────────────
+class _BmiDoubleArcPainter extends CustomPainter {
   final double bmiValue;
   final double animationValue;
 
-  _BmiNeedlePainter({required this.bmiValue, required this.animationValue});
+  _BmiDoubleArcPainter({required this.bmiValue, required this.animationValue});
 
-  static const double _minBmi = 0.0;
-  static const double _maxBmi = 45.0;
-  static const double _startAngle = math.pi;
-  static const double _totalSweep = math.pi;
-
-  double _bmiToAngle(double bmi) {
-    final fraction = (bmi - _minBmi) / (_maxBmi - _minBmi);
-    return _startAngle - fraction * _totalSweep;
+  // Color selection based on BMI value
+  Color _getActiveColor(double value) {
+    if (value < 18.5) return const Color(0xFFEE3638);
+    if (value < 25.0) return const Color(0xFF4CAF50);
+    if (value < 30.0) return const Color(0xFFFFC107);
+    if (value < 35.0) return const Color(0xFFFF9800);
+    return const Color(0xFFF44336);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height - 10);
-    final outerRadius = size.width * 0.46;
-    final strokeWidth = size.width * 0.095;
+    const thickness = 20.0;
 
-    // Animated needle
-    final targetAngle = _bmiToAngle(bmiValue);
-    final currentAngle =
-        _startAngle + (targetAngle - _startAngle) * animationValue;
+    // New specs: Outer radius 120, Inner radius 100
+    // Paint draws at the center of the stroke, so for a 20px thickness:
+    // Outer arc (100 to 120 radius) should be at center radius 110.
+    // Inner arc (80 to 100 radius) should be at center radius 90.
+    const outerRadius = 110.0;
+    const innerRadius = 90.0;
 
-    final needleLength = outerRadius - strokeWidth * 0.1;
-    final needleTip = Offset(
-      center.dx + needleLength * math.cos(currentAngle),
-      center.dy + needleLength * math.sin(currentAngle),
+    // 1. Draw First Layer (Background Track) - Outer
+    final trackPaint = Paint()
+      ..color = const Color(0xFFE0E0E0).withValues(alpha: 0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = thickness
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: outerRadius),
+      math.pi,
+      math.pi,
+      false,
+      trackPaint,
     );
 
-    // Shadow
-    canvas.drawLine(
-      center + const Offset(2, 2),
-      needleTip + const Offset(2, 2),
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.15)
-        ..strokeWidth = 4
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke,
+    // 2. Draw Second Layer (Colored Progress Arc) - Inner
+    // Map BMI 0-40 into 0-180 degrees (PI)
+    // Clamp bmiValue to max 40 for calculation to prevent over-sweeping
+    final clampedBmiValue = bmiValue.clamp(0.0, 40.0);
+    final sweepAngle = (clampedBmiValue / 40.0) * math.pi;
+    final progressSweep = sweepAngle * animationValue;
+
+    final progressPaint = Paint()
+      ..color = _getActiveColor(bmiValue)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = thickness
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: innerRadius),
+      math.pi,
+      progressSweep,
+      false,
+      progressPaint,
     );
 
-    // Needle
-    canvas.drawLine(
-      center,
-      needleTip,
-      Paint()
-        ..color = const Color(0xFF1A1A1A)
-        ..strokeWidth = 3.5
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke,
+    // 3. Center Value Text
+    final TextPainter tp = TextPainter(
+      text: TextSpan(
+        text: bmiValue.toStringAsFixed(1),
+        style: GoogleFonts.workSans(
+          fontSize: 40,
+          fontWeight: FontWeight.w600,
+          color: _getActiveColor(bmiValue),
+        ),
+      ),
+      textDirection: TextDirection.ltr,
     );
-
-    // Center pivot
-    canvas.drawCircle(center, 10, Paint()..color = const Color(0xFF1A1A1A));
-    canvas.drawCircle(center, 5, Paint()..color = Colors.white);
+    tp.layout();
+    tp.paint(canvas, center - Offset(tp.width / 2, tp.height * 0.95));
   }
 
   @override
-  bool shouldRepaint(_BmiNeedlePainter old) =>
+  bool shouldRepaint(_BmiDoubleArcPainter old) =>
       old.bmiValue != bmiValue || old.animationValue != animationValue;
 }
