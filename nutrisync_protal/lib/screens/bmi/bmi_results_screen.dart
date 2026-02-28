@@ -204,26 +204,43 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
           SizedBox(
             height: 200,
             width: double.infinity,
-            child: AnimatedBuilder(
-              animation: _needleAnimation,
-              builder: (context, _) {
-                return CustomPaint(
-                  painter: _BmiGaugePainter(
-                    bmiValue: _bmiValue,
-                    animationValue: _needleAnimation.value,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background Gauge Image
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/BMI Cal.png',
+                    fit: BoxFit.contain,
                   ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _bmiValue.toString(),
-            style: GoogleFonts.poppins(
-              fontSize: 48,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.primary,
-              height: 1.0,
+                ),
+                // Dynamic Needle
+                AnimatedBuilder(
+                  animation: _needleAnimation,
+                  builder: (context, _) {
+                    return CustomPaint(
+                      size: const Size(double.infinity, 200),
+                      painter: _BmiNeedlePainter(
+                        bmiValue: _bmiValue,
+                        animationValue: _needleAnimation.value,
+                      ),
+                    );
+                  },
+                ),
+                // 32.1 Value centered inside Gauge
+                Positioned(
+                  bottom: 30,
+                  child: Text(
+                    _bmiValue.toString(),
+                    style: GoogleFonts.poppins(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -297,7 +314,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.warning_amber_rounded,
                       size: 16,
                       color: AppTheme.primary,
@@ -321,7 +338,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: AppTheme.primary,
+              color: AppTheme.statusCriticalBg,
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Center(
@@ -335,26 +352,33 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
 
   // ─── Banner Card with Image ──────────────────────────
   Widget _buildBannerCard() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: SizedBox(
-        width: double.infinity,
-        height: 200,
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 180),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
         child: Stack(
-          fit: StackFit.expand,
           children: [
             // Background image
-            Image.asset('assets/images/overview image.png', fit: BoxFit.cover),
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/overview image.png',
+                fit: BoxFit.cover,
+              ),
+            ),
             // Dark gradient overlay
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.75),
-                    Colors.black.withValues(alpha: 0.20),
-                  ],
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.75),
+                      Colors.black.withValues(alpha: 0.20),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -363,7 +387,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               padding: const EdgeInsets.all(22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Heading
                   Text(
@@ -375,6 +399,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                       height: 1.25,
                     ),
                   ),
+                  const SizedBox(height: 24),
                   // Bottom row: subtitle + Dive In button
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -392,6 +417,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                         ),
                       ),
                       // Dive In button
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 18,
@@ -462,20 +488,12 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-// ─── BMI Gauge Custom Painter ──────────────────────────────
-class _BmiGaugePainter extends CustomPainter {
+// ─── BMI Needle Painter (Only draws the needle and pivot) ──
+class _BmiNeedlePainter extends CustomPainter {
   final double bmiValue;
   final double animationValue;
 
-  _BmiGaugePainter({required this.bmiValue, required this.animationValue});
-
-  static const _zones = [
-    [0.0, 18.5, Color(0xFF4FC3F7), 'Under\nWeight', '<18.5'],
-    [18.5, 25.0, Color(0xFF66BB6A), 'Normal\nWeight', '18.5-24.9'],
-    [25.0, 30.0, Color(0xFFFFCA28), 'Over\nweight', '25-29.9'],
-    [30.0, 35.0, Color(0xFFFF7043), 'Obese', '30-34.9'],
-    [35.0, 45.0, Color(0xFFE53935), 'Extremely\nObese', '>35.0'],
-  ];
+  _BmiNeedlePainter({required this.bmiValue, required this.animationValue});
 
   static const double _minBmi = 0.0;
   static const double _maxBmi = 45.0;
@@ -492,79 +510,6 @@ class _BmiGaugePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height - 10);
     final outerRadius = size.width * 0.46;
     final strokeWidth = size.width * 0.095;
-    final gapAngle = 0.025;
-
-    for (int i = 0; i < _zones.length; i++) {
-      final zone = _zones[i];
-      final startBmi = zone[0] as double;
-      final endBmi = zone[1] as double;
-      final color = zone[2] as Color;
-
-      final angleStart = _bmiToAngle(endBmi);
-      final angleEnd = _bmiToAngle(startBmi);
-      final sweep = angleEnd - angleStart;
-
-      final paint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.butt;
-
-      final arcRect = Rect.fromCircle(
-        center: center,
-        radius: outerRadius - strokeWidth / 2,
-      );
-      canvas.drawArc(
-        arcRect,
-        angleStart + gapAngle / 2,
-        sweep - gapAngle,
-        false,
-        paint,
-      );
-
-      final midAngle = angleStart + gapAngle / 2 + (sweep - gapAngle) / 2;
-      final labelRadius = outerRadius - strokeWidth / 2;
-      final labelPos = Offset(
-        center.dx + labelRadius * math.cos(midAngle),
-        center.dy + labelRadius * math.sin(midAngle),
-      );
-
-      final label = zone[3] as String;
-      final subLabel = zone[4] as String;
-
-      canvas.save();
-      canvas.translate(labelPos.dx, labelPos.dy);
-      canvas.rotate(midAngle + math.pi / 2);
-
-      final tp = TextPainter(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '$label\n',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: size.width * 0.028,
-                fontWeight: FontWeight.w700,
-                height: 1.3,
-              ),
-            ),
-            TextSpan(
-              text: subLabel,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontSize: size.width * 0.022,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        textDirection: TextDirection.ltr,
-        textAlign: TextAlign.center,
-      )..layout(maxWidth: strokeWidth + 4);
-
-      tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
-      canvas.restore();
-    }
 
     // Animated needle
     final targetAngle = _bmiToAngle(bmiValue);
@@ -605,6 +550,6 @@ class _BmiGaugePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BmiGaugePainter old) =>
+  bool shouldRepaint(_BmiNeedlePainter old) =>
       old.bmiValue != bmiValue || old.animationValue != animationValue;
 }
