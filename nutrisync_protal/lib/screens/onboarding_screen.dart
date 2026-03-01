@@ -22,7 +22,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   int _currentPage = 0;
   final int _totalSteps = 15;
-  bool _showWelcome = true;
+  bool _showWelcome = false;
   bool _isKcal = true;
   bool _isKg = true;
   bool _isCm = true;
@@ -90,9 +90,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (success) {
       showModernToast(
-          context,
-          "Profile created successfully!",
-          type: 'success'
+        context,
+        "Profile created successfully!",
+        type: 'success',
       );
 
       // Replace onboarding with dashboard
@@ -101,9 +101,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     } else {
       showModernToast(
-          context,
-          "Failed to save data. Please try again.",
-          type: 'error'
+        context,
+        "Failed to save data. Please try again.",
+        type: 'error',
       );
     }
   }
@@ -163,7 +163,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 SafeArea(
                   top: false,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 24,
+                    ),
                     child: PrimaryButton(
                       onTap: _nextPage,
                       text: _currentPage == _totalSteps - 1
@@ -204,7 +207,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset('assets/images/questionnaire/welcome.jpg', fit: BoxFit.cover),
+        Image.asset(
+          'assets/images/questionnaire/welcome.jpg',
+          fit: BoxFit.cover,
+        ),
         Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -234,7 +240,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const SizedBox(height: 40),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: PrimaryButton(onTap: _nextPage, text: "Let's Go", isRed: true),
+                child: PrimaryButton(
+                  onTap: _nextPage,
+                  text: "Let's Go",
+                  isRed: true,
+                ),
               ),
               const SizedBox(height: 40),
             ],
@@ -338,7 +348,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return SizedBox.expand(
       child: CupertinoPicker(
-        scrollController: FixedExtentScrollController(initialItem: initialIndex),
+        scrollController: FixedExtentScrollController(
+          initialItem: initialIndex,
+        ),
         itemExtent: 160,
         diameterRatio: 1.8,
 
@@ -354,39 +366,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           return Center(
             child: isSelected
                 ? Container(
-              width: 300,
-              height: 380,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.4),
-                    blurRadius: 20,
-                    offset: const Offset(0, 0),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  "$val",
-                  style: const TextStyle(
-                    fontSize: 130,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    height: 1.15,
-                  ),
-                ),
-              ),
-            )
+                    width: 300,
+                    height: 380,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(40),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.4),
+                          blurRadius: 20,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        "$val",
+                        style: const TextStyle(
+                          fontSize: 130,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.15,
+                        ),
+                      ),
+                    ),
+                  )
                 : Text(
-              "$val",
-              style: TextStyle(
-                fontSize: 65,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade500,
-              ),
-            ),
+                    "$val",
+                    style: TextStyle(
+                      fontSize: 65,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
           );
         }),
       ),
@@ -447,7 +459,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Expanded(
                     flex: 3,
                     child: Container(
-                      margin: const EdgeInsets.only(top:30, right: 0, bottom: 40),
+                      margin: const EdgeInsets.only(
+                        top: 30,
+                        right: 0,
+                        bottom: 40,
+                      ),
                       alignment: Alignment.center,
                       child: Image.asset(
                         'assets/images/questionnaire/height.png',
@@ -534,7 +550,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
 
         const SizedBox(height: 60), // Spacing before the number
-
         // Large Weight Value
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -672,8 +687,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ],
               border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
-                  width: 2
+                color: isSelected ? AppColors.primary : Colors.transparent,
+                width: 2,
               ),
             ),
             child: Column(
@@ -739,7 +754,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // --- Screen 10: Allergies ---
   Widget _buildAllergiesScreen() {
-
     List<String> commonAllergies = [
       "Milk",
       "Eggs",
@@ -807,10 +821,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: AppColors.primary,
-                width: 1.5,
-              ),
+              border: Border.all(color: AppColors.primary, width: 1.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -824,27 +835,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   )
                 else
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _data.allergies.map((item) {
-                    return Chip(
-                      label: Text(item),
-                      deleteIcon: const Icon(Icons.close, size: 16),
-                      onDeleted: () {
-                        setState(() {
-                          _data.allergies.remove(item);
-                        });
-                      },
-                      backgroundColor:
-                      AppColors.primary.withOpacity(0.15),
-                      labelStyle: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    );
-                  }).toList(),
-                ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _data.allergies.map((item) {
+                      return Chip(
+                        label: Text(item),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () {
+                          setState(() {
+                            _data.allergies.remove(item);
+                          });
+                        },
+                        backgroundColor: AppColors.primary.withOpacity(0.15),
+                        labelStyle: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    }).toList(),
+                  ),
 
                 const SizedBox(height: 50),
 
@@ -854,11 +864,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.edit_note,
-                        size: 16,
-                        color: AppColors.primary,
-                      ),
+                      Icon(Icons.edit_note, size: 16, color: AppColors.primary),
                       const SizedBox(width: 4),
                       Text(
                         "${_data.allergies.length}/$maxItems",
@@ -879,7 +885,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-
   // --- Screen 11: Meal Times ---
   Widget _buildMealTimeScreen() {
     return SingleChildScrollView(
@@ -888,20 +893,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         children: [
           _buildMealCard(
-              label: "Breakfast Time",
-              icon: Icons.sunny,
-              mealKey: "Breakfast"
+            label: "Breakfast Time",
+            icon: Icons.sunny,
+            mealKey: "Breakfast",
           ),
           _buildMealCard(
-              label: "Lunch Time",
-              icon: Icons.restaurant_rounded,
-              mealKey: "Lunch"
+            label: "Lunch Time",
+            icon: Icons.restaurant_rounded,
+            mealKey: "Lunch",
           ),
           _buildMealCard(
-              label: "Dinner Time",
-              icon: Icons.bedtime_rounded,
-              mealKey: "Dinner"
-          )
+            label: "Dinner Time",
+            icon: Icons.bedtime_rounded,
+            mealKey: "Dinner",
+          ),
         ],
       ),
     );
@@ -910,10 +915,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildMealCard({
     required String label,
     required IconData icon,
-    required String mealKey
+    required String mealKey,
   }) {
     bool isSelected = _mealTimes[mealKey] != null;
-    TimeOfDay displayTime = _mealTimes[mealKey] ?? const TimeOfDay(hour: 8, minute: 0);
+    TimeOfDay displayTime =
+        _mealTimes[mealKey] ?? const TimeOfDay(hour: 8, minute: 0);
 
     String hourStr = displayTime.hour.toString().padLeft(2, '0');
     String minuteStr = displayTime.minute.toString().padLeft(2, '0');
@@ -958,14 +964,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isSelected ? AppColors.primary : Colors.grey.shade600,
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.shade600,
                   ),
                 ),
                 const Spacer(),
 
                 SelectionIndicator(
-                    isSelected: isSelected,
-                    activeColor: activeColor
+                  isSelected: isSelected,
+                  activeColor: activeColor,
                 ),
               ],
             ),
@@ -976,7 +984,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildTimeBox(hourStr, isSelected, () => _pickTime(context, mealKey, displayTime)),
+                _buildTimeBox(
+                  hourStr,
+                  isSelected,
+                  () => _pickTime(context, mealKey, displayTime),
+                ),
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -985,12 +997,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w900,
-                      color: isSelected ? Colors.grey.shade800 : Colors.grey.shade400,
+                      color: isSelected
+                          ? Colors.grey.shade800
+                          : Colors.grey.shade400,
                     ),
                   ),
                 ),
 
-                _buildTimeBox(minuteStr, isSelected, () => _pickTime(context, mealKey, displayTime)),
+                _buildTimeBox(
+                  minuteStr,
+                  isSelected,
+                  () => _pickTime(context, mealKey, displayTime),
+                ),
               ],
             ),
           ],
@@ -1013,7 +1031,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             color: isActive ? Colors.transparent : Colors.transparent,
           ),
           boxShadow: isActive
-              ? [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 4))]
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
               : [],
         ),
         child: Text(
@@ -1029,7 +1053,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Future<void> _pickTime(BuildContext context, String key, TimeOfDay initial) async {
+  Future<void> _pickTime(
+    BuildContext context,
+    String key,
+    TimeOfDay initial,
+  ) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initial,
@@ -1038,8 +1066,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: Color(0xFFFF4B4B), // Header background & Active dial
-              onPrimary: Colors.white,    // Header text
-              onSurface: Colors.black,    // Unselected text
+              onPrimary: Colors.white, // Header text
+              onSurface: Colors.black, // Unselected text
               outline: Colors.transparent, // outlines
               tertiaryContainer: Color(0xFFFF4B4B),
               onTertiaryContainer: Colors.white,
@@ -1125,10 +1153,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: AppColors.primary,
-                width: 1.5,
-              ),
+              border: Border.all(color: AppColors.primary, width: 1.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1154,8 +1179,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             _data.medicalConditions.remove(item);
                           });
                         },
-                        backgroundColor:
-                        AppColors.primary.withOpacity(0.15),
+                        backgroundColor: AppColors.primary.withOpacity(0.15),
                         labelStyle: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w500,
@@ -1172,11 +1196,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.edit_note,
-                        size: 16,
-                        color: AppColors.primary,
-                      ),
+                      Icon(Icons.edit_note, size: 16, color: AppColors.primary),
                       const SizedBox(width: 4),
                       Text(
                         "${_data.medicalConditions.length}/$maxItems",
@@ -1304,8 +1324,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ],
               border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
-                  width: 2
+                color: isSelected ? AppColors.primary : Colors.transparent,
+                width: 2,
               ),
             ),
             child: Column(
@@ -1341,7 +1361,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(flex: 2), // Push content slightly upwards
-
           // 1. Hero Icon (Rocket Sign)
           Container(
             height: 260,
