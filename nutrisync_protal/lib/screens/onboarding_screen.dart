@@ -89,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     Navigator.pop(context);
 
     if (success) {
-      showCustomSnackBar(
+      showModernToast(
           context,
           "Profile created successfully!",
           type: 'success'
@@ -100,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } else {
-      showCustomSnackBar(
+      showModernToast(
           context,
           "Failed to save data. Please try again.",
           type: 'error'
@@ -154,10 +154,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       _buildMedicalConditionScreen(),
                       _buildCalorieGoalScreen(),
                       _buildSleepQualityScreen(),
-                      Container(
-                        color: Colors.white,
-                        child: const Center(child: Text("Ready to Sync?")),
-                      ),
+                      _buildCompletionScreen(),
                     ],
                   ),
                 ),
@@ -396,22 +393,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-// --- TODO : Screen 5: Height ---
   Widget _buildHeightScreen() {
     double currentCm = _data.heightCm ?? 170.0;
-
-    // Bounds
     double minCm = 100.0;
     double maxCm = 250.0;
+    double minVal, maxVal, displayVal;
 
-    double minVal = _isCm ? minCm : minCm / 2.54;
-    double maxVal = _isCm ? maxCm : maxCm / 2.54;
-    double displayVal = _isCm ? currentCm : (currentCm / 2.54);
+    if (_isCm) {
+      minVal = minCm;
+      maxVal = maxCm;
+      displayVal = currentCm;
+    } else {
+      minVal = (minCm / 2.54).floorToDouble();
+      maxVal = (maxCm / 2.54).ceilToDouble();
+      displayVal = currentCm / 2.54;
+    }
 
     return Column(
       children: [
         const SizedBox(height: 10),
-
         UnitSwitch(
           isLeftSelected: _isCm,
           leftLabel: "cm",
@@ -419,16 +419,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onLeftTap: () => setState(() => _isCm = true),
           onRightTap: () => setState(() => _isCm = false),
         ),
-
         const SizedBox(height: 20),
 
-        // Main Content Area
         Expanded(
           child: Stack(
             children: [
               Row(
                 children: [
-                  // --- Left: Interactive Ruler ---
                   Expanded(
                     flex: 3,
                     child: HeightRuler(
@@ -447,12 +444,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       },
                     ),
                   ),
-
-                  // --- Right: Static Image ---
                   Expanded(
                     flex: 3,
                     child: Container(
-                      margin: const EdgeInsets.only(right: 20, bottom: 50),
+                      margin: const EdgeInsets.only(top:30, right: 0, bottom: 40),
                       alignment: Alignment.center,
                       child: Image.asset(
                         'assets/images/questionnaire/height.png',
@@ -464,12 +459,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
 
-              // --- Center: Selected Value Display ---
-              // Using Align ensures it stays vertically centered with the red line
+              // Text Display
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 110), // Push slightly right of the ruler ticks
+                  padding: const EdgeInsets.only(left: 140),
                   child: IgnorePointer(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -504,13 +498,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ],
           ),
         ),
-
         const SizedBox(height: 30),
       ],
     );
   }
 
-// Helper to format feet
+  // Helper to format feet
   String _formatInchesToFeet(double totalInches) {
     int feet = totalInches ~/ 12;
     int inches = (totalInches % 12).round();
@@ -1277,6 +1270,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  // --- Screen 14: Sleep quality ---
   Widget _buildSleepQualityScreen() {
     final List<Map<String, dynamic>> speedOptions = [
       {"label": "Excellent", "icon": Icons.sentiment_very_satisfied_rounded},
@@ -1338,6 +1332,124 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       }).toList(),
     );
   }
+
+  // --- Screen 15: Completion / Ready to Sync ---
+  Widget _buildCompletionScreen() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Spacer(flex: 2), // Push content slightly upwards
+
+          // 1. Hero Icon (Rocket Sign)
+          Container(
+            height: 260,
+            width: 260,
+            decoration: BoxDecoration(
+              // Subtle primary color background blob
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.rocket_launch_rounded, // A dynamic rocket icon
+              size: 160, // Big size
+              color: AppColors.primary,
+            ),
+          ),
+
+          const SizedBox(height: 40),
+
+          // 2. Headline
+          const Text(
+            "You're All Set!",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: Colors.black87,
+              letterSpacing: -0.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 16),
+
+          // 3. Subtitle
+          Text(
+            "We've personalized your plan based on your goals and preferences. Let's start your journey!",
+            style: TextStyle(
+              fontSize: 16,
+              height: 1.5,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          const Spacer(flex: 3), // Leave space for the bottom button
+        ],
+      ),
+    );
+  }
+
+  // // --- Screen 15: Completion / Ready to Sync ---
+  // Widget _buildCompletionScreen() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
+  //     child: Column(
+  //       mainAxisAlignment: MainAxisAlignment.center,
+  //       children: [
+  //         const Spacer(flex: 2), // Push content slightly upwards
+  //
+  //         // 1. Hero Image
+  //         // Make sure to add a 'success.png' or 'finish.png' to your assets
+  //         Container(
+  //           height: 280,
+  //           decoration: BoxDecoration(
+  //             color: AppColors.primary.withOpacity(0.05), // Subtle background blob
+  //             shape: BoxShape.circle,
+  //           ),
+  //           padding: const EdgeInsets.all(40),
+  //           child: Image.asset(
+  //             'assets/images/questionnaire/finish.png',
+  //             fit: BoxFit.contain,
+  //           ),
+  //         ),
+  //
+  //         const SizedBox(height: 40),
+  //
+  //         // 2. Headline
+  //         const Text(
+  //           "You're All Set!",
+  //           style: TextStyle(
+  //             fontSize: 28,
+  //             fontWeight: FontWeight.w900,
+  //             color: Colors.black87,
+  //             letterSpacing: -0.5,
+  //           ),
+  //           textAlign: TextAlign.center,
+  //         ),
+  //
+  //         const SizedBox(height: 16),
+  //
+  //         // 3. Subtitle
+  //         Text(
+  //           "We've personalized your plan based on your goals and preferences. Let's start your journey!",
+  //           style: TextStyle(
+  //             fontSize: 16,
+  //             height: 1.5,
+  //             color: Colors.grey.shade600,
+  //             fontWeight: FontWeight.w500,
+  //           ),
+  //           textAlign: TextAlign.center,
+  //         ),
+  //
+  //         const Spacer(flex: 3), // Leave space for the bottom button
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildProgressBar() {
     final progress = (_currentPage + 1) / _totalSteps;

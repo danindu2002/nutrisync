@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../models/login_dto.dart';
 import '../models/onboarding_dto.dart';
 
 class ApiService {
@@ -35,6 +36,28 @@ class ApiService {
       }
     } catch (e) {
       print("Exception: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> onSubmitLogin(LoginDTO data) async {
+    final url = Uri.parse('$baseUrl/user/login');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(data.toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        debugPrint("Login error: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Login exception: $e");
       return false;
     }
   }

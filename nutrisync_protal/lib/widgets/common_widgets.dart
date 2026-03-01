@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import 'dart:async';
 
 // main button
 class PrimaryButton extends StatelessWidget {
@@ -823,7 +824,69 @@ class _SnapScrollPhysics extends ScrollPhysics {
   bool get allowImplicitScrolling => false;
 }
 
-// TODO : height ruler
+// Physics for height ruler
+class _MomentumSnapPhysics extends ScrollPhysics {
+  final double itemSize;
+
+  const _MomentumSnapPhysics({required this.itemSize, super.parent});
+
+  @override
+  _MomentumSnapPhysics applyTo(ScrollPhysics? ancestor) {
+    return _MomentumSnapPhysics(itemSize: itemSize, parent: buildParent(ancestor));
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+      ScrollMetrics position, double velocity) {
+    // If we are out of bounds (overscroll), use default spring
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+
+    final Tolerance tolerance = this.tolerance;
+
+    if (velocity.abs() >= tolerance.velocity) {
+      return BouncingScrollSimulation(
+        spring: spring,
+        position: position.pixels,
+        velocity: velocity,
+        leadingExtent: position.minScrollExtent,
+        trailingExtent: position.maxScrollExtent,
+        tolerance: tolerance,
+      );
+    }
+
+    final double target = _getTargetPixels(position, tolerance, velocity);
+
+    if (target != position.pixels) {
+      return ScrollSpringSimulation(
+        spring,
+        position.pixels,
+        target,
+        velocity,
+        tolerance: tolerance,
+      );
+    }
+    return null;
+  }
+
+  double _getTargetPixels(
+      ScrollMetrics position, Tolerance tolerance, double velocity) {
+    double page = position.pixels / itemSize;
+    // If we have a little velocity, bias the snap in that direction
+    if (velocity < -tolerance.velocity) {
+      page -= 0.5;
+    } else if (velocity > tolerance.velocity) {
+      page += 0.5;
+    }
+    return page.roundToDouble() * itemSize;
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
+}
+
 class HeightRuler extends StatefulWidget {
   final double initialHeight;
   final double minHeight;
@@ -846,24 +909,34 @@ class HeightRuler extends StatefulWidget {
 
 class _HeightRulerState extends State<HeightRuler> {
   late ScrollController _scrollController;
-  final double tickHeight = 15.0; // Pixel distance between values
+  final double tickHeight = 15.0; // Distance between ticks
 
   @override
   void initState() {
     super.initState();
-    double offset = (widget.initialHeight - widget.minHeight) * tickHeight;
-    _scrollController = ScrollController(initialScrollOffset: offset);
+    _updateController();
   }
 
   @override
   void didUpdateWidget(HeightRuler oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialHeight != widget.initialHeight || oldWidget.isCm != widget.isCm) {
+    if (oldWidget.initialHeight != widget.initialHeight ||
+        oldWidget.isCm != widget.isCm ||
+        oldWidget.minHeight != widget.minHeight) {
+
+      // Re-calculate offset because the scale (cm vs in) or range changed
       double offset = (widget.initialHeight - widget.minHeight) * tickHeight;
+
+      // If the scroll position is vastly different (unit switch), jump
       if (_scrollController.hasClients) {
         _scrollController.jumpTo(offset);
       }
     }
+  }
+
+  void _updateController() {
+    double offset = (widget.initialHeight - widget.minHeight) * tickHeight;
+    _scrollController = ScrollController(initialScrollOffset: offset);
   }
 
   @override
@@ -871,205 +944,307 @@ class _HeightRulerState extends State<HeightRuler> {
     int totalTicks = (widget.maxHeight - widget.minHeight).round();
 
     return LayoutBuilder(
-        builder: (context, constraints) {
-          // Fix: Use exact half-height padding to ensure the selected value is in the center
-          double paddingOffset = constraints.maxHeight / 2;
+      builder: (context, constraints) {
+        double paddingOffset = (constraints.maxHeight - tickHeight) / 2;
 
-          return Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              // --- Layer 1: The Scrolling Ruler ---
-              Padding(
-                padding: const EdgeInsets.only(left: 40), // Move ruler away from left edge
-                child: ShaderMask(
-                  shaderCallback: (Rect bounds) {
-                    return LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white.withOpacity(0.0),
-                        Colors.white,
-                        Colors.white,
-                        Colors.white.withOpacity(0.0),
-                      ],
-                      stops: const [0.0, 0.2, 0.8, 1.0],
-                    ).createShader(bounds);
+        return Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            // --- Layer 1: Scrolling Ticks ---
+            Padding(
+              padding: const EdgeInsets.only(left: 40),
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.0),
+                      Colors.white,
+                      Colors.white,
+                      Colors.white.withOpacity(0.0),
+                    ],
+                    stops: const [0.0, 0.2, 0.8, 1.0],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification is ScrollUpdateNotification) {
+                      double offset = _scrollController.offset;
+                      double value = widget.minHeight + (offset / tickHeight);
+                      value = value.clamp(widget.minHeight, widget.maxHeight);
+
+                      // Debounce slightly to avoid excessive rebuilding
+                      if ((value - widget.initialHeight).abs() > 0.05) {
+                        widget.onChanged(value);
+                      }
+                    }
+                    return true;
                   },
-                  blendMode: BlendMode.dstIn,
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification is ScrollUpdateNotification) {
-                        double offset = _scrollController.offset;
-                        double value = widget.minHeight + (offset / tickHeight);
-                        value = value.clamp(widget.minHeight, widget.maxHeight);
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.vertical,
+                    reverse: true, // Lower numbers at bottom
+                    itemExtent: tickHeight,
+                    itemCount: totalTicks + 1,
+                    padding: EdgeInsets.symmetric(vertical: paddingOffset),
+                    // Use the NEW momentum physics
+                    physics: _MomentumSnapPhysics(itemSize: tickHeight),
+                    itemBuilder: (context, index) {
+                      double value = widget.minHeight + index;
 
-                        if ((value - widget.initialHeight).abs() > 0.05) {
-                          widget.onChanged(value);
+                      // Visual Logic
+                      bool isMajor;
+                      bool isMedium = false;
+                      String label = "";
+
+                      if (widget.isCm) {
+                        // CM Logic: Major every 10, Medium every 5
+                        isMajor = value % 10 == 0;
+                        isMedium = value % 5 == 0;
+                        if (isMajor) label = "${value.toInt()}";
+                      } else {
+                        // Feet/Inch Logic:
+                        // Use epsilon for double comparison safety
+                        double remainder = value % 12;
+                        bool isFoot = (remainder).abs() < 0.1 || (12 - remainder).abs() < 0.1;
+                        bool isHalfFoot = (value % 6).abs() < 0.1;
+
+                        isMajor = isFoot;
+                        isMedium = isHalfFoot;
+
+                        if (isFoot) {
+                          label = "${(value / 12).round()}'"; // e.g., 5'
+                        } else if (isHalfFoot) {
+                          // Optional: Label 6 inches? Usually just a line is enough
                         }
                       }
-                      return true;
-                    },
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      scrollDirection: Axis.vertical,
-                      reverse: true, // Lower numbers at bottom
-                      itemExtent: tickHeight,
-                      itemCount: totalTicks + 1,
-                      padding: EdgeInsets.symmetric(vertical: paddingOffset),
-                      physics: _SnapScrollPhysics(itemSize: tickHeight),
-                      itemBuilder: (context, index) {
-                        double value = widget.minHeight + index;
 
-                        bool isMajor;
-                        if (widget.isCm) {
-                          isMajor = value % 10 == 0;
-                        } else {
-                          isMajor = value % 12 == 0;
-                        }
-                        bool isMedium = value % 5 == 0;
-
-                        return Row(
-                          children: [
-                            Container(
-                              height: isMajor ? 3 : 2,
-                              width: isMajor ? 50 : (isMedium ? 35 : 20),
-                              color: isMajor ? Colors.grey.shade600 : Colors.grey.shade300,
-                              margin: const EdgeInsets.only(right: 10),
-                            ),
-                            if (isMajor)
-                              Text(
-                                widget.isCm
-                                    ? "${value.toInt()}"
-                                    : "${(value/12).round()}'",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey.shade500,
-                                ),
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: isMajor ? 3 : (isMedium ? 2 : 1),
+                            // Make feet lines significantly longer
+                            width: isMajor ? 60 : (isMedium ? 40 : 25),
+                            color: isMajor
+                                ? Colors.grey.shade600
+                                : (isMedium ? Colors.grey.shade400 : Colors.grey.shade300),
+                            margin: const EdgeInsets.only(right: 10),
+                          ),
+                          if (isMajor)
+                            Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade600,
                               ),
-                          ],
-                        );
-                      },
-                    ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
+            ),
 
-              // --- Layer 2: Red Indicator Line ---
-              Positioned(
-                left: 40, // Aligned with the ruler padding
-                child: Container(
-                  width: 70,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF4B4B),
-                    borderRadius: BorderRadius.circular(2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFF4B4B).withOpacity(0.5),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+            // --- Layer 2: Red Indicator Line ---
+            Positioned(
+              left: 40,
+              child: Container(
+                width: 90, // Slightly wider to cover long feet ticks
+                height: 10,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF4B4B),
+                  borderRadius: BorderRadius.circular(5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF4B4B).withOpacity(0.5),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          );
-        }
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
-// Helper for Modern SnackBars
-void showCustomSnackBar(BuildContext context, String message, {String type = 'info'}) {
-  Color backgroundColor;
-  IconData icon;
-  Color iconColor;
+void showModernToast(BuildContext context, String message, {String type = 'info'}) {
+  final overlayState = Overlay.of(context);
+  late OverlayEntry overlayEntry;
 
-  // 1. Define styles based on type
-  switch (type) {
-    case 'success':
-      backgroundColor = Colors.green.shade50;
-      icon = Icons.check_circle;
-      iconColor = Colors.green;
-      break;
-    case 'error':
-      backgroundColor = Colors.red.shade50;
-      icon = Icons.error;
-      iconColor = Colors.red;
-      break;
-    case 'warning':
-      backgroundColor = Colors.orange.shade50;
-      icon = Icons.warning_amber_rounded;
-      iconColor = Colors.orange;
-      break;
-    default: // info
-      backgroundColor = Colors.blue.shade50;
-      icon = Icons.info;
-      iconColor = Colors.blue;
+  // Create the widget that performs the animation
+  overlayEntry = OverlayEntry(
+    builder: (context) => _TopToastWidget(
+      message: message,
+      type: type,
+      onDismiss: () {
+        if (overlayEntry.mounted) {
+          overlayEntry.remove();
+        }
+      },
+    ),
+  );
+
+  // Insert it into the screen
+  overlayState.insert(overlayEntry);
+}
+
+class _TopToastWidget extends StatefulWidget {
+  final String message;
+  final String type;
+  final VoidCallback onDismiss;
+
+  const _TopToastWidget({
+    required this.message,
+    required this.type,
+    required this.onDismiss,
+  });
+
+  @override
+  State<_TopToastWidget> createState() => _TopToastWidgetState();
+}
+
+class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    // 1. ENTRY: Left (-1.5) -> Center (0.0)
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(-1.5, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+    _controller.forward();
+
+    // 2. AUTO DISMISS
+    _timer = Timer(const Duration(seconds: 2), () {
+      _dismiss();
+    });
   }
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      backgroundColor: Colors.transparent, // Transparent to let our Container show
-      elevation: 0,
-      behavior: SnackBarBehavior.floating,
-      content: Container(
-        padding: const EdgeInsets.all(16),
-        height: 80,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          // Left colored border for accent
-          border: Border(
-            left: BorderSide(color: iconColor, width: 6),
-          ),
-        ),
-        child: Row(
-          children: [
-            // Icon
-            Icon(icon, color: iconColor, size: 28),
-            const SizedBox(width: 16),
+  void _dismiss() {
+    if (!mounted) return;
+    _timer?.cancel();
 
-            // Text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    type.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: iconColor,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    message,
+    // 3. EXIT: Center (0.0) -> Right (1.5)
+    setState(() {
+      _offsetAnimation = Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(1.5, 0.0),
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInBack));
+    });
+
+    _controller.reset();
+    _controller.forward().then((_) {
+      widget.onDismiss();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color iconColor;
+    IconData icon;
+    Color bgColor = Colors.white;
+
+    switch (widget.type) {
+      case 'success':
+        icon = Icons.check_circle;
+        iconColor = Colors.green;
+        break;
+      case 'error':
+        icon = Icons.error_outline;
+        iconColor = Colors.red;
+        break;
+      case 'warning':
+        icon = Icons.warning_amber_rounded;
+        iconColor = Colors.orange;
+        break;
+      default:
+        icon = Icons.info_outline;
+        iconColor = Colors.blue;
+    }
+
+    return Positioned(
+      top: 60,
+      left: 20,
+      right: 20,
+      child: SlideTransition(
+        position: _offsetAnimation,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+              border: Border(left: BorderSide(color: iconColor, width: 5)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center, // Vertically center icon & text
+              children: [
+                Icon(icon, color: iconColor, size: 28),
+                const SizedBox(width: 14),
+
+                // Message Text
+                Expanded(
+                  child: Text(
+                    widget.message,
                     style: const TextStyle(
-                      color: Colors.black87,
                       fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600, // Slightly bolder for readability
+                      height: 1.3,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
+                ),
+
+                // Close Button
+                GestureDetector(
+                  onTap: _dismiss,
+                  behavior: HitTestBehavior.opaque, // Ensures easier tapping area
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Icon(Icons.close, size: 20, color: Colors.grey.shade400),
+                  ),
+                )
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
