@@ -1,5 +1,6 @@
 import 'package:NutriSync/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
 import '../services/api_service.dart';
@@ -58,6 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
       showModernToast(
         context,
         "Login successfully!",
