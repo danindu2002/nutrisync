@@ -1251,17 +1251,25 @@ class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProvi
 
 // Auth Header (Logo + Title)
 class AuthHeader extends StatelessWidget {
-  const AuthHeader({super.key});
+  final double height;
+  final String imagePath;
+
+  const AuthHeader({
+    super.key,
+    this.height = 300,
+    this.imagePath =
+    "assets/images/authentication/login_bg.png",
+  });
 
   @override
   Widget build(BuildContext context) {
     return ClipPath(
       clipper: _BottomCurveClipper(),
       child: Container(
-        height: 300,
-        decoration: const BoxDecoration(
+        height: height,
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/authentication/login_bg.png"),
+            image: AssetImage(imagePath),
             fit: BoxFit.cover,
           ),
         ),

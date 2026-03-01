@@ -1,3 +1,4 @@
+import 'package:NutriSync/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
@@ -199,15 +200,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     /// Sign Up
                     Center(
                       child: RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           text: "Don't have an Account? ",
-                          style: TextStyle(color: Colors.grey),
+                          style: const TextStyle(color: Colors.grey),
                           children: [
-                            TextSpan(
-                              text: "Sign up",
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
+                            WidgetSpan(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const SignUpScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Sign up",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
                           ],

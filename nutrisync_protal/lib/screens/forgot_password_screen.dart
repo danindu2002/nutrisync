@@ -1,7 +1,8 @@
+import 'package:NutriSync/screens/submit_code_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../widgets/common_widgets.dart';
-import 'reset_password_screen.dart';
+import 'confirm_email_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -51,7 +52,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+      MaterialPageRoute(
+        builder: (_) => ConfirmEmailScreen(
+          email: _emailController.text.trim(),
+        ),
+      ),
     );
   }
 
