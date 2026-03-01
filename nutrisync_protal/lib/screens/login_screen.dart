@@ -3,6 +3,7 @@ import '../core/constants.dart';
 import '../models/login_dto.dart';
 import '../services/api_service.dart';
 import '../widgets/common_widgets.dart';
+import 'forgot_password_screen.dart';
 import 'onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -141,7 +142,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text("Remember Me"),
                         const Spacer(),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                            );
+                          },
                           child: const Text(
                             "Forgot Password?",
                             style: TextStyle(color: Colors.red),
