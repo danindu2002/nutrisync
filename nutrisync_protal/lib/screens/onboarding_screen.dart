@@ -8,6 +8,7 @@ import '../widgets/common_widgets.dart';
 import 'package:flutter/services.dart';
 
 import 'dashboard_screen.dart';
+import 'main_navigation_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -97,13 +98,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       // Replace onboarding with dashboard
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
       );
     } else {
       showModernToast(
         context,
         "Failed to save data. Please try again.",
         type: 'error',
+      );
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
       );
     }
   }
