@@ -1,5 +1,9 @@
+import 'package:NutriSync/screens/rewards_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../widgets/common_widgets.dart';
+import 'challenges_screen.dart';
+import 'add_meal_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -32,6 +36,38 @@ class DashboardScreen extends StatelessWidget {
                     _SectionTitle(title: "Diet & Nutrition"),
                     const SizedBox(height: 12),
                     _NutritionRow(),
+
+                    const SizedBox(height: 32),
+
+                    /// GO TO CHALLENGES BUTTON
+                    PrimaryButton(
+                      text: "Go to Challenges",
+                      isRed: true,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ChallengesScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    /// GO TO REWARDS BUTTON
+                    PrimaryButton(
+                      text: "Go to Rewards",
+                      isRed: true,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RewardsScreen(),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
