@@ -9,7 +9,7 @@ class NutritionSummaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -23,9 +23,11 @@ class NutritionSummaryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 24),
-                      _buildCalorieCard(),
+                      _buildDailySummaryCard(),
                       const SizedBox(height: 32),
-                      _buildMealList(),
+                      _buildAddFoodButton(),
+                      const SizedBox(height: 32),
+                      _buildMealHistory(),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -43,265 +45,278 @@ class NutritionSummaryScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(12),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 20,
+                  color: AppTheme.textPrimary,
+                ),
               ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: AppTheme.textPrimary,
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Nutrition',
+                    style: GoogleFonts.workSans(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF333333),
+                    ),
+                  ),
+                  Text(
+                    'Daily Summary',
+                    style: GoogleFonts.workSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF757575),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-          Text(
-            'Nutrition Summary',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
-            ),
+            ],
           ),
           Container(
-            width: 40,
-            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFC9F0D1),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(
-              Icons.calendar_today_rounded,
-              size: 18,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalorieCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(32),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 220,
-            width: 220,
-            child: Stack(
-              alignment: Alignment.center,
+            child: Row(
               children: [
-                CustomPaint(
-                  size: const Size(220, 220),
-                  painter: _NutritionDonutPainter(),
+                const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF4CAF50),
+                  size: 14,
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '1,240',
-                      style: GoogleFonts.poppins(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.textPrimary,
-                        height: 1.0,
-                      ),
-                    ),
-                    Text(
-                      'kcal left',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 6),
+                Text(
+                  'Excellent',
+                  style: GoogleFonts.workSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF4CAF50),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildMacroInfo('Carbs', '142g', Colors.orange),
-              _buildMacroInfo('Protein', '86g', Colors.redAccent),
-              _buildMacroInfo('Fat', '42g', Colors.blueAccent),
-            ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDailySummaryCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          // Circular Progress on the left
+          Expanded(
+            flex: 5,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CustomPaint(
+                    size: const Size(double.infinity, double.infinity),
+                    painter: _NutritionCirclePainter(),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '1,450',
+                        style: GoogleFonts.workSans(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF333333),
+                        ),
+                      ),
+                      Text(
+                        'of 2,000 kcal',
+                        style: GoogleFonts.workSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF757575),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 32),
+          // Metrics on the right
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMetricItem('Consumed', '1,450 kcal'),
+                const SizedBox(height: 16),
+                _buildMetricItem('Daily Goal', '2,000 kcal'),
+                const SizedBox(height: 16),
+                _buildMetricItem('Remaining', '550 kcal', isHighlighted: true),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMacroInfo(String label, String value, Color color) {
+  Widget _buildMetricItem(
+    String label,
+    String value, {
+    bool isHighlighted = false,
+  }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
+        Text(
+          label,
+          style: GoogleFonts.workSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFFADB5BD),
+          ),
         ),
-        const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.poppins(
-            fontSize: 15,
+          style: GoogleFonts.workSans(
+            fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
+            color: isHighlighted
+                ? const Color(0xFF333333)
+                : const Color(0xFF333333),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMealList() {
+  Widget _buildAddFoodButton() {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEE3638),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: const Icon(Icons.add, color: Colors.white, size: 16),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Add Food',
+            style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealHistory() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Today\'s Meals',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            Text(
-              'Total: 960 kcal',
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primary,
-              ),
-            ),
-          ],
+        _buildMealCard(
+          icon: Icons.breakfast_dining_rounded,
+          title: 'Breakfast (240 kcal)',
+          items: 'Oatmeal, Banana, Coffee',
         ),
         const SizedBox(height: 16),
-        _buildMealItem(
-          icon: Icons.wb_sunny_rounded,
-          title: 'Breakfast',
-          desc: 'Oatmeal with berries',
-          kcal: '320',
-          time: '08:30 AM',
-          color: Colors.amber,
-        ),
-        _buildMealItem(
+        _buildMealCard(
           icon: Icons.lunch_dining_rounded,
-          title: 'Lunch',
-          desc: 'Grilled Chicken Salad',
-          kcal: '420',
-          time: '01:15 PM',
-          color: Colors.green,
+          title: 'Lunch (480 kcal)',
+          items: 'Grilled Chicken Breast, Salad',
         ),
-        _buildMealItem(
-          icon: Icons.cookie_rounded,
-          title: 'Snack',
-          desc: 'Greek Yogurt',
-          kcal: '220',
-          time: '04:30 PM',
-          color: Colors.brown,
+        const SizedBox(height: 16),
+        _buildMealCard(
+          icon: Icons.restaurant_rounded,
+          title: 'Dinner (440 kcal)',
+          items: 'Baked Salmon, Broccoli',
         ),
       ],
     );
   }
 
-  Widget _buildMealItem({
+  Widget _buildMealCard({
     required IconData icon,
     required String title,
-    required String desc,
-    required String kcal,
-    required String time,
-    required Color color,
+    required String items,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
+              color: const Color(0xFFF8F9FA),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: const Color(0xFF2D2D4D), size: 28),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
+                  style: GoogleFonts.workSans(
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                    color: const Color(0xFF333333),
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
-                  desc,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: AppTheme.textSecondary,
+                  items,
+                  style: GoogleFonts.workSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF757575),
                   ),
                 ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$kcal kcal',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              Text(
-                time,
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textLight,
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -309,48 +324,39 @@ class NutritionSummaryScreen extends StatelessWidget {
   }
 }
 
-class _NutritionDonutPainter extends CustomPainter {
+class _NutritionCirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    final strokeWidth = 14.0;
+    final strokeWidth = 12.0;
     final rect = Rect.fromCircle(
       center: center,
       radius: radius - strokeWidth / 2,
     );
 
-    final paint = Paint()
+    final bgPaint = Paint()
+      ..color = const Color(0xFFC9F0D1).withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    // Remaining (Background)
-    paint.color = AppTheme.textLight.withValues(alpha: 0.1);
-    canvas.drawArc(rect, 0, 2 * math.pi, false, paint);
+    final progressPaint = Paint()
+      ..color = const Color(0xFFEE3638)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
 
-    // Carbs
-    paint.color = Colors.orange;
-    canvas.drawArc(rect, -math.pi / 2, 1.2 * math.pi, false, paint);
+    // Draw background partial circle
+    canvas.drawArc(rect, 2.5 * math.pi / 4, 1.5 * math.pi, false, bgPaint);
 
-    // Protein
-    paint.color = Colors.redAccent;
+    // Draw progress partial circle (1450/2000 = 0.725)
     canvas.drawArc(
       rect,
-      -math.pi / 2 + 1.2 * math.pi + 0.1,
-      0.4 * math.pi,
+      2.5 * math.pi / 4,
+      1.5 * math.pi * 0.725,
       false,
-      paint,
-    );
-
-    // Fat
-    paint.color = Colors.blueAccent;
-    canvas.drawArc(
-      rect,
-      -math.pi / 2 + 1.6 * math.pi + 0.2,
-      0.2 * math.pi,
-      false,
-      paint,
+      progressPaint,
     );
   }
 
