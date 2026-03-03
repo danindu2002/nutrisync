@@ -75,7 +75,6 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: const _BottomNavBar(),
     );
   }
 }
@@ -431,92 +430,6 @@ class _NutritionCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-
-class _BottomNavBar extends StatelessWidget {
-  const _BottomNavBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 6, 0, 12),
-        child: Container(
-          height: 66,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavIcon(icon: Icons.home, isActive: true),
-              _NavIcon(icon: Icons.show_chart),
-
-              /// Center Add Button
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddMealScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  height: 48,
-                  width: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 28),
-                ),
-              ),
-
-              _NavIcon(icon: Icons.receipt_long),
-              _NavIcon(icon: Icons.person_outline),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavIcon extends StatelessWidget {
-  final IconData icon;
-  final bool isActive;
-
-  const _NavIcon({
-    required this.icon,
-    this.isActive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      icon,
-      size: 26,
-      color: isActive ? AppColors.primary : Colors.grey.shade500,
     );
   }
 }
