@@ -1,7 +1,7 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nutrisync_protal/core/theme/app_theme.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class BmiResultsScreen extends StatefulWidget {
   const BmiResultsScreen({super.key});
@@ -156,7 +156,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: AppTheme.primary.withValues(alpha: 0.30),
+                      color: AppTheme.primary.withOpacity(0.30),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -182,13 +182,22 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F2F2),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(24),
-      height: 300,
-      alignment: Alignment.center,
-      child: BmiGauge(bmiValue: _bmiValue),
+      // Maintain aspect ratio around 1.2 height for 1.0 width
+      child: const AspectRatio(
+        aspectRatio: 1 / 0.85,
+        child: BmiGauge(bmiValue: _bmiValue),
+      ),
     );
   }
 
@@ -319,8 +328,8 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Colors.black.withValues(alpha: 0.75),
-                      Colors.black.withValues(alpha: 0.20),
+                      Colors.black.withOpacity(0.75),
+                      Colors.black.withOpacity(0.20),
                     ],
                   ),
                 ),
@@ -355,7 +364,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                           style: GoogleFonts.poppins(
                             fontSize: 11,
                             fontWeight: FontWeight.w400,
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: Colors.white.withOpacity(0.85),
                             height: 1.4,
                           ),
                         ),
@@ -432,273 +441,142 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-// ─── Reusable BMI Gauge Widget ──────────────────────────
-class BmiGauge extends StatefulWidget {
+/// A beautiful, accurate semi-circular BMI gauge using syncfusion_flutter_gauges.
+class BmiGauge extends StatelessWidget {
   final double bmiValue;
 
   const BmiGauge({super.key, required this.bmiValue});
 
   @override
-  State<BmiGauge> createState() => _BmiGaugeState();
-}
-
-class _BmiGaugeState extends State<BmiGauge>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    );
-    _controller.forward();
-  }
-
-  @override
-  void didUpdateWidget(BmiGauge oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.bmiValue != widget.bmiValue) {
-      _controller.reset();
-      _controller.forward();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double width = constraints.maxWidth;
-        // Half circle requires height around width/2 + some space for floating text
-        final double height = width * 0.6;
-
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: width,
-              height: height,
-              child: AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return CustomPaint(
-                    painter: BmiGaugePainter(
-                      bmiValue: widget.bmiValue,
-                      animationValue: _animation.value,
-                    ),
-                  );
-                },
+        return SfRadialGauge(
+          axes: <RadialAxis>[
+            RadialAxis(
+              minimum: 10,
+              maximum: 45,
+              startAngle: 180,
+              endAngle: 0,
+              showLabels: false,
+              showTicks: false,
+              axisLineStyle: const AxisLineStyle(
+                thickness: 0.15,
+                thicknessUnit: GaugeSizeUnit.factor,
+                cornerStyle: CornerStyle.bothCurve,
               ),
-            ),
-            // Floating center BMI value (no card background)
-            Positioned(
-              bottom: 10,
-              child: Text(
-                widget.bmiValue.toStringAsFixed(1),
-                style: GoogleFonts.poppins(
-                  fontSize: 48,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFFFF3B30),
+              ranges: <GaugeRange>[
+                GaugeRange(
+                  startValue: 10,
+                  endValue: 18.5,
+                  color: const Color(0xFF4FC3F7),
+                  label: 'Underweight',
+                  sizeUnit: GaugeSizeUnit.factor,
+                  labelStyle: const GaugeTextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                  startWidth: 0.15,
+                  endWidth: 0.15,
                 ),
-              ),
+                GaugeRange(
+                  startValue: 18.5,
+                  endValue: 24.9,
+                  color: const Color(0xFF66BB6A),
+                  label: 'Normal',
+                  sizeUnit: GaugeSizeUnit.factor,
+                  labelStyle: const GaugeTextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                  startWidth: 0.15,
+                  endWidth: 0.15,
+                ),
+                GaugeRange(
+                  startValue: 25,
+                  endValue: 29.9,
+                  color: const Color(0xFFFFCA28),
+                  label: 'Overweight',
+                  sizeUnit: GaugeSizeUnit.factor,
+                  labelStyle: const GaugeTextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                  startWidth: 0.15,
+                  endWidth: 0.15,
+                ),
+                GaugeRange(
+                  startValue: 30,
+                  endValue: 34.9,
+                  color: const Color(0xFFFF7043),
+                  label: 'Obese',
+                  sizeUnit: GaugeSizeUnit.factor,
+                  labelStyle: const GaugeTextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                  startWidth: 0.15,
+                  endWidth: 0.15,
+                ),
+                GaugeRange(
+                  startValue: 35,
+                  endValue: 45,
+                  color: const Color(0xFFEF5350),
+                  label: 'Extremely Obese',
+                  sizeUnit: GaugeSizeUnit.factor,
+                  labelStyle: const GaugeTextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                  startWidth: 0.15,
+                  endWidth: 0.15,
+                ),
+              ],
+              pointers: <GaugePointer>[
+                NeedlePointer(
+                  value: bmiValue,
+                  needleColor: Colors.black,
+                  knobStyle: const KnobStyle(
+                    color: Colors.black,
+                    knobRadius: 0.08,
+                    sizeUnit: GaugeSizeUnit.factor,
+                  ),
+                  needleStartWidth: 1,
+                  needleEndWidth: 4,
+                  needleLength: 0.8,
+                  lengthUnit: GaugeSizeUnit.factor,
+                  tailStyle: const TailStyle(
+                    width: 4,
+                    length: 0.15,
+                    lengthUnit: GaugeSizeUnit.factor,
+                    color: Colors.black,
+                  ),
+                  enableAnimation: true,
+                ),
+              ],
+              annotations: <GaugeAnnotation>[
+                GaugeAnnotation(
+                  widget: Text(
+                    bmiValue.toStringAsFixed(1),
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                    ),
+                  ),
+                  angle: 90,
+                  positionFactor: 0.5,
+                ),
+              ],
             ),
           ],
         );
       },
     );
   }
-}
-
-class BmiGaugePainter extends CustomPainter {
-  final double bmiValue;
-  final double animationValue;
-
-  BmiGaugePainter({required this.bmiValue, required this.animationValue});
-
-  static const List<Map<String, dynamic>> segments = [
-    {'label': 'Under Weight', 'range': '< 18.5', 'color': Color(0xFF1DA1F2)},
-    {
-      'label': 'Normal Weight',
-      'range': '18.5 - 24.9',
-      'color': Color(0xFF34C759),
-    },
-    {'label': 'Over Weight', 'range': '25 - 29.9', 'color': Color(0xFFFFD60A)},
-    {'label': 'Obese', 'range': '30 - 34.9', 'color': Color(0xFFFF9500)},
-    {'label': 'Extremely Obese', 'range': '> 35.0', 'color': Color(0xFFFF3B30)},
-  ];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double centerX = size.width / 2;
-    // Position center slightly up from bottom to account for the needle base
-    final double centerY = size.height - 30;
-    final Offset center = Offset(centerX, centerY);
-
-    // Geometry Constants
-    final double outerRadius = 130.0;
-    final double outerThickness = 38.0;
-    final double innerRadius = 85.0; // Spacing of ~7-10px between thick rings
-    final double innerThickness = 22.0;
-
-    const double startAngle = math.pi; // 180 degrees
-    const double totalSweepAngle = math.pi; // 180 degrees sweep
-    const double segmentSweepAngle =
-        totalSweepAngle / 5; // 36 degrees per segment
-    const double gapInRadians = (3.0 * math.pi) / 180.0; // 3 degrees gap
-
-    for (int i = 0; i < segments.length; i++) {
-      final double segmentStart = startAngle + (i * segmentSweepAngle);
-      final segmentData = segments[i];
-      final Color color = segmentData['color'] as Color;
-
-      // 1. Draw OUTER Arc
-      final outerPaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = outerThickness
-        ..strokeCap = StrokeCap.round;
-
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: outerRadius),
-        segmentStart + (gapInRadians / 2),
-        segmentSweepAngle - gapInRadians,
-        false,
-        outerPaint,
-      );
-
-      // 2. Draw INNER Arc
-      final innerPaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = innerThickness
-        ..strokeCap = StrokeCap.round;
-
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: innerRadius),
-        segmentStart + (gapInRadians / 2),
-        segmentSweepAngle - gapInRadians,
-        false,
-        innerPaint,
-      );
-
-      // 3. Draw Labels
-      final double midAngle = segmentStart + (segmentSweepAngle / 2);
-
-      // Determine text color (Yellow uses black, others use white as per requirement)
-      final Color textColor = (color == const Color(0xFFFFD60A))
-          ? Colors.black87
-          : Colors.white;
-
-      // Outer Label (Category)
-      _drawTextOnArc(
-        canvas,
-        center,
-        outerRadius,
-        midAngle,
-        segmentData['label'] as String,
-        9,
-        FontWeight.w700,
-        textColor,
-      );
-
-      // Inner Label (Range)
-      _drawTextOnArc(
-        canvas,
-        center,
-        innerRadius,
-        midAngle,
-        segmentData['range'] as String,
-        8,
-        FontWeight.w600,
-        textColor,
-      );
-    }
-
-    // 4. Draw Needle
-    _drawNeedle(canvas, center, innerRadius, startAngle, totalSweepAngle);
-  }
-
-  void _drawTextOnArc(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    double angle,
-    String text,
-    double fontSize,
-    FontWeight weight,
-    Color color,
-  ) {
-    final painter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: GoogleFonts.poppins(
-          fontSize: fontSize,
-          fontWeight: weight,
-          color: color,
-        ),
-      ),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    );
-    painter.layout();
-
-    canvas.save();
-    canvas.translate(
-      center.dx + radius * math.cos(angle),
-      center.dy + radius * math.sin(angle),
-    );
-    // Rotate text to follow the arc curve
-    canvas.rotate(angle + (math.pi / 2));
-    painter.paint(canvas, Offset(-painter.width / 2, -painter.height / 2));
-    canvas.restore();
-  }
-
-  void _drawNeedle(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    double startAngle,
-    double totalSweep,
-  ) {
-    // Linear Mapping: 0 to 40 BMI = 0 to 180 degrees
-    final double clampedBmi = bmiValue.clamp(0.0, 40.0);
-    // angle = 180 + (bmi / 40) * 180 (clamped between 180 and 360)
-    final double normalizedProgress = (clampedBmi / 40.0) * animationValue;
-    final double needleAngle = startAngle + (normalizedProgress * totalSweep);
-
-    final needlePaint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round;
-
-    // Needle length reaching middle of inner arc as requested
-    final double needleLen = radius;
-    final tip = Offset(
-      center.dx + needleLen * math.cos(needleAngle),
-      center.dy + needleLen * math.sin(needleAngle),
-    );
-
-    // Draw needle line
-    canvas.drawLine(center, tip, needlePaint);
-
-    // Draw circular base (radius 12)
-    canvas.drawCircle(center, 12, Paint()..color = Colors.black);
-    // Small white dot for axis look
-    canvas.drawCircle(center, 2.5, Paint()..color = Colors.white54);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
