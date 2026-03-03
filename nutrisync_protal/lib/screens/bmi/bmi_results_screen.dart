@@ -451,6 +451,7 @@ class BmiGauge extends StatelessWidget {
   Widget build(BuildContext context) {
     return SfRadialGauge(
       axes: <RadialAxis>[
+        // Outer Axis for Categories
         RadialAxis(
           minimum: 10,
           maximum: 45,
@@ -458,71 +459,57 @@ class BmiGauge extends StatelessWidget {
           endAngle: 0,
           showLabels: false,
           showTicks: false,
-          radiusFactor: 0.9,
-          axisLineStyle: const AxisLineStyle(
-            thickness: 0.2,
-            thicknessUnit: GaugeSizeUnit.factor,
-            cornerStyle: CornerStyle.bothCurve,
-          ),
+          radiusFactor: 1.0,
+          axisLineStyle: const AxisLineStyle(thickness: 0),
           ranges: <GaugeRange>[
-            GaugeRange(
-              startValue: 10,
-              endValue: 18.5,
-              color: const Color(0xFF4FC3F7),
-              startWidth: 0.2,
-              endWidth: 0.2,
-              sizeUnit: GaugeSizeUnit.factor,
-            ),
-            GaugeRange(
-              startValue: 18.5,
-              endValue: 24.9,
-              color: const Color(0xFF66BB6A),
-              startWidth: 0.2,
-              endWidth: 0.2,
-              sizeUnit: GaugeSizeUnit.factor,
-            ),
-            GaugeRange(
-              startValue: 25,
-              endValue: 29.9,
-              color: const Color(0xFFFFCA28),
-              startWidth: 0.2,
-              endWidth: 0.2,
-              sizeUnit: GaugeSizeUnit.factor,
-            ),
-            GaugeRange(
-              startValue: 30,
-              endValue: 34.9,
-              color: const Color(0xFFFF7043),
-              startWidth: 0.2,
-              endWidth: 0.2,
-              sizeUnit: GaugeSizeUnit.factor,
-            ),
-            GaugeRange(
-              startValue: 35,
-              endValue: 45,
-              color: const Color(0xFFEF5350),
-              startWidth: 0.2,
-              endWidth: 0.2,
-              sizeUnit: GaugeSizeUnit.factor,
-            ),
+            _buildCustomRange(10, 18.2, const Color(0xFF00B0FF), 0.7, 0.95),
+            _buildCustomRange(18.8, 24.7, const Color(0xFF4CAF50), 0.7, 0.95),
+            _buildCustomRange(25.3, 29.7, const Color(0xFFFFEB3B), 0.7, 0.95),
+            _buildCustomRange(30.3, 34.7, const Color(0xFFFF9800), 0.7, 0.95),
+            _buildCustomRange(35.3, 45, const Color(0xFFF44336), 0.7, 0.95),
+          ],
+          annotations: <GaugeAnnotation>[
+            _buildInternalLabel('Under\nWeight', 14.1, 0.82, 10),
+            _buildInternalLabel('Normal\nWeight', 21.75, 0.82, 10),
+            _buildInternalLabel('Over\nweight', 27.5, 0.82, 10),
+            _buildInternalLabel('Obese', 32.5, 0.82, 11),
+            _buildInternalLabel('Extremely\nObese', 40.15, 0.82, 9),
+          ],
+        ),
+        // Inner Axis for Ranges and Pointer
+        RadialAxis(
+          minimum: 10,
+          maximum: 45,
+          startAngle: 180,
+          endAngle: 0,
+          showLabels: false,
+          showTicks: false,
+          radiusFactor: 1.0,
+          axisLineStyle: const AxisLineStyle(thickness: 0),
+          ranges: <GaugeRange>[
+            _buildCustomRange(10, 18.2, const Color(0xFF00B0FF), 0.42, 0.67),
+            _buildCustomRange(18.8, 24.7, const Color(0xFF4CAF50), 0.42, 0.67),
+            _buildCustomRange(25.3, 29.7, const Color(0xFFFFEB3B), 0.42, 0.67),
+            _buildCustomRange(30.3, 34.7, const Color(0xFFFF9800), 0.42, 0.67),
+            _buildCustomRange(35.3, 45, const Color(0xFFF44336), 0.42, 0.67),
           ],
           pointers: <GaugePointer>[
             NeedlePointer(
               value: value,
-              needleColor: Colors.black,
+              needleColor: const Color(0xFF212121),
               needleStartWidth: 1,
-              needleEndWidth: 6,
-              needleLength: 0.75,
+              needleEndWidth: 8,
+              needleLength: 0.7,
               knobStyle: const KnobStyle(
-                color: Colors.black,
-                knobRadius: 0.08,
+                color: Color(0xFF212121),
+                knobRadius: 0.09,
                 sizeUnit: GaugeSizeUnit.factor,
               ),
               tailStyle: const TailStyle(
-                width: 6,
+                width: 8,
                 length: 0.15,
                 lengthUnit: GaugeSizeUnit.factor,
-                color: Colors.black,
+                color: Color(0xFF212121),
               ),
             ),
           ],
@@ -532,37 +519,47 @@ class BmiGauge extends StatelessWidget {
               widget: Text(
                 value.toStringAsFixed(1),
                 style: GoogleFonts.poppins(
-                  fontSize: 34,
+                  fontSize: 48,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFFEF5350), // Red color
+                  color: const Color(0xFFF44336),
                 ),
               ),
               angle: 90,
-              positionFactor: 0.4,
+              positionFactor: 0.15,
             ),
-
-            // --- LAYER 1: Category Names (Outer) ---
-            _buildCategoryAnnotation('Under Weight', 14.25, 1.15, 10),
-            _buildCategoryAnnotation('Normal Weight', 21.7, 1.15, 10),
-            _buildCategoryAnnotation('Over weight', 27.45, 1.15, 10),
-            _buildCategoryAnnotation('Obese', 32.45, 1.15, 10),
-            _buildCategoryAnnotation('Extremely Obese', 40, 1.15, 10),
-
-            // --- LAYER 2: Ranges (Inner) ---
-            _buildRangeAnnotation('<18.5', 14.25, 0.85),
-            _buildRangeAnnotation('18.5-24.9', 21.7, 0.85),
-            _buildRangeAnnotation('25-29.9', 27.45, 0.85),
-            _buildRangeAnnotation('30-34.9', 32.45, 0.85),
-            _buildRangeAnnotation('≥35.0', 40, 0.85),
+            // Inner layer labels (Ranges)
+            _buildInternalLabel('<18.5', 14.1, 0.54, 8),
+            _buildInternalLabel('18.5-24.9', 21.75, 0.54, 8),
+            _buildInternalLabel('25-29.9', 27.5, 0.54, 8),
+            _buildInternalLabel('30-34.9', 32.5, 0.54, 8),
+            _buildInternalLabel('>35.0', 40.15, 0.54, 8),
           ],
         ),
       ],
     );
   }
 
-  GaugeAnnotation _buildCategoryAnnotation(
+  GaugeRange _buildCustomRange(
+    double start,
+    double end,
+    Color color,
+    double startFactor,
+    double endFactor,
+  ) {
+    return GaugeRange(
+      startValue: start,
+      endValue: end,
+      color: color,
+      startWidth: endFactor - startFactor,
+      endWidth: endFactor - startFactor,
+      sizeUnit: GaugeSizeUnit.factor,
+      rangeOffset: startFactor,
+    );
+  }
+
+  GaugeAnnotation _buildInternalLabel(
     String label,
-    double value,
+    double bmiValue,
     double positionFactor,
     double fontSize,
   ) {
@@ -573,36 +570,16 @@ class BmiGauge extends StatelessWidget {
         style: GoogleFonts.poppins(
           fontSize: fontSize,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: const Color(0xFF212121),
+          height: 1.1,
         ),
       ),
       positionFactor: positionFactor,
-      angle: _getAngleFromValue(value),
-    );
-  }
-
-  GaugeAnnotation _buildRangeAnnotation(
-    String label,
-    double value,
-    double positionFactor,
-  ) {
-    return GaugeAnnotation(
-      widget: Text(
-        label,
-        style: GoogleFonts.poppins(
-          fontSize: 8.5,
-          fontWeight: FontWeight.w500,
-          color: Colors.black.withOpacity(0.7),
-        ),
-      ),
-      positionFactor: positionFactor,
-      angle: _getAngleFromValue(value),
+      angle: _getAngleFromValue(bmiValue),
     );
   }
 
   double _getAngleFromValue(double bmi) {
-    // Linear mapping from BMI (10-45) to Angle (180-0)
-    // angle = 180 - ((bmi - 10) / (45 - 10) * 180)
     return 180 - ((bmi - 10) / 35 * 180);
   }
 }
