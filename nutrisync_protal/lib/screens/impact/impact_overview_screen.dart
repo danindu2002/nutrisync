@@ -8,7 +8,7 @@ class ImpactOverviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -22,11 +22,25 @@ class ImpactOverviewScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 24),
-                      _buildSummaryCard(),
+                      _buildSummaryCards(),
+                      const SizedBox(height: 24),
+                      _buildNavigationCard(
+                        icon: Icons.speed_rounded,
+                        title: 'Body Measurements Overview',
+                        onTap: () {},
+                      ),
                       const SizedBox(height: 32),
-                      _buildChartSection(),
+                      _buildPerformanceHeader(),
+                      const SizedBox(height: 24),
+                      _buildTimeRangeSelector(),
                       const SizedBox(height: 32),
-                      _buildDetailCards(),
+                      _buildCustomChart(),
+                      const SizedBox(height: 32),
+                      _buildNavigationCard(
+                        icon: Icons.monitor_heart_outlined,
+                        title: 'Possible Health Conditions',
+                        onTap: () {},
+                      ),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -43,84 +57,49 @@ class ImpactOverviewScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Text(
-            'Impact Overview',
-            style: GoogleFonts.poppins(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppTheme.primary,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.25),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSummaryItem('Current BMI', '32.1', Colors.white),
-              Container(width: 1, height: 40, color: Colors.white24),
-              _buildSummaryItem('Weight', '85.2 kg', Colors.white),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 20,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Impact Overview',
+                style: GoogleFonts.workSans(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF333333),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(16),
+              color: const Color(0xFFC9F0D1),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               children: [
                 const Icon(
-                  Icons.trending_down_rounded,
-                  color: Colors.white,
-                  size: 20,
+                  Icons.check_circle,
+                  color: Color(0xFF4CAF50),
+                  size: 14,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'You\'ve lost 2.4 kg in the last 2 weeks!',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
+                const SizedBox(width: 6),
+                Text(
+                  'Excellent',
+                  style: GoogleFonts.workSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF4CAF50),
                   ),
                 ),
               ],
@@ -131,75 +110,145 @@ class ImpactOverviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryItem(String label, String value, Color color) {
-    return Column(
+  Widget _buildSummaryCards() {
+    return Row(
       children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-            color: color.withValues(alpha: 0.8),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.local_fire_department_rounded,
+            value: '450 kcal',
+            label: 'Daily Goal',
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: color,
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.fitness_center_rounded,
+            value: '12',
+            label: 'Workouts',
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.access_time_filled_rounded,
+            value: '3 months',
+            label: 'Total Time',
           ),
         ),
       ],
     );
   }
 
-  Widget _buildChartSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildStatCard({
+    required IconData icon,
+    required String value,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: const Color(0xFFEE3638), size: 32),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF333333),
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.workSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF757575),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationCard({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF3C3E44),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
           children: [
-            Text(
-              'Weekly Progress',
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.workSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
-            Text(
-              'Oct 14 - Oct 20',
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textSecondary,
-              ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.white,
+              size: 24,
             ),
           ],
         ),
-        const SizedBox(height: 20),
+      ),
+    );
+  }
+
+  Widget _buildPerformanceHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Current Performance',
+          style: GoogleFonts.workSans(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF333333),
+          ),
+        ),
         Container(
-          height: 220,
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: AppTheme.surface,
+            color: const Color(0xFFEE3638),
             borderRadius: BorderRadius.circular(24),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _buildBar('Mon', 0.6, false),
-              _buildBar('Tue', 0.8, false),
-              _buildBar('Wed', 0.5, false),
-              _buildBar('Thu', 0.9, true), // Active day
-              _buildBar('Fri', 0.7, false),
-              _buildBar('Sat', 0.4, false),
-              _buildBar('Sun', 0.55, false),
+              Text(
+                'Calories',
+                style: GoogleFonts.workSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ],
           ),
         ),
@@ -207,131 +256,121 @@ class ImpactOverviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBar(String day, double heightFactor, bool isActive) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          height: 140 * heightFactor,
-          width: 28,
-          decoration: BoxDecoration(
-            color: isActive
-                ? AppTheme.primary
-                : AppTheme.textLight.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          day,
-          style: GoogleFonts.poppins(
-            fontSize: 11,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            color: isActive ? AppTheme.textPrimary : AppTheme.textSecondary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailCards() {
-    return Column(
-      children: [
-        _buildDetailRow(
-          icon: Icons.local_fire_department_rounded,
-          title: 'Calories Burned',
-          value: '1,240 kcal',
-          trend: '+12%',
-          color: Colors.orange,
-        ),
-        const SizedBox(height: 16),
-        _buildDetailRow(
-          icon: Icons.directions_run_rounded,
-          title: 'Daily Steps',
-          value: '8,542',
-          trend: '+5%',
-          color: Colors.blue,
-        ),
-        const SizedBox(height: 16),
-        _buildDetailRow(
-          icon: Icons.nightlight_round,
-          title: 'Sleep quality',
-          value: '7h 45m',
-          trend: 'Stable',
-          color: Colors.purple,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String title,
-    required String value,
-    required String trend,
-    required Color color,
-  }) {
+  Widget _buildTimeRangeSelector() {
+    final ranges = ['1D', '1W', '1M', '6M', '1Y'];
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: ranges.map((range) {
+          final isActive = range == '1W';
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                Text(
-                  value,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: trend == 'Stable'
-                  ? AppTheme.textLight.withValues(alpha: 0.1)
-                  : Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: isActive ? const Color(0xFFEE3638) : Colors.transparent,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFFEE3638).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
             child: Text(
-              trend,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: trend == 'Stable'
-                    ? AppTheme.textSecondary
-                    : Colors.green,
+              range,
+              style: GoogleFonts.workSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: isActive ? Colors.white : const Color(0xFFADB5BD),
               ),
             ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
+    );
+  }
+
+  Widget _buildCustomChart() {
+    final data = [
+      {'day': 'Sun', 'value': 0.6},
+      {'day': 'Mon', 'value': 0.8},
+      {'day': 'Tue', 'value': 0.65},
+      {'day': 'Wed', 'value': 0.4},
+      {'day': 'Thu', 'value': 0.45},
+      {'day': 'Fri', 'value': 0.45},
+      {'day': 'Sat', 'value': 0.75},
+    ];
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Column(
+              children: ['4k', '3k', '2k', '1k', '0'].map((label) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    label,
+                    style: GoogleFonts.workSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFFADB5BD),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            ...data.map((item) {
+              final isTarget = item['day'] == 'Tue';
+              return Column(
+                children: [
+                  Container(
+                    height: 160,
+                    width: 14,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE9ECEF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    alignment: Alignment.bottomCenter,
+                    child: FractionallySizedBox(
+                      heightFactor: item['value'] as double,
+                      child: Container(
+                        width: 14,
+                        decoration: BoxDecoration(
+                          color: isTarget
+                              ? const Color(0xFFEE3638)
+                              : const Color(0xFFEE3638).withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    item['day'] as String,
+                    style: GoogleFonts.workSans(
+                      fontSize: 12,
+                      fontWeight: isTarget ? FontWeight.w700 : FontWeight.w500,
+                      color: isTarget
+                          ? const Color(0xFFEE3638)
+                          : const Color(0xFFADB5BD),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+      ],
     );
   }
 }
