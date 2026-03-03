@@ -498,15 +498,14 @@ class _BmiGaugePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Bottom-centre of the semi-circle sits at 85% of widget height
-    // to leave room underneath for the BMI text.
     final center = Offset(size.width / 2, size.height * 0.85);
-    final maxR = (size.width / 2) * 0.92;
+    final maxR = (size.width / 2) * 0.95; // Expanded to utilize container width
 
-    // ── Radial boundaries (as fraction of maxR) ──────────────────────
-    final outerOuter = maxR; // outer edge of outer band
-    final outerInner = maxR * 0.73; // inner edge of outer band
-    final innerOuter = maxR * 0.68; // outer edge of inner band (gap above)
-    final innerInner = maxR * 0.43; // inner edge of inner band
+    // ── Radial boundaries (as fraction of maxR) tightened gaps ──────
+    final outerOuter = maxR; // 1.00 outer edge
+    final outerInner = maxR * 0.76; // 0.76 Inner edge outer band (width 0.24)
+    final innerOuter = maxR * 0.74; // 0.74 Outer edge inner band (2% gap)
+    final innerInner = maxR * 0.50; // 0.50 Inner edge inner band (width 0.24)
 
     final arcPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -568,7 +567,7 @@ class _BmiGaugePainter extends CustomPainter {
       );
     }
 
-    // ── Large red BMI value (draw before needle so needle overlays it)
+    // ── Large red BMI value (draw before needle so needle overlays if close)
     final valueTP = TextPainter(
       text: TextSpan(
         text: bmi.toStringAsFixed(1),
@@ -576,38 +575,56 @@ class _BmiGaugePainter extends CustomPainter {
           fontSize: 42,
           fontWeight: FontWeight.w800,
           color: const Color(0xFFF44336),
-          height: 1.0,
         ),
       ),
+      textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     )..layout();
 
-    // Position text above the knob, just below the inner arc.
-    // If center is the pivot, value should be floating above the center.
-    // Actually, in the design it's between the arcs and the needle.
-    // the inner band starts at maxR * 0.43, so let's put it there.
+    // Position text above the knob, safely within the lower gap area.
+    // 50 pixels above center puts it neatly under the inner arcs
     valueTP.paint(
       canvas,
-      Offset(center.dx - valueTP.width / 2, center.dy - maxR * 0.40),
+      Offset(center.dx - valueTP.width / 2, center.dy - 60),
     );
 
-    // ── Needle ────────────────────────────────────────────────────────
+    // ── Needle Arrowhead Path ─────────────────────────────────────────
     final needleA = _bmiToAngle(bmi.clamp(_minBmi, _maxBmi));
-    final needleLen = innerInner * 0.9;
+    final needleLen = innerInner * 0.95; // reaches right near inner arc
     final tailLen = 14.0;
-    final tip =
-        center + Offset(math.cos(needleA), math.sin(needleA)) * needleLen;
-    final tail =
-        center - Offset(math.cos(needleA), math.sin(needleA)) * tailLen;
 
-    canvas.drawLine(
-      tail,
-      tip,
-      Paint()
-        ..color = const Color(0xFF1A1A1A)
-        ..strokeWidth = 6.0
-        ..strokeCap = StrokeCap.round,
-    );
+    // directional vectors
+    final dir = Offset(math.cos(needleA), math.sin(needleA));
+    final ortho = Offset(
+      -math.sin(needleA),
+      math.cos(needleA),
+    ); // orthogonal 90 deg off
+
+    final tip = center + dir * needleLen;
+    final tail = center - dir * tailLen;
+
+    final Path needlePath = Path()
+      ..moveTo(tip.dx, tip.dy) // Sharp point
+      ..lineTo(
+        center.dx - ortho.dx * 6,
+        center.dy - ortho.dy * 6,
+      ) // Widens backwards (left)
+      ..lineTo(
+        tail.dx - ortho.dx * 1.5,
+        tail.dy - ortho.dy * 1.5,
+      ) // Reaches tail (left)
+      ..lineTo(
+        tail.dx + ortho.dx * 1.5,
+        tail.dy + ortho.dy * 1.5,
+      ) // Reaches tail (right)
+      ..lineTo(
+        center.dx + ortho.dx * 6,
+        center.dy + ortho.dy * 6,
+      ) // Widens backwards (right)
+      ..close();
+
+    canvas.drawPath(needlePath, Paint()..color = const Color(0xFF1A1A1A));
+
     // Outer knob ring
     canvas.drawCircle(center, 18, Paint()..color = const Color(0xFF1A1A1A));
     // Inner white dot
