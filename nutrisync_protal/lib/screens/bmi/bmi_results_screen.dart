@@ -182,12 +182,11 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFF2F2F2),
+        borderRadius: BorderRadius.circular(25),
       ),
       padding: const EdgeInsets.all(24),
-      // Set a fixed height as requested (~260)
-      height: 260,
+      height: 300,
       alignment: Alignment.center,
       child: BmiGauge(bmiValue: _bmiValue),
     );
@@ -482,8 +481,8 @@ class _BmiGaugeState extends State<BmiGauge>
     return LayoutBuilder(
       builder: (context, constraints) {
         final double width = constraints.maxWidth;
-        // The gauge is a half circle, but we need space for the floating center text
-        final double height = width * 0.55;
+        // Half circle requires height around width/2 + some space for floating text
+        final double height = width * 0.6;
 
         return Stack(
           alignment: Alignment.center,
@@ -509,7 +508,7 @@ class _BmiGaugeState extends State<BmiGauge>
               child: Text(
                 widget.bmiValue.toStringAsFixed(1),
                 style: GoogleFonts.poppins(
-                  fontSize: 44,
+                  fontSize: 48,
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFFFF3B30),
                 ),
@@ -532,127 +531,137 @@ class BmiGaugePainter extends CustomPainter {
     {'label': 'Under Weight', 'range': '< 18.5', 'color': Color(0xFF1DA1F2)},
     {
       'label': 'Normal Weight',
-      'range': '18.5-24.9',
+      'range': '18.5 - 24.9',
       'color': Color(0xFF34C759),
     },
-    {'label': 'Over Weight', 'range': '25-29.9', 'color': Color(0xFFFFD60A)},
-    {'label': 'Obese', 'range': '30-34.9', 'color': Color(0xFFFF9500)},
+    {'label': 'Over Weight', 'range': '25 - 29.9', 'color': Color(0xFFFFD60A)},
+    {'label': 'Obese', 'range': '30 - 34.9', 'color': Color(0xFFFF9500)},
     {'label': 'Extremely Obese', 'range': '> 35.0', 'color': Color(0xFFFF3B30)},
   ];
 
   @override
   void paint(Canvas canvas, Size size) {
     final double centerX = size.width / 2;
-    // Position center slightly up from bottom to account for the needle circular base and text
-    final double centerY = size.height - 20;
+    // Position center slightly up from bottom to account for the needle base
+    final double centerY = size.height - 30;
     final Offset center = Offset(centerX, centerY);
 
-    // Calculate radius to fit within width safely
-    final double radius = size.width * 0.38;
-    final double thickness = 40.0; // Thick arc around 40px
+    // Geometry Constants
+    final double outerRadius = 130.0;
+    final double outerThickness = 38.0;
+    final double innerRadius = 85.0; // Spacing of ~7-10px between thick rings
+    final double innerThickness = 22.0;
 
-    const double startAngle = math.pi; // Left
-    const double totalSweepAngle = math.pi; // 180 degrees
-    const double segmentSweepAngle = totalSweepAngle / 5; // 36 degrees
-    const double gapInRadians = (2 * math.pi) / 360; // 2 degrees gap
+    const double startAngle = math.pi; // 180 degrees
+    const double totalSweepAngle = math.pi; // 180 degrees sweep
+    const double segmentSweepAngle =
+        totalSweepAngle / 5; // 36 degrees per segment
+    const double gapInRadians = (3.0 * math.pi) / 180.0; // 3 degrees gap
 
-    // 1. Draw 5 Equal Segments
     for (int i = 0; i < segments.length; i++) {
       final double segmentStart = startAngle + (i * segmentSweepAngle);
       final segmentData = segments[i];
       final Color color = segmentData['color'] as Color;
 
-      final paint = Paint()
+      // 1. Draw OUTER Arc
+      final outerPaint = Paint()
         ..color = color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = thickness
+        ..strokeWidth = outerThickness
         ..strokeCap = StrokeCap.round;
 
-      // Draw Arc for each segment
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
+        Rect.fromCircle(center: center, radius: outerRadius),
         segmentStart + (gapInRadians / 2),
         segmentSweepAngle - gapInRadians,
         false,
-        paint,
+        outerPaint,
       );
 
-      // 2. Draw Text Inside Each Segment
+      // 2. Draw INNER Arc
+      final innerPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = innerThickness
+        ..strokeCap = StrokeCap.round;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: innerRadius),
+        segmentStart + (gapInRadians / 2),
+        segmentSweepAngle - gapInRadians,
+        false,
+        innerPaint,
+      );
+
+      // 3. Draw Labels
       final double midAngle = segmentStart + (segmentSweepAngle / 2);
-      _drawSegmentLabels(canvas, center, radius, midAngle, segmentData);
+
+      // Determine text color (Yellow uses black, others use white as per requirement)
+      final Color textColor = (color == const Color(0xFFFFD60A))
+          ? Colors.black87
+          : Colors.white;
+
+      // Outer Label (Category)
+      _drawTextOnArc(
+        canvas,
+        center,
+        outerRadius,
+        midAngle,
+        segmentData['label'] as String,
+        9,
+        FontWeight.w700,
+        textColor,
+      );
+
+      // Inner Label (Range)
+      _drawTextOnArc(
+        canvas,
+        center,
+        innerRadius,
+        midAngle,
+        segmentData['range'] as String,
+        8,
+        FontWeight.w600,
+        textColor,
+      );
     }
 
-    // 3. Draw Needle
-    _drawNeedle(canvas, center, radius, startAngle, totalSweepAngle);
+    // 4. Draw Needle
+    _drawNeedle(canvas, center, innerRadius, startAngle, totalSweepAngle);
   }
 
-  void _drawSegmentLabels(
+  void _drawTextOnArc(
     Canvas canvas,
     Offset center,
     double radius,
     double angle,
-    Map<String, dynamic> data,
+    String text,
+    double fontSize,
+    FontWeight weight,
+    Color color,
   ) {
-    final String label = data['label'] as String;
-    final String range = data['range'] as String;
-    final Color bgColor = data['color'] as Color;
-
-    // Determine text color based on background luminance for better contrast
-    // Yellow (#FFD60A) and Green (#34C759) -> Black
-    // Others -> White
-    final Color textColor =
-        (bgColor == const Color(0xFFFFD60A) ||
-            bgColor == const Color(0xFF34C759))
-        ? Colors.black
-        : Colors.white;
-
-    final labelPainter = TextPainter(
+    final painter = TextPainter(
       text: TextSpan(
-        text: label.toUpperCase(),
+        text: text,
         style: GoogleFonts.poppins(
-          fontSize: 8,
-          fontWeight: FontWeight.w700,
-          color: textColor,
-          letterSpacing: 0.2,
+          fontSize: fontSize,
+          fontWeight: weight,
+          color: color,
         ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     );
-    labelPainter.layout();
+    painter.layout();
 
-    final rangePainter = TextPainter(
-      text: TextSpan(
-        text: range,
-        style: GoogleFonts.poppins(
-          fontSize: 7,
-          fontWeight: FontWeight.w500,
-          color: textColor.withValues(alpha: 0.8),
-        ),
-      ),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    );
-    rangePainter.layout();
-
-    // Text radius should be roughly same as arc radius to stay centered inside the stroke
     canvas.save();
     canvas.translate(
       center.dx + radius * math.cos(angle),
       center.dy + radius * math.sin(angle),
     );
+    // Rotate text to follow the arc curve
     canvas.rotate(angle + (math.pi / 2));
-
-    // Vertical offsets to center stacked text within the thickness
-    labelPainter.paint(
-      canvas,
-      Offset(-labelPainter.width / 2, -labelPainter.height / 2 - 4),
-    );
-    rangePainter.paint(
-      canvas,
-      Offset(-rangePainter.width / 2, rangePainter.height / 2 - 2),
-    );
-
+    painter.paint(canvas, Offset(-painter.width / 2, -painter.height / 2));
     canvas.restore();
   }
 
@@ -665,39 +674,29 @@ class BmiGaugePainter extends CustomPainter {
   ) {
     // Linear Mapping: 0 to 40 BMI = 0 to 180 degrees
     final double clampedBmi = bmiValue.clamp(0.0, 40.0);
-    // angle = (bmi / 40) * 180
-    final double normalizedValue = (clampedBmi / 40.0) * animationValue;
-    final double needleAngle = startAngle + (normalizedValue * totalSweep);
+    // angle = 180 + (bmi / 40) * 180 (clamped between 180 and 360)
+    final double normalizedProgress = (clampedBmi / 40.0) * animationValue;
+    final double needleAngle = startAngle + (normalizedProgress * totalSweep);
 
     final needlePaint = Paint()
       ..color = Colors.black
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 1.5;
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
 
-    // Needle length reaching arc middle (radius is already to arc middle)
-    final double needleLength = radius;
-    final Offset tip = Offset(
-      center.dx + needleLength * math.cos(needleAngle),
-      center.dy + needleLength * math.sin(needleAngle),
+    // Needle length reaching middle of inner arc as requested
+    final double needleLen = radius;
+    final tip = Offset(
+      center.dx + needleLen * math.cos(needleAngle),
+      center.dy + needleLen * math.sin(needleAngle),
     );
 
-    // Draw single thin needle line
-    canvas.drawLine(
-      center,
-      tip,
-      needlePaint
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
-    );
+    // Draw needle line
+    canvas.drawLine(center, tip, needlePaint);
 
-    // Draw circular base
+    // Draw circular base (radius 12)
     canvas.drawCircle(center, 12, Paint()..color = Colors.black);
-    // Tiny white dot for aesthetic consistency with common gauges
-    canvas.drawCircle(
-      center,
-      2,
-      Paint()..color = Colors.white.withValues(alpha: 0.3),
-    );
+    // Small white dot for axis look
+    canvas.drawCircle(center, 2.5, Paint()..color = Colors.white54);
   }
 
   @override
