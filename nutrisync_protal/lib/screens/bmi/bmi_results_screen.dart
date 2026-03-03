@@ -16,16 +16,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   static const double _bmiValue = 32.1;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -156,7 +146,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: AppTheme.primary.withOpacity(0.30),
+                      color: AppTheme.primary.withValues(alpha: 0.30),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -186,7 +176,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -328,8 +318,8 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Colors.black.withOpacity(0.75),
-                      Colors.black.withOpacity(0.20),
+                      Colors.black.withValues(alpha: 0.75),
+                      Colors.black.withValues(alpha: 0.20),
                     ],
                   ),
                 ),
@@ -364,7 +354,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                           style: GoogleFonts.poppins(
                             fontSize: 11,
                             fontWeight: FontWeight.w400,
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: 0.85),
                             height: 1.4,
                           ),
                         ),
