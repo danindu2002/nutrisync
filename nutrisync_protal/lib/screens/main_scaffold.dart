@@ -35,28 +35,32 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   Widget _buildBottomNav() {
     return Container(
-      height: 85,
+      height: 88,
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 20,
-            offset: const Offset(0, -8),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(index: 0, icon: Icons.home_rounded),
-              _buildNavItem(index: 1, icon: Icons.analytics_rounded),
+              _buildNavItem(index: 1, icon: Icons.show_chart_rounded),
               _buildNavItemCenter(),
-              _buildNavItem(index: 3, icon: Icons.menu_book_rounded),
+              _buildNavItem(index: 3, icon: Icons.bookmark_rounded),
               _buildNavItem(index: 4, icon: Icons.person_rounded),
             ],
           ),
@@ -66,23 +70,15 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   Widget _buildNavItem({required int index, required IconData icon}) {
-    final bool isActive = _currentIndex == index;
-    const Color selectedColor = Color(0xFFEE3638);
-    const Color unselectedColor = Color(0xFF2D2D4D);
+    const Color iconColor = Color(0xFF2D2D2D);
 
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 60,
-        height: 60,
-        child: Icon(
-          icon,
-          size: 28,
-          color: isActive
-              ? selectedColor
-              : unselectedColor.withValues(alpha: 0.6),
-        ),
+        width: 64,
+        height: 64,
+        child: Icon(icon, size: 26, color: iconColor),
       ),
     );
   }
@@ -91,29 +87,21 @@ class _MainScaffoldState extends State<MainScaffold> {
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = 2),
       child: Container(
-        width: 56,
-        height: 56,
+        width: 50,
+        height: 50,
         decoration: BoxDecoration(
-          color: const Color(0xFFFFEBEB),
+          color: const Color(0xFFFF5C5C),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: const Color(0xFFEE3638).withValues(alpha: 0.2),
-            width: 1.5,
-          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFEE3638).withValues(alpha: 0.15),
-              blurRadius: 15,
-              offset: const Offset(0, 6),
+              color: const Color(0xFFFF5C5C).withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: const Center(
-          child: Icon(
-            Icons.add_circle_outline_rounded,
-            color: Color(0xFFEE3638),
-            size: 32,
-          ),
+          child: Icon(Icons.add, color: Colors.white, size: 28),
         ),
       ),
     );
