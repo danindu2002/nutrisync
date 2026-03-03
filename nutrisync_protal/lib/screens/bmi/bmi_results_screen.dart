@@ -196,7 +196,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       // Maintain aspect ratio around 1.2 height for 1.0 width
       child: const AspectRatio(
         aspectRatio: 1 / 0.85,
-        child: BmiGauge(bmiValue: _bmiValue),
+        child: BmiGauge(value: _bmiValue),
       ),
     );
   }
@@ -443,140 +443,166 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
 
 /// A beautiful, accurate semi-circular BMI gauge using syncfusion_flutter_gauges.
 class BmiGauge extends StatelessWidget {
-  final double bmiValue;
+  final double value;
 
-  const BmiGauge({super.key, required this.bmiValue});
+  const BmiGauge({super.key, this.value = 32.1});
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SfRadialGauge(
-          axes: <RadialAxis>[
-            RadialAxis(
-              minimum: 10,
-              maximum: 45,
-              startAngle: 180,
-              endAngle: 0,
-              showLabels: false,
-              showTicks: false,
-              axisLineStyle: const AxisLineStyle(
-                thickness: 0.15,
-                thicknessUnit: GaugeSizeUnit.factor,
-                cornerStyle: CornerStyle.bothCurve,
-              ),
-              ranges: <GaugeRange>[
-                GaugeRange(
-                  startValue: 10,
-                  endValue: 18.5,
-                  color: const Color(0xFF4FC3F7),
-                  label: 'Underweight',
-                  sizeUnit: GaugeSizeUnit.factor,
-                  labelStyle: const GaugeTextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                  startWidth: 0.15,
-                  endWidth: 0.15,
-                ),
-                GaugeRange(
-                  startValue: 18.5,
-                  endValue: 24.9,
-                  color: const Color(0xFF66BB6A),
-                  label: 'Normal',
-                  sizeUnit: GaugeSizeUnit.factor,
-                  labelStyle: const GaugeTextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                  startWidth: 0.15,
-                  endWidth: 0.15,
-                ),
-                GaugeRange(
-                  startValue: 25,
-                  endValue: 29.9,
-                  color: const Color(0xFFFFCA28),
-                  label: 'Overweight',
-                  sizeUnit: GaugeSizeUnit.factor,
-                  labelStyle: const GaugeTextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                  startWidth: 0.15,
-                  endWidth: 0.15,
-                ),
-                GaugeRange(
-                  startValue: 30,
-                  endValue: 34.9,
-                  color: const Color(0xFFFF7043),
-                  label: 'Obese',
-                  sizeUnit: GaugeSizeUnit.factor,
-                  labelStyle: const GaugeTextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                  startWidth: 0.15,
-                  endWidth: 0.15,
-                ),
-                GaugeRange(
-                  startValue: 35,
-                  endValue: 45,
-                  color: const Color(0xFFEF5350),
-                  label: 'Extremely Obese',
-                  sizeUnit: GaugeSizeUnit.factor,
-                  labelStyle: const GaugeTextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                  startWidth: 0.15,
-                  endWidth: 0.15,
-                ),
-              ],
-              pointers: <GaugePointer>[
-                NeedlePointer(
-                  value: bmiValue,
-                  needleColor: Colors.black,
-                  knobStyle: const KnobStyle(
-                    color: Colors.black,
-                    knobRadius: 0.08,
-                    sizeUnit: GaugeSizeUnit.factor,
-                  ),
-                  needleStartWidth: 1,
-                  needleEndWidth: 4,
-                  needleLength: 0.8,
-                  lengthUnit: GaugeSizeUnit.factor,
-                  tailStyle: const TailStyle(
-                    width: 4,
-                    length: 0.15,
-                    lengthUnit: GaugeSizeUnit.factor,
-                    color: Colors.black,
-                  ),
-                  enableAnimation: true,
-                ),
-              ],
-              annotations: <GaugeAnnotation>[
-                GaugeAnnotation(
-                  widget: Text(
-                    bmiValue.toStringAsFixed(1),
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black,
-                    ),
-                  ),
-                  angle: 90,
-                  positionFactor: 0.5,
-                ),
-              ],
+    return SfRadialGauge(
+      axes: <RadialAxis>[
+        RadialAxis(
+          minimum: 10,
+          maximum: 45,
+          startAngle: 180,
+          endAngle: 0,
+          showLabels: false,
+          showTicks: false,
+          radiusFactor: 0.9,
+          axisLineStyle: const AxisLineStyle(
+            thickness: 0.2,
+            thicknessUnit: GaugeSizeUnit.factor,
+            cornerStyle: CornerStyle.bothCurve,
+          ),
+          ranges: <GaugeRange>[
+            GaugeRange(
+              startValue: 10,
+              endValue: 18.5,
+              color: const Color(0xFF4FC3F7),
+              startWidth: 0.2,
+              endWidth: 0.2,
+              sizeUnit: GaugeSizeUnit.factor,
+            ),
+            GaugeRange(
+              startValue: 18.5,
+              endValue: 24.9,
+              color: const Color(0xFF66BB6A),
+              startWidth: 0.2,
+              endWidth: 0.2,
+              sizeUnit: GaugeSizeUnit.factor,
+            ),
+            GaugeRange(
+              startValue: 25,
+              endValue: 29.9,
+              color: const Color(0xFFFFCA28),
+              startWidth: 0.2,
+              endWidth: 0.2,
+              sizeUnit: GaugeSizeUnit.factor,
+            ),
+            GaugeRange(
+              startValue: 30,
+              endValue: 34.9,
+              color: const Color(0xFFFF7043),
+              startWidth: 0.2,
+              endWidth: 0.2,
+              sizeUnit: GaugeSizeUnit.factor,
+            ),
+            GaugeRange(
+              startValue: 35,
+              endValue: 45,
+              color: const Color(0xFFEF5350),
+              startWidth: 0.2,
+              endWidth: 0.2,
+              sizeUnit: GaugeSizeUnit.factor,
             ),
           ],
-        );
-      },
+          pointers: <GaugePointer>[
+            NeedlePointer(
+              value: value,
+              needleColor: Colors.black,
+              needleStartWidth: 1,
+              needleEndWidth: 6,
+              needleLength: 0.75,
+              knobStyle: const KnobStyle(
+                color: Colors.black,
+                knobRadius: 0.08,
+                sizeUnit: GaugeSizeUnit.factor,
+              ),
+              tailStyle: const TailStyle(
+                width: 6,
+                length: 0.15,
+                lengthUnit: GaugeSizeUnit.factor,
+                color: Colors.black,
+              ),
+            ),
+          ],
+          annotations: <GaugeAnnotation>[
+            // BMI Value text in bold red
+            GaugeAnnotation(
+              widget: Text(
+                value.toStringAsFixed(1),
+                style: GoogleFonts.poppins(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFFEF5350), // Red color
+                ),
+              ),
+              angle: 90,
+              positionFactor: 0.4,
+            ),
+
+            // --- LAYER 1: Category Names (Outer) ---
+            _buildCategoryAnnotation('Under Weight', 14.25, 1.15, 10),
+            _buildCategoryAnnotation('Normal Weight', 21.7, 1.15, 10),
+            _buildCategoryAnnotation('Over weight', 27.45, 1.15, 10),
+            _buildCategoryAnnotation('Obese', 32.45, 1.15, 10),
+            _buildCategoryAnnotation('Extremely Obese', 40, 1.15, 10),
+
+            // --- LAYER 2: Ranges (Inner) ---
+            _buildRangeAnnotation('<18.5', 14.25, 0.85),
+            _buildRangeAnnotation('18.5-24.9', 21.7, 0.85),
+            _buildRangeAnnotation('25-29.9', 27.45, 0.85),
+            _buildRangeAnnotation('30-34.9', 32.45, 0.85),
+            _buildRangeAnnotation('≥35.0', 40, 0.85),
+          ],
+        ),
+      ],
     );
+  }
+
+  GaugeAnnotation _buildCategoryAnnotation(
+    String label,
+    double value,
+    double positionFactor,
+    double fontSize,
+  ) {
+    return GaugeAnnotation(
+      widget: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.poppins(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
+        ),
+      ),
+      positionFactor: positionFactor,
+      angle: _getAngleFromValue(value),
+    );
+  }
+
+  GaugeAnnotation _buildRangeAnnotation(
+    String label,
+    double value,
+    double positionFactor,
+  ) {
+    return GaugeAnnotation(
+      widget: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 8.5,
+          fontWeight: FontWeight.w500,
+          color: Colors.black.withOpacity(0.7),
+        ),
+      ),
+      positionFactor: positionFactor,
+      angle: _getAngleFromValue(value),
+    );
+  }
+
+  double _getAngleFromValue(double bmi) {
+    // Linear mapping from BMI (10-45) to Angle (180-0)
+    // angle = 180 - ((bmi - 10) / (45 - 10) * 180)
+    return 180 - ((bmi - 10) / 35 * 180);
   }
 }
