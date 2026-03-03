@@ -57,11 +57,23 @@ class _MainScaffoldState extends State<MainScaffold> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(index: 0, icon: Icons.home_rounded),
-              _buildNavItem(index: 1, icon: Icons.show_chart_rounded),
+              _buildNavItem(
+                index: 0,
+                assetPath: 'assets/images/HOME FILLED BUTTON.png',
+              ),
+              _buildNavItem(
+                index: 1,
+                assetPath: 'assets/images/CHAT FILLED.png',
+              ),
               _buildNavItemCenter(),
-              _buildNavItem(index: 3, icon: Icons.bookmark_rounded),
-              _buildNavItem(index: 4, icon: Icons.person_rounded),
+              _buildNavItem(
+                index: 3,
+                assetPath: 'assets/images/saved jobs.png',
+              ),
+              _buildNavItem(
+                index: 4,
+                assetPath: 'assets/images/profile vector.png',
+              ),
             ],
           ),
         ),
@@ -69,16 +81,21 @@ class _MainScaffoldState extends State<MainScaffold> {
     );
   }
 
-  Widget _buildNavItem({required int index, required IconData icon}) {
-    const Color iconColor = Color(0xFF2D2D2D);
-
+  Widget _buildNavItem({required int index, required String assetPath}) {
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 64,
         height: 64,
-        child: Icon(icon, size: 26, color: iconColor),
+        child: Center(
+          child: Image.asset(
+            assetPath,
+            width: 26,
+            height: 26,
+            fit: BoxFit.contain,
+          ),
+        ),
       ),
     );
   }
@@ -86,23 +103,11 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget _buildNavItemCenter() {
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = 2),
-      child: Container(
+      child: Image.asset(
+        'assets/images/FAB.png',
         width: 50,
         height: 50,
-        decoration: BoxDecoration(
-          color: const Color(0xFFFF5C5C),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFF5C5C).withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Center(
-          child: Icon(Icons.add, color: Colors.white, size: 28),
-        ),
+        fit: BoxFit.contain,
       ),
     );
   }
