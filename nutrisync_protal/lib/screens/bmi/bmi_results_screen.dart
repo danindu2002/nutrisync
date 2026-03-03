@@ -1,7 +1,7 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nutrisync_protal/core/theme/app_theme.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class BmiResultsScreen extends StatefulWidget {
   const BmiResultsScreen({super.key});
@@ -441,7 +441,12 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-/// A beautiful, accurate semi-circular BMI gauge using syncfusion_flutter_gauges.
+/// A beautiful, accurate semi-circular BMI gauge using CustomPaint.
+///
+/// Two concentric arc-bands display category names (outer) and BMI ranges
+/// (inner), each label rotated so it follows the arc direction exactly.
+/// A black needle points to the current [value] and a large red number
+/// is drawn at the centre of the gauge.
 ///
 /// Design: two concentric arc-bands (outer = categories, inner = ranges),
 /// with labels centered inside each band, a large red BMI value at center,
@@ -451,10 +456,23 @@ class BmiGauge extends StatelessWidget {
 
   const BmiGauge({super.key, this.value = 32.1});
 
-  // Segment definitions: [startBmi, endBmi, color, categoryLabel, rangeLabel]
-  // Small gaps (0.3 units) are added between segments for visual separation.
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _BmiGaugePainter(bmi: value));
+  }
+}
+
+// ─── Custom Painter ───────────────────────────────────────────────────────────
+
+class _BmiGaugePainter extends CustomPainter {
+  final double bmi;
+
+  static const double _minBmi = 10.0;
+  static const double _maxBmi = 45.0;
+
+  /// Each tuple: (startBmi, endBmi, color, categoryLabel, rangeLabel)
+  /// Small 0.3-unit gaps between each segment for visual separation.
   static const _segments = [
-    // startBmi, endBmi, color, categoryLabel, rangeLabel
     (10.0, 18.2, Color(0xFF00B0FF), 'Under\nWeight', '<18.5'),
     (18.8, 24.7, Color(0xFF4CAF50), 'Normal\nWeight', '18.5-24.9'),
     (25.3, 29.7, Color(0xFFFFEB3B), 'Over\nweight', '25-29.9'),
@@ -462,167 +480,178 @@ class BmiGauge extends StatelessWidget {
     (35.3, 45.0, Color(0xFFF44336), 'Extremely\nObese', '>35.0'),
   ];
 
+  _BmiGaugePainter({required this.bmi});
+
+  /// Maps a BMI value to a canvas angle in radians.
+  /// Flutter's Y-axis points downwards.
+  /// 0 is -> (right, 3 o'clock).
+  /// pi/2 is v (down, 6 o'clock).
+  /// pi is <- (left, 9 o'clock).
+  /// 3pi/2 is ^ (up, 12 o'clock).
+  /// We want the gauge to sweep from left, UP over the top, to right.
+  /// So it must start at pi and go to 2pi (or 0).
+  double _bmiToAngle(double v) {
+    final fraction = (v - _minBmi) / (_maxBmi - _minBmi);
+    return math.pi + fraction * math.pi;
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return SfRadialGauge(
-      axes: <RadialAxis>[
-        // ── Outer axis: category name blocks ───────────────────────────
-        RadialAxis(
-          minimum: 10,
-          maximum: 45,
-          startAngle: 180,
-          endAngle: 0,
-          showLabels: false,
-          showTicks: false,
-          radiusFactor: 1.0,
-          axisLineStyle: const AxisLineStyle(thickness: 0),
-          ranges: [
-            for (final s in _segments)
-              _band(s.$1, s.$2, s.$3, outerStart: 0.70, outerEnd: 0.96),
-          ],
-          annotations: [
-            for (final s in _segments)
-              // positionFactor 0.83 = midpoint of the 0.70→0.96 band
-              _label(
-                s.$4,
-                _midBmi(s.$1, s.$2),
-                positionFactor: 0.83,
-                fontSize: 9.5,
-              ),
-          ],
-        ),
+  void paint(Canvas canvas, Size size) {
+    // Bottom-centre of the semi-circle sits at 85% of widget height
+    // to leave room underneath for the BMI text.
+    final center = Offset(size.width / 2, size.height * 0.85);
+    final maxR = (size.width / 2) * 0.92;
 
-        // ── Inner axis: range labels blocks + needle + BMI number ──────
-        RadialAxis(
-          minimum: 10,
-          maximum: 45,
-          startAngle: 180,
-          endAngle: 0,
-          showLabels: false,
-          showTicks: false,
-          radiusFactor: 1.0,
-          axisLineStyle: const AxisLineStyle(thickness: 0),
-          ranges: [
-            for (final s in _segments)
-              _band(s.$1, s.$2, s.$3, outerStart: 0.42, outerEnd: 0.67),
-          ],
-          pointers: [
-            NeedlePointer(
-              value: value,
-              needleColor: const Color(0xFF212121),
-              needleStartWidth: 1,
-              needleEndWidth: 7,
-              needleLength: 0.65,
-              knobStyle: const KnobStyle(
-                color: Color(0xFF212121),
-                knobRadius: 0.09,
-                sizeUnit: GaugeSizeUnit.factor,
-              ),
-              tailStyle: const TailStyle(
-                width: 7,
-                length: 0.18,
-                lengthUnit: GaugeSizeUnit.factor,
-                color: Color(0xFF212121),
-              ),
-              enableAnimation: true,
-              animationDuration: 1200,
-              animationType: AnimationType.ease,
-            ),
-          ],
-          annotations: [
-            // Large red BMI value centered below the gauge arc
-            GaugeAnnotation(
-              angle: 90, // points straight up from bottom-center
-              positionFactor: 0.18,
-              widget: Text(
-                value.toStringAsFixed(1),
-                style: GoogleFonts.poppins(
-                  fontSize: 44,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFFF44336),
-                  height: 1.0,
-                ),
-              ),
-            ),
-            // Range labels inside inner band
-            for (final s in _segments)
-              // positionFactor 0.545 = midpoint of the 0.42→0.67 band
-              _label(
-                s.$5,
-                _midBmi(s.$1, s.$2),
-                positionFactor: 0.545,
-                fontSize: 8,
-              ),
-          ],
-        ),
-      ],
-    );
-  }
+    // ── Radial boundaries (as fraction of maxR) ──────────────────────
+    final outerOuter = maxR; // outer edge of outer band
+    final outerInner = maxR * 0.73; // inner edge of outer band
+    final innerOuter = maxR * 0.68; // outer edge of inner band (gap above)
+    final innerInner = maxR * 0.43; // inner edge of inner band
 
-  /// Builds a colored arc band with specified radial extent.
-  GaugeRange _band(
-    double start,
-    double end,
-    Color color, {
-    required double outerStart,
-    required double outerEnd,
-  }) {
-    final thickness = outerEnd - outerStart;
-    return GaugeRange(
-      startValue: start,
-      endValue: end,
-      color: color,
-      startWidth: thickness,
-      endWidth: thickness,
-      sizeUnit: GaugeSizeUnit.factor,
-      rangeOffset: outerStart,
-    );
-  }
+    final arcPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.butt;
 
-  /// Builds a GaugeAnnotation with text centered at the midpoint BMI of a segment.
-  ///
-  /// [bmiMid] – the midpoint BMI value of the segment.
-  /// [positionFactor] – 0 = gauge center, 1 = outer radius edge.
-  GaugeAnnotation _label(
-    String text,
-    double bmiMid, {
-    required double positionFactor,
-    required double fontSize,
-  }) {
-    return GaugeAnnotation(
-      angle: _angle(bmiMid),
-      positionFactor: positionFactor,
-      widget: Text(
-        text,
-        textAlign: TextAlign.center,
+    for (final seg in _segments) {
+      final startA = _bmiToAngle(seg.$1);
+      final endA = _bmiToAngle(seg.$2);
+      final sweep = endA - startA; // positive (clockwise)
+      final midA = (startA + endA) / 2;
+      final color = seg.$3;
+
+      // ── Draw outer band (category colours) ─────────────────────────
+      final outerR = (outerOuter + outerInner) / 2;
+      final outerThick = outerOuter - outerInner;
+      arcPaint
+        ..color = color
+        ..strokeWidth = outerThick;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: outerR),
+        startA,
+        sweep,
+        false,
+        arcPaint,
+      );
+
+      // Category label centered inside outer band, rotated along arc
+      _drawLabel(
+        canvas,
+        text: seg.$4,
+        position: center + Offset(math.cos(midA), math.sin(midA)) * outerR,
+        arcAngle: midA,
+        fontSize: 10.5,
+        bold: true,
+      );
+
+      // ── Draw inner band (range colours) ────────────────────────────
+      final innerR = (innerOuter + innerInner) / 2;
+      final innerThick = innerOuter - innerInner;
+      arcPaint
+        ..color = color
+        ..strokeWidth = innerThick;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: innerR),
+        startA,
+        sweep,
+        false,
+        arcPaint,
+      );
+
+      // Range label centered inside inner band
+      _drawLabel(
+        canvas,
+        text: seg.$5,
+        position: center + Offset(math.cos(midA), math.sin(midA)) * innerR,
+        arcAngle: midA,
+        fontSize: 9.0,
+        bold: false,
+      );
+    }
+
+    // ── Large red BMI value (draw before needle so needle overlays it)
+    final valueTP = TextPainter(
+      text: TextSpan(
+        text: bmi.toStringAsFixed(1),
         style: GoogleFonts.poppins(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFF1A1A1A),
-          height: 1.15,
+          fontSize: 42,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFFF44336),
+          height: 1.0,
         ),
       ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    // Position text above the knob, just below the inner arc.
+    // If center is the pivot, value should be floating above the center.
+    // Actually, in the design it's between the arcs and the needle.
+    // the inner band starts at maxR * 0.43, so let's put it there.
+    valueTP.paint(
+      canvas,
+      Offset(center.dx - valueTP.width / 2, center.dy - maxR * 0.40),
     );
+
+    // ── Needle ────────────────────────────────────────────────────────
+    final needleA = _bmiToAngle(bmi.clamp(_minBmi, _maxBmi));
+    final needleLen = innerInner * 0.9;
+    final tailLen = 14.0;
+    final tip =
+        center + Offset(math.cos(needleA), math.sin(needleA)) * needleLen;
+    final tail =
+        center - Offset(math.cos(needleA), math.sin(needleA)) * tailLen;
+
+    canvas.drawLine(
+      tail,
+      tip,
+      Paint()
+        ..color = const Color(0xFF1A1A1A)
+        ..strokeWidth = 6.0
+        ..strokeCap = StrokeCap.round,
+    );
+    // Outer knob ring
+    canvas.drawCircle(center, 18, Paint()..color = const Color(0xFF1A1A1A));
+    // Inner white dot
+    canvas.drawCircle(center, 6, Paint()..color = Colors.white);
   }
 
-  /// Returns the midpoint BMI of a segment.
-  double _midBmi(double start, double end) => (start + end) / 2;
+  /// Draws [text] centered at [position], rotated so it follows the arc.
+  ///
+  /// [arcAngle] is the canvas angle (radians) at the label position.
+  /// The rotation makes the text tangent to the circle such that the bottom
+  /// of the text faces the center.
+  ///   at left  (pi)    → text reads bottom-to-top  (rotate -90°)
+  ///   at top   (3pi/2) → text reads left-to-right  (rotate 0°)
+  ///   at right (2pi)   → text reads top-to-bottom  (rotate +90°)
+  void _drawLabel(
+    Canvas canvas, {
+    required String text,
+    required Offset position,
+    required double arcAngle,
+    required double fontSize,
+    required bool bold,
+  }) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: GoogleFonts.poppins(
+          fontSize: fontSize,
+          fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
+          color: const Color(0xFF1A1A1A),
+          height: 1.1,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    )..layout();
 
-  /// Maps a BMI value (10–45) to a GaugeAnnotation angle (degrees).
-  ///
-  /// SfRadialGauge annotation angles:
-  ///   • 0° = 3 o'clock (right)
-  ///   • 90° = 6 o'clock (bottom)
-  ///   • 180° = 9 o'clock (left)
-  ///   • 270° = 12 o'clock (top)
-  ///
-  /// The axis startAngle=180 is bottom-left, endAngle=0 is bottom-right.
-  /// BMI 10 → bottom-left (annotation angle 180°)
-  /// BMI 45 → bottom-right (annotation angle 0°)
-  double _angle(double bmi) {
-    // Fraction along the 180° sweep (0 = start, 1 = end)
-    final fraction = (bmi - 10) / 35;
-    // Map fraction to annotation angle: 180° (left) → 0° (right)
-    return 180 - (fraction * 180);
+    canvas.save();
+    canvas.translate(position.dx, position.dy);
+    // Rotate so text baseline is tangent to the arc
+    canvas.rotate(arcAngle + math.pi / 2);
+    tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
+    canvas.restore();
   }
+
+  @override
+  bool shouldRepaint(_BmiGaugePainter old) => old.bmi != bmi;
 }
