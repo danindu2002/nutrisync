@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nutrisync_protal/core/theme/app_theme.dart';
+import 'package:NutriSync/core/theme/app_theme.dart';
+import 'package:NutriSync/widgets/common_widgets.dart';
 
 class NutritionSummaryScreen extends StatelessWidget {
   const NutritionSummaryScreen({super.key});
@@ -209,36 +210,7 @@ class NutritionSummaryScreen extends StatelessWidget {
   }
 
   Widget _buildAddFoodButton() {
-    return Container(
-      width: double.infinity,
-      height: 60,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEE3638),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-            ),
-            child: const Icon(Icons.add, color: Colors.white, size: 16),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Add Food',
-            style: GoogleFonts.workSans(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
+    return PrimaryButton(text: 'Add Food', isRed: true, onTap: () {});
   }
 
   Widget _buildMealHistory() {

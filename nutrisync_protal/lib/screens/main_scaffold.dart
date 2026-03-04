@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:nutrisync_protal/screens/bmi/bmi_results_screen.dart';
-import 'package:nutrisync_protal/screens/impact/impact_overview_screen.dart';
-import 'package:nutrisync_protal/screens/impact/impact_simulation_screen.dart';
-import 'package:nutrisync_protal/screens/nutrition/nutrition_summary_screen.dart';
+import 'package:NutriSync/screens/bmi/bmi_results_screen.dart';
+import 'package:NutriSync/screens/impact/impact_overview_screen.dart';
+import 'package:NutriSync/screens/impact/impact_simulation_screen.dart';
+import 'package:NutriSync/screens/nutrition/nutrition_summary_screen.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});

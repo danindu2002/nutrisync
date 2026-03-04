@@ -1,10 +1,13 @@
+import 'package:NutriSync/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nutrisync_protal/main.dart';
 
 void main() {
-  testWidgets('App smoke test', (WidgetTester tester) async {
+  testWidgets('App builds successfully', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
     await tester.pumpWidget(const NutriSyncApp());
+
+    // Verify that the app builds without errors.
     expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

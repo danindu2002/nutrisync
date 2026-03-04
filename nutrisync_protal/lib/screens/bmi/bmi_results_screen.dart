@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nutrisync_protal/core/theme/app_theme.dart';
+import 'package:NutriSync/core/theme/app_theme.dart';
+import 'package:NutriSync/widgets/common_widgets.dart';
 
 class BmiResultsScreen extends StatefulWidget {
   const BmiResultsScreen({super.key});
@@ -117,52 +118,13 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
 
   // ─── Tab Switcher ────────────────────────────────────
   Widget _buildTabSwitcher() {
-    return Container(
-      height: 52,
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          _buildTab(index: 0, label: 'Analouge Meter'),
-          _buildTab(index: 1, label: 'Histogram'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTab({required int index, required String label}) {
-    final bool isActive = _selectedTab == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedTab = index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: isActive ? AppTheme.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: AppTheme.primary.withValues(alpha: 0.30),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ]
-                : null,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isActive ? Colors.white : AppTheme.textSecondary,
-            ),
-          ),
-        ),
+    return Center(
+      child: UnitSwitch(
+        isLeftSelected: _selectedTab == 0,
+        leftLabel: 'Analouge Meter',
+        rightLabel: 'Histogram',
+        onLeftTap: () => setState(() => _selectedTab = 0),
+        onRightTap: () => setState(() => _selectedTab = 1),
       ),
     );
   }

@@ -1,7 +1,5 @@
-name: nutrisync_protal
+name: NutriSync
 description: "Smart Diet and Nutrition Advisor Mobile App"
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
@@ -30,10 +28,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
   syncfusion_flutter_gauges: ^21.1.35
+  provider: ^6.1.1      # For state management
+  http: ^1.2.0          # For API calls
+  intl: ^0.19.0         # For date/time formatting
+  shared_preferences: ^2.2.2
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:
@@ -56,16 +58,12 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/to/asset-from-package
+    - assets/images/questionnaire/
+    - assets/images/dashboard/
+    - assets/images/authentication/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nutrisync_protal/core/theme/app_theme.dart';
+import 'package:NutriSync/core/theme/app_theme.dart';
+import 'package:NutriSync/widgets/common_widgets.dart';
 
 class ImpactSimulationScreen extends StatefulWidget {
   const ImpactSimulationScreen({super.key});
@@ -268,40 +269,7 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
   }
 
   Widget _buildActionButton() {
-    return Container(
-      width: double.infinity,
-      height: 64,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEE3638),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFEE3638).withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Impact Overview',
-            style: GoogleFonts.workSans(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: Colors.white,
-            size: 24,
-          ),
-        ],
-      ),
-    );
+    return PrimaryButton(text: 'Impact Overview', isRed: true, onTap: () {});
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nutrisync_protal/core/theme/app_theme.dart';
+import 'package:NutriSync/core/theme/app_theme.dart';
+import 'package:NutriSync/widgets/common_widgets.dart';
 
 class ImpactOverviewScreen extends StatelessWidget {
   const ImpactOverviewScreen({super.key});
@@ -182,36 +183,11 @@ class ImpactOverviewScreen extends StatelessWidget {
     required String title,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return OptionCard(
+      title: title,
+      icon: icon,
+      isSelected: false,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF3C3E44),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: GoogleFonts.workSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
