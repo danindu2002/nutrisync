@@ -1,67 +1,100 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import 'dashboard_screen.dart';
+import 'home_screen.dart';
+import 'meal_log_screen.dart';
 import 'my_profile_screen.dart';
+import 'scan_meal_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() =>
-      _MainNavigationScreenState();
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState
-    extends State<MainNavigationScreen> {
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    DashboardScreen(),
-    Placeholder(), // Analytics
-    SizedBox(),    // Empty for center button
-    Placeholder(), // History
-    MyProfileScreen(),
+  // 1. Create unique GlobalKeys for each tab's Navigator
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(), // Home
+    GlobalKey<NavigatorState>(), // Analytics
+    GlobalKey<NavigatorState>(), // Add Meal
+    GlobalKey<NavigatorState>(), // Meal Plan
+    GlobalKey<NavigatorState>(), // Profile
   ];
 
   void _onTap(int index) {
     if (index == 2) {
-      // Center Add Button Action
-      _showAddModal();
+      // Open Add Meal Screen as a full screen
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const ScanMealScreen()),
+      );
       return;
     }
 
-    setState(() => _currentIndex = index);
+    if (_currentIndex == index) {
+      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else {
+      setState(() => _currentIndex = index);
+    }
   }
 
-  void _showAddModal() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-        BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => const Padding(
-        padding: EdgeInsets.all(30),
-        child: Text(
-          "Add New Activity",
-          style: TextStyle(fontSize: 18),
+  @override
+  Widget build(BuildContext context) {
+    // 3. Use PopScope to handle the Android hardware back button
+    // This ensures back button pops nested screens before closing the app
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final NavigatorState? currentNav = _navigatorKeys[_currentIndex].currentState;
+        if (currentNav != null && currentNav.canPop()) {
+          currentNav.pop();
+        } else {
+          // If we can't pop anymore in the nested nav, we could let the app close
+          // or navigate back to the first tab.
+          if (_currentIndex != 0) {
+            setState(() => _currentIndex = 0);
+          } else {
+            // Exit app
+            Navigator.of(context).pop();
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: IndexedStack(
+          index: _currentIndex,
+          children: [
+            _buildTabNavigator(0, HomeScreen(onMealLogTap: () {
+              setState(() => _currentIndex = 3);
+            })),
+            _buildTabNavigator(1, const DashboardScreen()),
+            const SizedBox.shrink(), // Placeholder for center button
+            _buildTabNavigator(3, const MealLogScreen()),
+            _buildTabNavigator(4, const MyProfileScreen()),
+          ],
+        ),
+        bottomNavigationBar: _BottomNavBar(
+          currentIndex: _currentIndex,
+          onTap: _onTap,
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: _BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
-      ),
+  // 4. Helper method to wrap each tab in a nested Navigator
+  Widget _buildTabNavigator(int index, Widget rootPage) {
+    return Navigator(
+      key: _navigatorKeys[index],
+      onGenerateRoute: (routeSettings) {
+        return MaterialPageRoute(
+          builder: (context) => rootPage,
+        );
+      },
     );
   }
 }
@@ -95,13 +128,11 @@ class _BottomNavBar extends StatelessWidget {
             ],
           ),
           child: Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _navItem(Icons.home, 0),
               _navItem(Icons.show_chart, 1),
 
-              /// Center Button
               GestureDetector(
                 onTap: () => onTap(2),
                 child: Container(
@@ -112,8 +143,7 @@ class _BottomNavBar extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary
-                            .withOpacity(0.4),
+                        color: AppColors.primary.withOpacity(0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
