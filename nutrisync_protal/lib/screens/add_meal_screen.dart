@@ -75,7 +75,6 @@ class _AddMealScreenState extends State<AddMealScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
     );
   }
 
@@ -310,77 +309,6 @@ class _AddMealScreenState extends State<AddMealScreen> {
           onChanged: (v) => setState(() => suggestRecommendations = v),
         ),
       ],
-    );
-  }
-}
-
-class CustomBottomNavBar extends StatelessWidget {
-  final int currentIndex;
-  const CustomBottomNavBar({super.key, required this.currentIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-        child: Container(
-          height: 70,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(35),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavIcon(icon: Icons.home, isActive: currentIndex == 0),
-              _NavIcon(icon: Icons.show_chart, isActive: currentIndex == 1),
-
-              /// Center Add Button
-              Container(
-                height: 54,
-                width: 54,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                ),
-                child: Icon(
-                  Icons.add_circle_outline,
-                  color: AppColors.primary,
-                  size: 30,
-                ),
-              ),
-
-              _NavIcon(icon: Icons.receipt_long, isActive: currentIndex == 3),
-              _NavIcon(icon: Icons.person, isActive: currentIndex == 4),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavIcon extends StatelessWidget {
-  final IconData icon;
-  final bool isActive;
-
-  const _NavIcon({required this.icon, this.isActive = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      icon,
-      size: 28,
-      color: isActive ? const Color(0xFF1F2937) : Colors.grey.shade400,
     );
   }
 }

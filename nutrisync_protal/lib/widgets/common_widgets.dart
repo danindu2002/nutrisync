@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../core/constants.dart';
 import 'dart:async';
 
@@ -1369,6 +1371,107 @@ class InputFieldState extends State<InputField> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Colors.red),
+        ),
+      ),
+    );
+  }
+}
+
+class HomeHeader extends StatelessWidget {
+  const HomeHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    String formattedDate = DateFormat('MMM dd, yyyy').format(DateTime.now());
+
+    // AnnotatedRegion tells the OS to use light icons (white) for the status bar
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent, // Keeps the status bar transparent
+        statusBarIconBrightness: Brightness.light, // For Android (white icons)
+        statusBarBrightness: Brightness.dark, // For iOS (white icons)
+      ),
+      child: Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(28),
+            bottomRight: Radius.circular(28),
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.black, Color(0xFF2B2B2B)],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false, // Prevents extra padding at the bottom of the header
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+            child: Row(
+              children: [
+                /// User Avatar
+                const CircleAvatar(
+                  radius: 26,
+                  backgroundImage: AssetImage("assets/images/dashboard/avatar.png"),
+                ),
+                const SizedBox(width: 12),
+
+                /// User Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Hello John!",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.favorite,
+                            color: AppColors.primary,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "88% healthy",
+                            style: TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formattedDate,
+                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                /// Notification Icon with Badge
+                Stack(
+                  children: [
+                    const Icon(
+                      Icons.notifications_none,
+                      size: 28,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
