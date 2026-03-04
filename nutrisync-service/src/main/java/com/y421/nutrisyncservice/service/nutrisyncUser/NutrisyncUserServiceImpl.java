@@ -1,7 +1,7 @@
 package com.y421.nutrisyncservice.service.nutrisyncUser;
 
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
-import com.y421.nutrisyncservice.mapper.NutrisyncUser.NutrisyncUserMapper;
+import com.y421.nutrisyncservice.mapper.nutrisyncUser.NutrisyncUserMapper;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
 import com.y421.nutrisyncservice.request.nutrisyncUser.LoginDto;
 import com.y421.nutrisyncservice.request.nutrisyncUser.NutrisyncUserRequestDto;

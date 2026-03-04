@@ -4,6 +4,7 @@ import com.y421.nutrisyncservice.entity.foodMaster.FoodMaster;
 import com.y421.nutrisyncservice.entity.mealLog.MealLog;
 import com.y421.nutrisyncservice.entity.mealLog.MealTime;
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
+import com.y421.nutrisyncservice.mapper.meal.MealMapper;
 import com.y421.nutrisyncservice.repository.foodMaster.FoodMasterRepository;
 import com.y421.nutrisyncservice.repository.mealLog.MealLogRepository;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
@@ -30,6 +31,7 @@ public class MealLogServiceImpl implements MealLogService {
     private final FoodMasterRepository foodRepository;
     private final MealLogRepository mealLogRepository;
     private final NutrisyncUserRepository userRepository;
+    private final MealMapper mealMapper;
     private final AIServiceClient aiServiceClient;
 
     @Override
@@ -42,14 +44,8 @@ public class MealLogServiceImpl implements MealLogService {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Food not recognized in database"));
 
-            FoodIdentificationDTO dto = new FoodIdentificationDTO(
-                    food.getFoodId(),
-                    food.getName(),
-                    food.getCaloriesInKcal(),
-                    food.getProteinInG(),
-                    food.getCarbohydratesInG(),
-                    food.getTotalFatsInG()
-            );
+            FoodIdentificationDTO dto = mealMapper.toFoodIdentificationDTO(food);
+            dto.setName(label); // Override with AI label for better user experience
 
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (Exception e) {
@@ -100,7 +96,7 @@ public class MealLogServiceImpl implements MealLogService {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-            List<MealLogResponseDTO> dtoList = foodRepository.findByUserIdAndDate(userId, date).stream()
+            List<MealLogResponseDTO> dtoList = mealLogRepository.findByUserIdAndDate(userId, date).stream()
                     .map(log -> MealLogResponseDTO.builder()
                             .logId(log.getLogId())
                             .foodName(log.getFoodName())

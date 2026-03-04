@@ -18,6 +18,10 @@ public interface FoodMasterRepository extends JpaRepository<FoodMaster, Long> {
     @Query("SELECT f FROM FoodMaster f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :label, '%'))")
     List<FoodMaster> searchByLabel(@Param("label") String label);
 
-    @Query("SELECT m FROM MealLog m WHERE m.user.userId = :userId AND CAST(m.createdOn AS date) = :date")
-    List<MealLog> findByUserIdAndDate(@Param("userId") Long userId, @Param("date") LocalDate date);
+    @Query(value = "SELECT * FROM nutrisync.m_food_master " +
+                   "WHERE LOWER(name) " +
+                   "LIKE LOWER(CONCAT('%', :label, '%')) " +
+                   "ORDER BY LENGTH(name) " +
+                   "LIMIT 1", nativeQuery = true)
+    Optional<FoodMaster> findBestMatch(@Param("label") String label);
 }

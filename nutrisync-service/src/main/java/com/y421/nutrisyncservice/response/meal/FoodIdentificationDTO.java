@@ -8,8 +8,17 @@ import lombok.Data;
 public class FoodIdentificationDTO {
     private Long foodId;
     private String name;
-    private String calories; // per 100g
-    private String protein;
-    private String carbohydrates;
-    private String fats;
+    private String caloriesInKcal;
+    private String proteinInG;
+    private String carbohydratesInG;
+    private String totalFatsInG;
+    private String calciumInMg;
+    private String fiberInG;
+    private String sugarsInG;
+    private String fructoseInG;
+    private String glucoseInG;
+    private String lactoseInG;
+    private String sodiumInMg;
+    private String cholesterolInMg;
+    private String waterInG;
 }
