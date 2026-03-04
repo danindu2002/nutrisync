@@ -1,9 +1,8 @@
-import 'package:NutriSync/screens/rewards_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../core/constants.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../widgets/common_widgets.dart';
-import 'challenges_screen.dart';
-import 'add_meal_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -12,418 +11,24 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          _Header(),
-
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    _SectionTitle(title: "Fitness Metrics"),
-                    const SizedBox(height: 12),
-                    _MetricsRow(),
-                    const SizedBox(height: 24),
-                    _SectionTitle(title: "Workouts (26)"),
-                    const SizedBox(height: 12),
-                    _WorkoutCard(),
-                    const SizedBox(height: 24),
-                    _SectionTitle(title: "Diet & Nutrition"),
-                    const SizedBox(height: 12),
-                    _NutritionRow(),
-
-                    const SizedBox(height: 32),
-
-                    /// GO TO CHALLENGES BUTTON
-                    PrimaryButton(
-                      text: "Go to Challenges",
-                      isRed: true,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ChallengesScreen(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    /// GO TO REWARDS BUTTON
-                    PrimaryButton(
-                      text: "Go to Rewards",
-                      isRed: true,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const RewardsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.black, Color(0xFF2B2B2B)],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-          child: Row(
-            children: [
-              const CircleAvatar(
-                radius: 26,
-                backgroundImage: AssetImage("assets/images/dashboard/avatar.png"),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Hello John!",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.favorite,
-                          color: AppColors.primary,
-                          size: 14,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          "88% healthy",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                        SizedBox(width: 12),
-                        Icon(
-                          Icons.calendar_today,
-                          size: 14,
-                          color: AppColors.primary,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          "Dec 03, 2025",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Stack(
-                children: [
-                  const Icon(
-                    Icons.notifications_none,
-                    size: 26,
-                    color: Colors.white,
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Text(
-                        "3",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-
-  const _SectionTitle({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        Text(
-          "See All",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppColors.primary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MetricsRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: const [
-        _MetricCard(title: "Score", value: "88%", color: Colors.red),
-        SizedBox(width: 12),
-        _MetricCard(title: "Hydration", value: "67%", color: Colors.blue),
-        SizedBox(width: 12),
-        _MetricCard(title: "Calories", value: "1200", color: Colors.grey),
-      ],
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final Color color;
-
-  const _MetricCard({
-    required this.title,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 110,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(18),
-        ),
+      body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(color: Colors.white70)),
-            const Spacer(),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WorkoutCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 160,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        image: const DecorationImage(
-          image: AssetImage("assets/images/dashboard/workout.png"),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            bottom: 16,
-            left: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  "Upper Strength 2",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  "8 Series Workout",
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: CircleAvatar(
-              backgroundColor: AppColors.primary,
-              radius: 22,
-              child: Icon(Icons.play_arrow, color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NutritionRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: const [
-        _NutritionCard(
-          title: "Salad & Eggs",
-          calories: "347 kcal",
-          imagePath: "assets/images/dashboard/salad_eggs.png",
-        ),
-        SizedBox(width: 12),
-        _NutritionCard(
-          title: "Chicken Bowl",
-          calories: "762 kcal",
-          imagePath: "assets/images/dashboard/salad_eggs.png",
-        ),
-      ],
-    );
-  }
-}
-
-class _NutritionCard extends StatelessWidget {
-  final String title;
-  final String calories;
-  final String imagePath;
-
-  const _NutritionCard({
-    required this.title,
-    required this.calories,
-    required this.imagePath,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 160,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-          ),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8),
-          ],
-        ),
-        child: Stack(
-          children: [
-            /// Gradient overlay
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.15),
-                    Colors.black.withOpacity(0.65),
-                  ],
-                ),
-              ),
-            ),
-
-            /// Protein badge
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  "25g Protein",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-
-            /// Title + calories
-            Positioned(
-              bottom: 12,
-              left: 12,
-              right: 12,
+            const HomeHeader(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    calories,
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
+                  const SizedBox(height: 20),
+                  const Text("Calories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  _CaloriesLineChart(),
+                  const SizedBox(height: 30),
+                  const Text("Nutritions", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  _NutritionsBarChart(),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -434,3 +39,161 @@ class _NutritionCard extends StatelessWidget {
   }
 }
 
+class _CaloriesLineChart extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: ["1d", "1w", "1m", "1y", "All"].map((t) => _TimeTab(t, t == "1d")).toList(),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 180,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: 500),
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 500,
+                      getTitlesWidget: (val, _) => Text(val.toInt().toString(), style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: const [
+                      FlSpot(0, 1400), FlSpot(1, 1450), FlSpot(2, 1000), FlSpot(3, 1500),
+                      FlSpot(4, 1867), FlSpot(5, 1300), FlSpot(6, 400), FlSpot(7, 800), FlSpot(8, 1600),
+                    ],
+                    isCurved: true,
+                    color: AppColors.primary,
+                    barWidth: 4,
+                    isStrokeCapRound: true,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [AppColors.primary.withOpacity(0.3), AppColors.primary.withOpacity(0)],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text("1867 kcal", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+}
+
+class _NutritionsBarChart extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 200,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: 100,
+                barTouchData: BarTouchData(enabled: false),
+                titlesData: const FlTitlesData(show: false),
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                barGroups: [
+                  _makeGroup(0, 70, Colors.black, "20%"),
+                  _makeGroup(1, 40, Colors.redAccent, "30%"),
+                  _makeGroup(2, 60, Colors.blueAccent, "40%"),
+                  _makeGroup(3, 30, Colors.lightGreen, "10%"),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          _nutritionLegend("Fat", "201g", Colors.black),
+          _nutritionLegend("Protein", "158g", Colors.redAccent),
+          _nutritionLegend("Carbs", "11g", Colors.blueAccent),
+          _nutritionLegend("Macro", "5g", Colors.lightGreen),
+        ],
+      ),
+    );
+  }
+
+  BarChartGroupData _makeGroup(int x, double y, Color color, String label) {
+    return BarChartGroupData(
+      x: x,
+      barRods: [
+        BarChartRodData(
+          toY: y,
+          color: color,
+          width: 45,
+          borderRadius: BorderRadius.circular(12),
+          backDrawRodData: BackgroundBarChartRodData(show: true, toY: 100, color: const Color(0xFFF5F5F5)),
+        ),
+      ],
+    );
+  }
+
+  Widget _nutritionLegend(String title, String val, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(height: 12, width: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3))),
+          const SizedBox(width: 8),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+          const Spacer(),
+          Text(val, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeTab extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  const _TimeTab(this.text, this.isSelected);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: isSelected ? AppColors.primary : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(text, style: TextStyle(color: isSelected ? Colors.white : Colors.grey, fontWeight: FontWeight.bold, fontSize: 12)),
+    );
+  }
+}
