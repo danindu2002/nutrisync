@@ -55,6 +55,7 @@ public class SecurityConfig {
             "/api/v1/auth/logout",
             "/api/v1/auth/getProfileImage",
             "/api/v1/reference/**",
+            "/api/v1/meal/**",
     };
 
     @Bean
