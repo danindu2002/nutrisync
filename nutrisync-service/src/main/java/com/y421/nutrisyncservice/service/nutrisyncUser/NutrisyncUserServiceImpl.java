@@ -106,6 +106,21 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     }
 
     @Override
+    public ResponseEntity<Object> getProfile(Long userId) {
+        try {
+            if (!nutrisyncUserRepository.existsByUserIdAndIsDeletedFalse(userId)) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+            NutrisyncUser user  = nutrisyncUserRepository.getReferenceById(userId);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error occurred during get profile", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
     public ResponseEntity<Object> deleteAccount() {
         return null;
     }

@@ -46,6 +46,14 @@ public class NutrisyncUserControllerImpl implements NutrisyncUserController {
                 }
             } else {
                 return ResponseHandler.generateResponse("Username or Password null", HttpStatus.BAD_REQUEST, null);
+              
+    public ResponseEntity<Object> getProfile(Long userId) {
+        try {
+            ResponseEntity<Object> response = nutrisyncUserService.getProfile(userId);
+            if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                return generateResponse("User Retrieved Successfully", HttpStatus.OK, response.getBody());
+            } else {
+                return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
             }
         } catch (Exception e) {
             return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
