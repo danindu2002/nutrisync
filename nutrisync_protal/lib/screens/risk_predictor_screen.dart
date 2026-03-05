@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import 'dashboard_screen.dart';
+import '../models/risk_model.dart';
+import '../widgets/risk_card.dart';
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -11,12 +13,35 @@ class RiskPredictorScreen extends StatefulWidget {
 
 class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
   String? selectedPeriod;
+
   final List<String> periods = [
-    '6 months',
     '1 year',
     '2 years',
     '5 years',
     '10 years'
+  ];
+
+  /// MOCK DATA
+  /// Replace this later with API response
+  final List<RiskModel> mockRisks = [
+    RiskModel(
+      name: "High Cholesterol",
+      description: "High saturated fat diet",
+      riskLevel: 0.1,
+      icon: Icons.monitor_heart,
+    ),
+    RiskModel(
+      name: "Obesity",
+      description: "Sedentary lifestyle & excess calories.",
+      riskLevel: 0.5,
+      icon: Icons.balance,
+    ),
+    RiskModel(
+      name: "Type 2 Diabetes",
+      description: "Genetics & high sugar intake",
+      riskLevel: 0.9,
+      icon: Icons.water_drop,
+    ),
   ];
 
   @override
@@ -46,6 +71,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                     },
                   ),
                   const SizedBox(width: 8),
+
                   /// Title
                   Text(
                     "Risk Predictor",
@@ -69,7 +95,8 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                     /// Left Side: Label and Dropdown
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 20, top: 12, bottom: 12),
+                        padding: const EdgeInsets.only(
+                            left: 20, top: 12, bottom: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -82,13 +109,15 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+
                             const SizedBox(height: 8),
-                            
+
                             /// Time Period Dropdown
                             Container(
                               height: 28,
                               width: 133,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
@@ -103,22 +132,33 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                       fontSize: 12,
                                     ),
                                   ),
-                                  icon: const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.black),
+                                  icon: const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    size: 18,
+                                    color: Colors.black,
+                                  ),
                                   isExpanded: true,
+                                  menuMaxHeight: 200,
+                                  isDense: true,
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       selectedPeriod = newValue;
                                     });
                                   },
-                                  items: periods.map<DropdownMenuItem<String>>((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        style: const TextStyle(fontSize: 12, color: Colors.black),
-                                      ),
-                                    );
-                                  }).toList(),
+                                  items: periods
+                                      .map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
                                 ),
                               ),
                             ),
@@ -158,7 +198,35 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                     ),
                   ],
                 ),
-              )
+              ),
+
+              const SizedBox(height: 24),
+
+              Text(
+                "Top Predicted Risks",
+                style: AppTextStyles.subHeader.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textMain,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBg,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  children: mockRisks.map((risk) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: RiskCard(risk: risk),
+                    );
+                  }).toList(),
+                ),
+              ),
             ],
           ),
         ),
