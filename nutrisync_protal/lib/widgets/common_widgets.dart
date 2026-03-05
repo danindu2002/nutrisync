@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../core/constants.dart';
 import 'dart:async';
 
@@ -1240,6 +1242,233 @@ class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProvi
                     child: Icon(Icons.close, size: 20, color: Colors.grey.shade400),
                   ),
                 )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Auth Header (Logo + Title)
+class AuthHeader extends StatelessWidget {
+  final double height;
+  final String imagePath;
+
+  const AuthHeader({
+    super.key,
+    this.height = 300,
+    this.imagePath =
+    "assets/images/authentication/login_bg.png",
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipPath(
+      clipper: _BottomCurveClipper(),
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(imagePath),
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomCurveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    // Start top-left
+    path.lineTo(0, size.height - 20);
+
+    // First half curve (upwards)
+    path.quadraticBezierTo(
+      size.width * 0.25,
+      size.height - 80,
+      size.width * 0.5,
+      size.height - 40,
+    );
+
+    // Second half curve (downwards)
+    path.quadraticBezierTo(
+      size.width * 0.75,
+      size.height,
+      size.width,
+      size.height - 20,
+    );
+
+    // Finish shape
+    path.lineTo(size.width, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+// Auth input field
+class InputLabel extends StatelessWidget {
+  final String text;
+  const InputLabel(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(fontWeight: FontWeight.w600),
+    );
+  }
+}
+
+class InputField extends StatefulWidget {
+  final IconData icon;
+  final bool isPassword;
+  final TextEditingController controller;
+
+  const InputField({super.key,
+    required this.icon,
+    required this.controller,
+    this.isPassword = false,
+  });
+
+  @override
+  State<InputField> createState() => InputFieldState();
+}
+
+class InputFieldState extends State<InputField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: widget.controller,
+      obscureText: widget.isPassword ? _obscure : false,
+      decoration: InputDecoration(
+        prefixIcon: Icon(widget.icon),
+        suffixIcon: widget.isPassword
+            ? IconButton(
+          icon: Icon(
+            _obscure ? Icons.visibility_off : Icons.visibility,
+          ),
+          onPressed: () => setState(() => _obscure = !_obscure),
+        )
+            : null,
+        filled: true,
+        fillColor: Colors.grey.shade100,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+      ),
+    );
+  }
+}
+
+class HomeHeader extends StatelessWidget {
+  const HomeHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    String formattedDate = DateFormat('MMM dd, yyyy').format(DateTime.now());
+
+    // AnnotatedRegion tells the OS to use light icons (white) for the status bar
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent, // Keeps the status bar transparent
+        statusBarIconBrightness: Brightness.light, // For Android (white icons)
+        statusBarBrightness: Brightness.dark, // For iOS (white icons)
+      ),
+      child: Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(28),
+            bottomRight: Radius.circular(28),
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.black, Color(0xFF2B2B2B)],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false, // Prevents extra padding at the bottom of the header
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+            child: Row(
+              children: [
+                /// User Avatar
+                const CircleAvatar(
+                  radius: 26,
+                  backgroundImage: AssetImage("assets/images/dashboard/avatar.png"),
+                ),
+                const SizedBox(width: 12),
+
+                /// User Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Hello John!",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.favorite,
+                            color: AppColors.primary,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "88% healthy",
+                            style: TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formattedDate,
+                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                /// Notification Icon with Badge
+                Stack(
+                  children: [
+                    const Icon(
+                      Icons.notifications_none,
+                      size: 28,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
