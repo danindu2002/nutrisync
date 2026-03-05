@@ -108,10 +108,10 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     @Override
     public ResponseEntity<Object> getProfile(Long userId) {
         try {
-            if (!nutrisyncUserRepository.existsByUserIdAndIsDeletedFalse(userId)) {
+            if (!userRepository.existsByUserIdAndIsDeletedFalse(userId)) {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
-            NutrisyncUser user  = nutrisyncUserRepository.getReferenceById(userId);
+            NutrisyncUser user  = userRepository.getReferenceById(userId);
 
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception e) {

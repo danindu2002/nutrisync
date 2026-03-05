@@ -40,11 +40,12 @@ public class MealLogServiceImpl implements MealLogService {
             String label = aiServiceClient.predictFood(image);
 
             // Find the first matching entry from USDA data
-            FoodMaster food = foodRepository.searchByLabel(label).stream()
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Food not recognized in database"));
+            Optional<FoodMaster> food = foodRepository.searchByLabel(label).stream().findFirst();
+            if (food.isEmpty()) {
+                return new ResponseEntity<>("Food not found in database", HttpStatus.NOT_FOUND);
+            }
 
-            FoodIdentificationDTO dto = mealMapper.toFoodIdentificationDTO(food);
+            FoodIdentificationDTO dto = mealMapper.toFoodIdentificationDTO(food.get());
             dto.setName(label); // Override with AI label for better user experience
 
             return new ResponseEntity<>(dto, HttpStatus.OK);

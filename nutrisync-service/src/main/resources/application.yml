@@ -82,7 +82,7 @@ rest:
   nutrisync-service:
     realm: nutrisync-service
     admin_id: admin-user
-    admin_secret: R4DI6EP86CK64IWoCe4qFUbqiec55xzR
+    admin_secret: ff5XiyXgoLtzSaPUHx29NEnOUKjBeJa4
     client_id: client-user
     jwk_set_uri: ${rest.service.url}realms/${rest.nutrisync-service.realm}/${rest.service.jwk_path}
   service:
