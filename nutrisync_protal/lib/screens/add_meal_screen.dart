@@ -1,0 +1,314 @@
+import 'package:flutter/material.dart';
+import '../core/constants.dart';
+import '../widgets/common_widgets.dart';
+
+class AddMealScreen extends StatefulWidget {
+  const AddMealScreen({super.key});
+
+  @override
+  State<AddMealScreen> createState() => _AddMealScreenState();
+}
+
+class _AddMealScreenState extends State<AddMealScreen> {
+  bool isManual = true;
+  String selectedMealType = "Breakfast";
+  double protein = 40;
+  double carbs = 75;
+  double calories = 55;
+  bool suggestRecommendations = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel("Meal Name"),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    "Enter your meal name",
+                    Icons.restaurant_menu,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildLabel("Meal Type"),
+                  const SizedBox(height: 12),
+                  _buildMealTypeSelector(),
+                  const SizedBox(height: 24),
+                  _buildSlider(
+                    "Total Protein",
+                    protein,
+                    (v) => setState(() => protein = v),
+                  ),
+                  _buildSlider(
+                    "Total Carbs",
+                    carbs,
+                    (v) => setState(() => carbs = v),
+                  ),
+                  _buildSlider(
+                    "Total Calories",
+                    calories,
+                    (v) => setState(() => calories = v),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildLabel("Meal Thumbnail"),
+                  const SizedBox(height: 12),
+                  _buildImagePickerPlaceholder(),
+                  const SizedBox(height: 24),
+                  _buildLabel("Additional Note"),
+                  const SizedBox(height: 12),
+                  _buildTextField("What would you like AI to know", null),
+                  const SizedBox(height: 24),
+                  _buildSwitch(),
+                  const SizedBox(height: 32),
+                  PrimaryButton(onTap: () {}, text: "Continue", isRed: true),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFF1F2937), // Dark grey background like in image
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    "Add New Meal",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 40), // Balance the back button
+            ],
+          ),
+          const SizedBox(height: 24),
+          _buildToggleSwitch(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleSwitch() {
+    return Container(
+      height: 54,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => isManual = true),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isManual ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "Manual",
+                  style: TextStyle(
+                    color: isManual ? Colors.white : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => isManual = false),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !isManual ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "AI Scan",
+                  style: TextStyle(
+                    color: !isManual ? Colors.white : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+    );
+  }
+
+  Widget _buildTextField(String hint, IconData? icon) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.grey),
+          prefixIcon: icon != null ? Icon(icon, color: Colors.grey) : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMealTypeSelector() {
+    final types = ["Breakfast", "Launch", "Snack"];
+    return Row(
+      children: types.map((type) {
+        final isSelected = selectedMealType == type;
+        return Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: GestureDetector(
+            onTap: () => setState(() => selectedMealType = type),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E7EB),
+                borderRadius: BorderRadius.circular(20),
+                border: isSelected
+                    ? Border.all(color: Colors.black, width: 2)
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    type,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    isSelected
+                        ? Icons.check_box_rounded
+                        : Icons.check_box_outline_blank_rounded,
+                    size: 16,
+                    color: Colors.black87,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildSlider(
+    String label,
+    double value,
+    ValueChanged<double> onChanged,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: AppColors.primary,
+            inactiveTrackColor: Colors.grey.shade200,
+            thumbColor: AppColors.primary,
+            overlayColor: AppColors.primary.withOpacity(0.2),
+            trackHeight: 6,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+          ),
+          child: Slider(value: value, min: 0, max: 100, onChanged: onChanged),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImagePickerPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 120,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: AppColors.primary,
+          width: 2,
+          style: BorderStyle.solid,
+        ), // In Flutter, dashed is harder, solid for now or custom painter
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+      ),
+      child: Center(child: Icon(Icons.add, color: AppColors.primary, size: 40)),
+    );
+  }
+
+  Widget _buildSwitch() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          "Suggest Recommendations",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Switch(
+          value: suggestRecommendations,
+          activeColor: AppColors.primary,
+          onChanged: (v) => setState(() => suggestRecommendations = v),
+        ),
+      ],
+    );
+  }
+}

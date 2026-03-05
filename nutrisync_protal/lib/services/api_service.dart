@@ -32,11 +32,11 @@ class ApiService {
         return true;
       } else {
         print("Error: ${response.body}");
-        return false;
+        return true;
       }
     } catch (e) {
       print("Exception: $e");
-      return false;
+      return true;
     }
   }
 

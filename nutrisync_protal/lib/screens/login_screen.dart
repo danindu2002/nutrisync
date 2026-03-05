@@ -1,8 +1,11 @@
+import 'package:NutriSync/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
 import '../services/api_service.dart';
 import '../widgets/common_widgets.dart';
+import 'forgot_password_screen.dart';
 import 'onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -56,6 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
       showModernToast(
         context,
         "Login successfully!",
@@ -89,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const _LoginHeader(),
+              const AuthHeader(),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -110,8 +115,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
 
                     /// Username
-                    const _InputLabel("Username"),
-                    _InputField(
+                    const InputLabel("Username"),
+                    InputField(
                       controller: _usernameController,
                       icon: Icons.email_outlined,
                     ),
@@ -119,8 +124,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
 
                     /// Password
-                    const _InputLabel("Password"),
-                    _InputField(
+                    const InputLabel("Password"),
+                    InputField(
                       controller: _passwordController,
                       icon: Icons.lock_outline,
                       isPassword: true,
@@ -141,7 +146,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text("Remember Me"),
                         const Spacer(),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                            );
+                          },
                           child: const Text(
                             "Forgot Password?",
                             style: TextStyle(color: Colors.red),
@@ -193,15 +203,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     /// Sign Up
                     Center(
                       child: RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           text: "Don't have an Account? ",
-                          style: TextStyle(color: Colors.grey),
+                          style: const TextStyle(color: Colors.grey),
                           children: [
-                            TextSpan(
-                              text: "Sign up",
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
+                            WidgetSpan(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const SignUpScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Sign up",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -220,121 +242,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-class _LoginHeader extends StatelessWidget {
-  const _LoginHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: _BottomCurveClipper(),
-      child: Container(
-        height: 300,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/authentication/login_bg.png"),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InputLabel extends StatelessWidget {
-  final String text;
-  const _InputLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(fontWeight: FontWeight.w600),
-    );
-  }
-}
-
-class _InputField extends StatefulWidget {
-  final IconData icon;
-  final bool isPassword;
-  final TextEditingController controller;
-
-  const _InputField({
-    required this.icon,
-    required this.controller,
-    this.isPassword = false,
-  });
-
-  @override
-  State<_InputField> createState() => _InputFieldState();
-}
-
-class _InputFieldState extends State<_InputField> {
-  bool _obscure = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      obscureText: widget.isPassword ? _obscure : false,
-      decoration: InputDecoration(
-        prefixIcon: Icon(widget.icon),
-        suffixIcon: widget.isPassword
-            ? IconButton(
-          icon: Icon(
-            _obscure ? Icons.visibility_off : Icons.visibility,
-          ),
-          onPressed: () => setState(() => _obscure = !_obscure),
-        )
-            : null,
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.red),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomCurveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-
-    // Start top-left
-    path.lineTo(0, size.height - 20);
-
-    // 🔼 First half curve (upwards)
-    path.quadraticBezierTo(
-      size.width * 0.25,
-      size.height - 80,
-      size.width * 0.5,
-      size.height - 40,
-    );
-
-    // 🔽 Second half curve (downwards)
-    path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height,
-      size.width,
-      size.height - 20,
-    );
-
-    // Finish shape
-    path.lineTo(size.width, 0);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
 
