@@ -1,5 +1,6 @@
 package com.y421.nutrisyncservice.controller.mealLog;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.y421.nutrisyncservice.request.meal.MealLogRequestDTO;
 import com.y421.nutrisyncservice.service.mealLog.MealLogService;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,11 @@ public class MealLogControllerImpl implements MealLogController {
     }
 
     @Override
-    public ResponseEntity<Object> logMeal(MealLogRequestDTO dto, MultipartFile image) throws IOException {
+    public ResponseEntity<Object> logMeal(String data, MultipartFile image) throws IOException {
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            MealLogRequestDTO dto = objectMapper.readValue(data, MealLogRequestDTO.class);
+
             ResponseEntity<Object> response = mealService.saveMealLog(dto, image);
             if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
                 return generateResponse("Meal Logged Successfully", HttpStatus.OK, response.getBody());
