@@ -219,20 +219,6 @@ class _TimeTab extends StatelessWidget {
 class _NutritionsBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Dynamic Data Logic: Defining counts to calculate percentages
-    final double fatGrams = 201;
-    final double proteinGrams = 158;
-    final double carbGrams = 11;
-    final double macroGrams = 5;
-
-    double totalGrams = fatGrams + proteinGrams + carbGrams + macroGrams;
-
-    // Percentage strings for the bar labels
-    String fatPerc = "${((fatGrams / totalGrams) * 100).toStringAsFixed(0)}%";
-    String proteinPerc = "${((proteinGrams / totalGrams) * 100).toStringAsFixed(0)}%";
-    String carbPerc = "${((carbGrams / totalGrams) * 100).toStringAsFixed(0)}%";
-    String macroPerc = "${((macroGrams / totalGrams) * 100).toStringAsFixed(0)}%";
-
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -249,62 +235,29 @@ class _NutritionsBarChart extends StatelessWidget {
                 alignment: BarChartAlignment.spaceAround,
                 maxY: 100,
                 barTouchData: BarTouchData(enabled: false),
+                titlesData: const FlTitlesData(show: false),
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
-                titlesData: FlTitlesData(
-                  show: true,
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      // Adding explicit types (double value, TitleMeta meta) resolves the error
-                      getTitlesWidget: (double value, TitleMeta meta) {
-                        const style = TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        );
-
-                        String text = "";
-                        switch (value.toInt()) {
-                          case 0: text = fatPerc; break;
-                          case 1: text = proteinPerc; break;
-                          case 2: text = carbPerc; break;
-                          case 3: text = macroPerc; break;
-                        }
-
-                        return SideTitleWidget(
-                          axisSide: meta.axisSide,
-                          space: -25, // Moves text inside the bar
-                          child: Text(text, style: style),
-                        );
-                      },
-                    ),
-                  ),
-                ),
                 barGroups: [
-                  _makeGroup(0, (fatGrams / totalGrams) * 100, Colors.black),
-                  _makeGroup(1, (proteinGrams / totalGrams) * 100, Colors.redAccent),
-                  _makeGroup(2, (carbGrams / totalGrams) * 100, Colors.blueAccent),
-                  _makeGroup(3, (macroGrams / totalGrams) * 100, Colors.lightGreen),
+                  _makeGroup(0, 70, Colors.black, "20%"),
+                  _makeGroup(1, 40, Colors.redAccent, "30%"),
+                  _makeGroup(2, 60, Colors.blueAccent, "40%"),
+                  _makeGroup(3, 30, Colors.lightGreen, "10%"),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 20),
-          _nutritionLegend("Fat", "${fatGrams.toInt()}g", Colors.black),
-          _nutritionLegend("Protein", "${proteinGrams.toInt()}g", Colors.redAccent),
-          _nutritionLegend("Carbs", "${carbGrams.toInt()}g", Colors.blueAccent),
-          _nutritionLegend("Macro", "${macroGrams.toInt()}g", Colors.lightGreen),
+          _nutritionLegend("Fat", "201g", Colors.black),
+          _nutritionLegend("Protein", "158g", Colors.redAccent),
+          _nutritionLegend("Carbs", "11g", Colors.blueAccent),
+          _nutritionLegend("Macro", "5g", Colors.lightGreen),
         ],
       ),
     );
   }
 
-  BarChartGroupData _makeGroup(int x, double y, Color color) {
+  BarChartGroupData _makeGroup(int x, double y, Color color, String label) {
     return BarChartGroupData(
       x: x,
       barRods: [
@@ -312,37 +265,33 @@ class _NutritionsBarChart extends StatelessWidget {
           toY: y,
           color: color,
           width: 45,
-          borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-              bottom: Radius.circular(20)
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20), bottom: Radius.circular(20)),
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
             toY: 100,
             color: const Color(0xFFF5F5F5),
           ),
+          // Adding the label inside the bar
+          rodStackItems: [
+            BarChartRodStackItem(0, y, color),
+          ],
         ),
       ],
+      // This is used by showing titles at the bottom
+      showingTooltipIndicators: [0],
     );
   }
 
   Widget _nutritionLegend(String title, String val, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Container(
-            height: 16,
-            width: 16,
-            decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
-          ),
-          const SizedBox(width: 12),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+          Container(height: 12, width: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3))),
+          const SizedBox(width: 8),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
           const Spacer(),
-          Text(val, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(val, style: const TextStyle(color: Colors.grey)),
         ],
       ),
     );
