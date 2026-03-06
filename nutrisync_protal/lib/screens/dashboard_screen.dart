@@ -42,15 +42,15 @@ class DashboardScreen extends StatelessWidget {
 // Note: Ensure your DashboardScreen calls _CaloriesLineChart() in the column
 
 class _CaloriesLineChart extends StatefulWidget {
+  const _CaloriesLineChart({super.key});
+
   @override
   State<_CaloriesLineChart> createState() => _CaloriesLineChartState();
 }
 
 class _CaloriesLineChartState extends State<_CaloriesLineChart> {
-  // Tracking the selected tab
   String selectedTab = "1w";
 
-  // Mock Data sets for different time frames
   final Map<String, Map<String, dynamic>> _chartData = {
     "1d": {
       "burnLeft": "Burn 120 calorie left.",
@@ -59,14 +59,10 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
     },
     "1w": {
       "burnLeft": "Burn 250 calorie left.",
-      "total": "315", // Matches your Figma 315 kcal header
+      "total": "315",
       "spots": [
-        const FlSpot(0, 1850),
-        const FlSpot(1, 1930),
-        const FlSpot(2, 1800),
-        const FlSpot(3, 1700),
-        const FlSpot(4, 1900),
-        const FlSpot(5, 2050),
+        const FlSpot(0, 1850), const FlSpot(1, 1930), const FlSpot(2, 1800),
+        const FlSpot(3, 1700), const FlSpot(4, 1900), const FlSpot(5, 2050),
         const FlSpot(6, 1950),
       ]
     },
@@ -78,86 +74,43 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
     "All": {
       "burnLeft": "Daily average achieved.",
       "total": "1867",
-      "spots": [const FlSpot(0, 1000), const FlSpot(5, 1867), const FlSpot(10, 1400)]
+      "spots": [
+        const FlSpot(0, 1400), const FlSpot(2, 1000), const FlSpot(4, 1867),
+        const FlSpot(6, 400), const FlSpot(8, 1600)
+      ]
     },
   };
 
   @override
   Widget build(BuildContext context) {
     final currentData = _chartData[selectedTab] ?? _chartData["1w"]!;
+    final List<FlSpot> spots = currentData["spots"];
+
+    // Dynamic scale logic so the line stays within the chart
+    double minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
+    double maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    double padding = (maxY - minY) * 0.2; // 20% padding
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          )
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
       ),
       child: Column(
         children: [
-          // Header: Icon + Calorie Count + "Burn left"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.local_fire_department_rounded, color: AppColors.primary, size: 32),
-              const SizedBox(width: 8),
-              Text(
-                currentData["total"],
-                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 4),
-              const Text(
-                "kcal",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey),
-              ),
-            ],
-          ),
-          Text(
-            currentData["burnLeft"],
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          _buildHeader(currentData["total"], currentData["burnLeft"]),
           const SizedBox(height: 20),
-
-          // Time Tabs
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: ["1d", "1w", "1m", "All"].map((tab) {
-                return _TimeTab(
-                  tab,
-                  selectedTab == tab,
-                  onTap: () => setState(() => selectedTab = tab),
-                );
-              }).toList(),
-            ),
-          ),
+          _buildTabs(),
           const SizedBox(height: 30),
-
-          // Line Chart
           SizedBox(
             height: 250,
             child: LineChart(
               LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: 100,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: Colors.grey.withOpacity(0.1),
-                    strokeWidth: 1,
-                  ),
-                ),
+                minY: (minY - padding).floorToDouble(),
+                maxY: (maxY + padding).ceilToDouble(),
+                gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: 400),
                 titlesData: FlTitlesData(
                   show: true,
                   rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -166,36 +119,26 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 100,
-                      reservedSize: 35,
-                      getTitlesWidget: (val, _) => Text(
-                        val.toInt().toString(),
-                        style: const TextStyle(color: Colors.grey, fontSize: 10),
-                      ),
+                      reservedSize: 40,
+                      getTitlesWidget: (val, _) => Text(val.toInt().toString(),
+                          style: const TextStyle(color: Colors.grey, fontSize: 10)),
                     ),
                   ),
                 ),
                 borderData: FlBorderData(show: false),
-                minY: 1500, // Adjusted to match Figma range
-                maxY: 2100,
                 lineBarsData: [
                   LineChartBarData(
-                    spots: currentData["spots"],
+                    spots: spots,
                     isCurved: true,
-                    curveSmoothness: 0.35,
                     color: AppColors.primary,
                     barWidth: 6,
-                    isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          AppColors.primary.withOpacity(0.4),
-                          AppColors.primary.withOpacity(0.01),
-                        ],
+                        colors: [AppColors.primary.withOpacity(0.4), AppColors.primary.withOpacity(0.01)],
                       ),
                     ),
                   ),
@@ -204,6 +147,39 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(String total, String burnLeft) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.local_fire_department_rounded, color: AppColors.primary, size: 32),
+            const SizedBox(width: 8),
+            Text(total, style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 4),
+            const Text("kcal", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey)),
+          ],
+        ),
+        Text(burnLeft, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _buildTabs() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(color: const Color(0xFFF5F5F5), borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: ["1d", "1w", "1m", "All"].map((tab) => _TimeTab(
+            tab,
+            selectedTab == tab,
+            onTap: () => setState(() => selectedTab = tab)
+        )).toList(),
       ),
     );
   }
