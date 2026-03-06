@@ -229,12 +229,31 @@ class _NutritionsBarChart extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(
-            height: 200,
+            height: 250, // Slightly increased height to accommodate labels
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
                 maxY: 100,
-                barTouchData: BarTouchData(enabled: false),
+                // This section handles the text labels appearing on the bars
+                barTouchData: BarTouchData(
+                  enabled: false,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => Colors.transparent,
+                    tooltipPadding: EdgeInsets.zero,
+                    tooltipMargin: -30, // Moves the text inside the bar at the bottom
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        // This looks up the custom 'label' we pass in _makeGroup
+                        (group as dynamic).groupLabel,
+                        const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 titlesData: const FlTitlesData(show: false),
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
@@ -257,28 +276,25 @@ class _NutritionsBarChart extends StatelessWidget {
     );
   }
 
+  // Modified to include the label logic
   BarChartGroupData _makeGroup(int x, double y, Color color, String label) {
-    return BarChartGroupData(
+    return _CustomBarGroupData(
       x: x,
+      groupLabel: label,
+      showingTooltipIndicators: [0], // Tells fl_chart to show the tooltip by default
       barRods: [
         BarChartRodData(
           toY: y,
           color: color,
           width: 45,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20), bottom: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12), bottom: Radius.circular(12)),
           backDrawRodData: BackgroundBarChartRodData(
-            show: true,
-            toY: 100,
-            color: const Color(0xFFF5F5F5),
+              show: true,
+              toY: 100,
+              color: const Color(0xFFF5F5F5)
           ),
-          // Adding the label inside the bar
-          rodStackItems: [
-            BarChartRodStackItem(0, y, color),
-          ],
         ),
       ],
-      // This is used by showing titles at the bottom
-      showingTooltipIndicators: [0],
     );
   }
 
@@ -296,6 +312,17 @@ class _NutritionsBarChart extends StatelessWidget {
       ),
     );
   }
+}
+
+// Simple helper class to hold the label string
+class _CustomBarGroupData extends BarChartGroupData {
+  final String groupLabel;
+  _CustomBarGroupData({
+    required int x,
+    required this.groupLabel,
+    required List<int> showingTooltipIndicators,
+    required List<BarChartRodData> barRods,
+  }) : super(x: x, barRods: barRods, showingTooltipIndicators: showingTooltipIndicators);
 }
 
 /*class _TimeTab extends StatelessWidget {
