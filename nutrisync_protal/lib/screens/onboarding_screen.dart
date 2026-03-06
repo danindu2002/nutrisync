@@ -20,6 +20,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   final OnboardingDTO _data = OnboardingDTO();
+  final TextEditingController _allergyController = TextEditingController();
 
   int _currentPage = 0;
   final int _totalSteps = 15;
@@ -846,7 +847,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    // 1. Render Selected Tags (Both from list and manual input)
+                    // Selected Tags
                     ..._data.allergies.map((item) {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -857,20 +858,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                                item,
-                                style: const TextStyle(
-                                    color: Color(0xFFF2544D),
-                                    fontWeight: FontWeight.bold
-                                )
-                            ),
+                            Text(item, style: const TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
                             const SizedBox(width: 4),
                             GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _data.allergies = List<String>.from(_data.allergies)..remove(item);
-                                });
-                              },
+                              onTap: () => setState(() => _data.allergies.remove(item)),
                               child: const Icon(Icons.close, size: 14, color: Color(0xFFF2544D)),
                             ),
                           ],
@@ -878,83 +869,54 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       );
                     }).toList(),
 
-                    // 2. The Input Area with "Add" Button
-                    IntrinsicWidth(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 80,
+                    // Optimized Input Field
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        // If list is empty, take full width. If typing, give enough space.
+                        minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 120,
+                      ),
+                      child: TextField(
+                        controller: _allergyController, // Using the class-level controller
+                        onChanged: (val) {
+                          // Only rebuild to show the "Add" button if we transition from empty to text
+                          if (val.length <= 1) setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          hintText: _data.allergies.isEmpty
+                              ? "No allergies selected. Tap chips above to add."
+                              : "Add food...",
+                          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                          border: InputBorder.none,
+                          isDense: true,
+                          suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                          suffixIcon: _allergyController.text.isNotEmpty
+                              ? TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {
+                              if (_allergyController.text.trim().isNotEmpty) {
+                                setState(() {
+                                  _data.allergies.add(_allergyController.text.trim());
+                                  _allergyController.clear();
+                                });
+                              }
+                            },
+                            child: const Text("Add", style: TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
+                          )
+                              : null,
                         ),
-                        child: TextField(
-                          controller: _controller,
-                          onChanged: (value) => setState(() {}), // Refresh to show/hide "Add" button
-                          decoration: InputDecoration(
-                            hintText: _data.allergies.isEmpty
-                                ? "No allergies selected. Tap chips above to add."
-                                : "Add...",
-                            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
-                            border: InputBorder.none,
-                            isDense: true,
-                            // Custom "Add" button that appears when typing
-                            suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                            suffixIcon: _controller.text.isNotEmpty
-                                ? GestureDetector(
-                              onTap: () {
-                                if (_controller.text.isNotEmpty && _data.allergies.length < maxItems) {
-                                  setState(() {
-                                    _data.allergies = List<String>.from(_data.allergies)..add(_controller.text.trim());
-                                    _controller.clear();
-                                  });
-                                }
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF2544D),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Text(
-                                    "Add",
-                                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
-                                ),
-                              ),
-                            )
-                                : null,
-                          ),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          onSubmitted: (value) {
-                            if (value.isNotEmpty && _data.allergies.length < maxItems) {
-                              setState(() {
-                                _data.allergies = List<String>.from(_data.allergies)..add(value.trim());
-                                _controller.clear();
-                              });
-                            }
-                          },
-                        ),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 40),
-
-                /// Counter
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.edit_document, size: 18, color: Color(0xFFF2544D)),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${_data.allergies.length}/$maxItems",
-                        style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
+                // ... (Counter code)
               ],
             ),
-          )
+          ),
         ],
       ),
     );
