@@ -827,12 +827,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 40),
 
           /// Selection Container
+          /// 02. Selection Container (Input Area)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFF2544D).withOpacity(0.5), width: 1.5),
+              border: Border.all(
+                  color: const Color(0xFFF2544D).withOpacity(0.5),
+                  width: 1.5
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -842,6 +846,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
+                    // 1. Render the selected tags
                     ..._data.allergies.map((item) {
                       return GestureDetector(
                         onTap: () {
@@ -855,31 +860,62 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             color: const Color(0xFFF2544D).withOpacity(0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(item, style: const TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                  item,
+                                  style: const TextStyle(
+                                      color: Color(0xFFF2544D),
+                                      fontWeight: FontWeight.bold
+                                  )
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }).toList(),
 
-                    SizedBox(
-                      width: 100,
-                      child: TextField(
-                        controller: _controller,
-                        decoration: const InputDecoration(hintText: "Add...", border: InputBorder.none, isDense: true),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        onSubmitted: (value) {
-                          if (value.isNotEmpty && _data.allergies.length < maxItems) {
-                            setState(() {
-                              // Ensure list is growable here too
-                              _data.allergies = List<String>.from(_data.allergies)..add(value);
-                              _controller.clear();
-                            });
-                          }
-                        },
+                    // 2. The Dynamic Text Field
+                    IntrinsicWidth( // Automatically fits the text/hint width
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          // If empty, take full width for the long hint. If not, keep it small.
+                          minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 60,
+                        ),
+                        child: TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            // Conditional Placeholder Text
+                            hintText: _data.allergies.isEmpty
+                                ? "No allergies selected. Tap chips above to add."
+                                : "Add...",
+                            hintStyle: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          onSubmitted: (value) {
+                            if (value.isNotEmpty && _data.allergies.length < maxItems) {
+                              setState(() {
+                                _data.allergies = List<String>.from(_data.allergies)..add(value);
+                                _controller.clear();
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 40),
+
+                /// Counter and Icon
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Row(
@@ -887,7 +923,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       const Icon(Icons.edit_document, size: 18, color: Color(0xFFF2544D)),
                       const SizedBox(width: 4),
-                      Text("${_data.allergies.length}/$maxItems", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold)),
+                      Text(
+                        "${_data.allergies.length}/$maxItems",
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),
