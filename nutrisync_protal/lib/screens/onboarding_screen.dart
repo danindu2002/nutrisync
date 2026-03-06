@@ -883,7 +883,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         },
                         decoration: InputDecoration(
                           hintText: _data.allergies.isEmpty
-                              ? "No allergies selected. Tap chips above to add."
+                              ? "No allergies selected. Pick from above or type here to add..."
                               : "Add food...",
                           hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
                           border: InputBorder.none,
