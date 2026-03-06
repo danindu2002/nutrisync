@@ -759,8 +759,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 // --- Screen 10: Allergies ---
   Widget _buildAllergiesScreen() {
     List<String> presetAllergies = [
-      "MilkLow-Sodium", "Low-Cholesterol", "Keto", "Caffeine-Free",
-      "MSG-Free", "Histamine", "Lacktose free", "Gluten free", "Diary free",
+      "Milk",
+      "Eggs",
+      "Peanuts",
+      "Wheat",
+      "Fish",
+      "Shellfish",
+      "Mustard",
+      "Corn",
+      "Pork",
+      "Beef",
+      "Chicken",
+      "Mushrooms",
+      "Tomatoes",
     ];
 
     const maxItems = 10;
