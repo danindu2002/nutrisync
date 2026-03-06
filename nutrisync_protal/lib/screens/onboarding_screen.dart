@@ -846,64 +846,86 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    // 1. Render the selected tags
+                    // 1. Render Selected Tags (Both from list and manual input)
                     ..._data.allergies.map((item) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _data.allergies = List<String>.from(_data.allergies)..remove(item);
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF2544D).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                  item,
-                                  style: const TextStyle(
-                                      color: Color(0xFFF2544D),
-                                      fontWeight: FontWeight.bold
-                                  )
-                              ),
-                            ],
-                          ),
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2544D).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                item,
+                                style: const TextStyle(
+                                    color: Color(0xFFF2544D),
+                                    fontWeight: FontWeight.bold
+                                )
+                            ),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _data.allergies = List<String>.from(_data.allergies)..remove(item);
+                                });
+                              },
+                              child: const Icon(Icons.close, size: 14, color: Color(0xFFF2544D)),
+                            ),
+                          ],
                         ),
                       );
                     }).toList(),
 
-                    // 2. The Dynamic Text Field
-                    IntrinsicWidth( // Automatically fits the text/hint width
+                    // 2. The Input Area with "Add" Button
+                    IntrinsicWidth(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          // If empty, take full width for the long hint. If not, keep it small.
-                          minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 60,
+                          minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 80,
                         ),
                         child: TextField(
                           controller: _controller,
+                          onChanged: (value) => setState(() {}), // Refresh to show/hide "Add" button
                           decoration: InputDecoration(
-                            // Conditional Placeholder Text
                             hintText: _data.allergies.isEmpty
                                 ? "No allergies selected. Tap chips above to add."
                                 : "Add...",
-                            hintStyle: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal
-                            ),
+                            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
                             border: InputBorder.none,
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                            // Custom "Add" button that appears when typing
+                            suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                            suffixIcon: _controller.text.isNotEmpty
+                                ? GestureDetector(
+                              onTap: () {
+                                if (_controller.text.isNotEmpty && _data.allergies.length < maxItems) {
+                                  setState(() {
+                                    _data.allergies = List<String>.from(_data.allergies)..add(_controller.text.trim());
+                                    _controller.clear();
+                                  });
+                                }
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF2544D),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                    "Add",
+                                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
+                                ),
+                              ),
+                            )
+                                : null,
                           ),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           onSubmitted: (value) {
                             if (value.isNotEmpty && _data.allergies.length < maxItems) {
                               setState(() {
-                                _data.allergies = List<String>.from(_data.allergies)..add(value);
+                                _data.allergies = List<String>.from(_data.allergies)..add(value.trim());
                                 _controller.clear();
                               });
                             }
@@ -915,7 +937,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                /// Counter and Icon
+                /// Counter
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Row(
@@ -925,17 +947,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const SizedBox(width: 4),
                       Text(
                         "${_data.allergies.length}/$maxItems",
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-          ),
+          )
         ],
       ),
     );
