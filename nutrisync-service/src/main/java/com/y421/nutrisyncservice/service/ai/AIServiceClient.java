@@ -15,7 +15,7 @@ public class AIServiceClient {
 
     private final RestTemplate restTemplate;
 
-    @Value("python.service.url")
+    @Value("${python-service-url}")
     private String baseUrl;
 
 //    private final String PYTHON_SERVICE_URL = "http://127.0.0.1:5000/predict";
@@ -42,7 +42,7 @@ public class AIServiceClient {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return "unknown.";
+    return "unknown.";
         }
     }
 }
