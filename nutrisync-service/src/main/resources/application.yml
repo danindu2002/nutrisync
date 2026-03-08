@@ -7,7 +7,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/nutrisync-service
+          issuer-uri: http://host.docker.internal:8080/realms/nutrisync-service
           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
       client:
         registration:
@@ -29,7 +29,7 @@ spring:
     name: NUTRISYNC-SERVICE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/NUTRISYNC?createDatabaseIfNotExist=true
+    url: jdbc:mysql://host.docker.internal:3306/NUTRISYNC?createDatabaseIfNotExist=true
     username: root
     password: 12345
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -82,11 +82,11 @@ rest:
   nutrisync-service:
     realm: nutrisync-service
     admin_id: admin-user
-    admin_secret: R4DI6EP86CK64IWoCe4qFUbqiec55xzR
+    admin_secret: ff5XiyXgoLtzSaPUHx29NEnOUKjBeJa4
     client_id: client-user
     jwk_set_uri: ${rest.service.url}realms/${rest.nutrisync-service.realm}/${rest.service.jwk_path}
   service:
-    url: http://localhost:8080/
+    url: http://localhost:host.docker.internal/
     username: admin
     password: admin
     jwk_path: protocol/openid-connect/certs
@@ -95,3 +95,5 @@ new-login-pwd:
   letters: true
   numbers: true
   length: 8
+
+python-service-url: http://host.docker.internal:5000

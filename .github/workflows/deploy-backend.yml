@@ -1,0 +1,113 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - backend/development-test
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  verify:
+    name: Verify Stage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Spring Boot verification
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build Spring Boot
+        working-directory: ./nutrisync-service
+        run: |
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+
+      # Python verification
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        working-directory: ./nutrisync-ai-service
+        run: |
+          pip install flask tensorflow pillow numpy
+
+      - name: Python syntax check
+        working-directory: ./nutrisync-ai-service
+        run: |
+          python -m py_compile app.py
+
+  security_scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: verify
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy security scan
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: fs
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL
+
+  build_and_push:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    needs: security_scan
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Spring Boot image
+        run: |
+          docker build \
+          -t ghcr.io/${{ github.repository_owner }}/y421-nutrisync-service:latest \
+          ./nutrisync-service
+
+      - name: Build Python AI image
+        run: |
+          docker build \
+          -t ghcr.io/${{ github.repository_owner }}/y421-nutrisync-ai-service:latest \
+          ./nutrisync-ai-service
+
+      - name: Push images
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/y421-nutrisync-service:latest
+          docker push ghcr.io/${{ github.repository_owner }}/y421-nutrisync-ai-service:latest
+
+  deploy:
+    name: Deploy to VM
+    runs-on: ubuntu-latest
+    needs: build_and_push
+
+    steps:
+
+      - name: Deploy using SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd /opt/nutrisync
+            docker compose pull
+            docker compose up -d
+            docker image prune -f

@@ -48,12 +48,14 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/webjars/**",
             "/swagger-ui.html",
+            "/api/v1/user/**",
     };
 
     private static final String[] PROTECTED_LIST_URL = {
             "/api/v1/auth/logout",
             "/api/v1/auth/getProfileImage",
             "/api/v1/reference/**",
+            "/api/v1/meal/**",
     };
 
     @Bean

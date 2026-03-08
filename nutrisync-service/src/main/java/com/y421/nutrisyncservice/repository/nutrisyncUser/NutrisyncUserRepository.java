@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NutrisyncUserRepository extends JpaRepository<NutrisyncUser, Long> {
+
+    Boolean existsByEmailAndIsDeletedFalse(String email);
+    Boolean existsByUserIdAndIsDeletedFalse(Long userId);
 }
