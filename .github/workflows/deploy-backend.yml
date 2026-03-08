@@ -20,6 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Spring Boot verification
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -32,6 +33,7 @@ jobs:
           chmod +x mvnw
           ./mvnw clean package -DskipTests
 
+      # Python verification
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -74,27 +76,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Login to GitHub Container Registry
+      - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      # Spring Boot image
       - name: Build and Push Spring Boot Image
         uses: docker/build-push-action@v6
         with:
           context: ./nutrisync-service
           push: true
           platforms: linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           tags: ghcr.io/${{ github.repository_owner }}/y421-nutrisync-service:latest
 
+      # Python AI image
       - name: Build and Push Python AI Image
         uses: docker/build-push-action@v6
         with:
           context: ./nutrisync-ai-service
           push: true
           platforms: linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           tags: ghcr.io/${{ github.repository_owner }}/y421-nutrisync-ai-service:latest
 
 
