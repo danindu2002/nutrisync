@@ -80,19 +80,19 @@ jobs:
       - name: Build and Push Spring Boot Image
         uses: docker/build-push-action@v6
         with:
-           context: ./nutrisync-service
-           push: true
-           platforms: linux/arm64
-           tags: ghcr.io/${{ github.repository_owner }}/y421-nutrisync-service:latest
+          context: ./nutrisync-service
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ github.repository_owner }}/y421-nutrisync-service:latest
 
       # Python AI image
       - name: Build and Push Python AI Image
         uses: docker/build-push-action@v6
         with:
-           context: ./nutrisync-ai-service
-           push: true
-           platforms: linux/arm64
-           tags: ghcr.io/${{ github.repository_owner }}/y421-nutrisync-ai-service:latest
+          context: ./nutrisync-ai-service
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ github.repository_owner }}/y421-nutrisync-ai-service:latest
 
       - name: Push images
         run: |
