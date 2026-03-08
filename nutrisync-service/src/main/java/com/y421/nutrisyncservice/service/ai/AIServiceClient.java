@@ -42,7 +42,7 @@ public class AIServiceClient {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return "unknown";
+            return "unknown.";
         }
     }
 }
