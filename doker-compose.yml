@@ -22,5 +22,5 @@ networks:
   nutrisync-network:
     driver: bridge
 
-  keycloak-network:
+  core-net:
     external: true
