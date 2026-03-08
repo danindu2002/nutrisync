@@ -1,7 +1,7 @@
 package com.y421.nutrisyncservice.service.ai;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -14,7 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class AIServiceClient {
 
     private final RestTemplate restTemplate;
-    private final String PYTHON_SERVICE_URL = "http://127.0.0.1:5000/predict";
+
+    @Value("python.service.url")
+    private String baseUrl;
+
+//    private final String PYTHON_SERVICE_URL = "http://127.0.0.1:5000/predict";
 
     public String predictFood(MultipartFile image) {
         try {
@@ -29,7 +33,7 @@ public class AIServiceClient {
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
             // 3. Call the Python API
-            ResponseEntity<String> response = restTemplate.postForEntity(PYTHON_SERVICE_URL, requestEntity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(baseUrl + "/predict", requestEntity, String.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody(); // Returns food name like "pizza"

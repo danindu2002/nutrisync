@@ -13,6 +13,7 @@ COPY . .
 RUN pip install --no-cache-dir \
     flask \
     tensorflow==2.16.1 \
+    tf-keras \
     pillow \
     numpy
 
