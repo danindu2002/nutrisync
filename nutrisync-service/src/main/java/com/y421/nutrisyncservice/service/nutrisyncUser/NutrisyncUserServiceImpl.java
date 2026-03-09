@@ -3,13 +3,14 @@ package com.y421.nutrisyncservice.service.nutrisyncUser;
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
 import com.y421.nutrisyncservice.mapper.NutrisyncUser.NutrisyncUserMapper;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
-import com.y421.nutrisyncservice.request.nutrisyncUser.LoginDto;
-import com.y421.nutrisyncservice.request.nutrisyncUser.NutrisyncUserRequestDto;
+import com.y421.nutrisyncservice.request.nutrisyncUser.*;
+import com.y421.nutrisyncservice.response.email.EmailDetailsDTO;
+import com.y421.nutrisyncservice.util.EmailService;
+import com.y421.nutrisyncservice.util.EmailTemplate;
 import com.y421.nutrisyncservice.util.KeycloakRealmChanger;
 import com.y421.nutrisyncservice.util.YamlConfig;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UserResource;
@@ -21,8 +22,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,8 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     private final YamlConfig yamlConfig;
     private final NutrisyncUserRepository userRepository;
     private final NutrisyncUserMapper nutrisyncUserMapper;
+    private final EmailTemplate emailTemplate;
+    private final EmailService emailService;
 
     @Value("${rest.nutrisync-service.realm}")
     private String serviceName;
@@ -49,6 +55,9 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     @Override
     public ResponseEntity<Object> register(NutrisyncUserRequestDto dto) {
         try {
+            if (!userRepository.existsByUserNameAndIsDeletedFalse(dto.getUserName())) {
+                return new ResponseEntity<>("User Name is taken. Please try another User Name.", HttpStatus.CONFLICT);
+            }
             if (userRepository.existsByEmailAndIsDeletedFalse(dto.getEmail())) {
                 return new ResponseEntity<>("User already exist with given E-mail", HttpStatus.CONFLICT);
             }
@@ -74,7 +83,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
 //            return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Error occurred during registration", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Error occurred during onboarding", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -84,7 +93,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
                 Keycloak keycloak = KeycloakBuilder.builder()
                         .serverUrl(yamlConfig.getService().getUrl())
                         .realm(serviceName)
-                        .username(dto.getEmail())
+                        .username(dto.getUserName())
                         .password(dto.getPassword())
                         .clientId(yamlConfig.getNutrisyncService().getClientId())
                         .build()
@@ -101,6 +110,89 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     }
 
     @Override
+    public ResponseEntity<Object> logout() {
+        try {
+            currentKeycloak = keycloakRealmChanger.changeRealm();
+            if (currentKeycloak == null) {
+                return serviceValidation();
+            }
+            currentKeycloak.realm(serviceName).users().get(yamlConfig.getUserId()).logout();
+            return new ResponseEntity<>("Logout Successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } finally {
+            currentKeycloak = null;
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> forgotPassword(String email) {
+        try {
+            Optional<NutrisyncUser> user = userRepository.findByEmailAndIsDeletedFalse(email);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("Email Not Found", HttpStatus.BAD_REQUEST);
+            }
+            NutrisyncUser appUser = user.get();
+
+            String token = createOtp();
+            yamlConfig.setUserId(appUser.getKeycloakUserId());
+            appUser.setForgotPwdOtp(token);
+            userRepository.save(appUser);
+            forgetPasswordEmail(user.get());
+            return new ResponseEntity<>("Email Sent", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> validateForgotPwdOtp(ResetPwdValidationDto dto) {
+        try {
+            Optional<NutrisyncUser> user = userRepository.findByEmailAndIsDeletedFalse(dto.getEmail());
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User For Email Not Found", HttpStatus.BAD_REQUEST);
+            }
+            NutrisyncUser appUser = user.get();
+            if(dto.getOtp() != null && dto.getOtp().equals(appUser.getForgotPwdOtp())) {
+                appUser.setForgotPwdOtp(null);
+                userRepository.save(appUser);
+                return new ResponseEntity<>("OTP Correct", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("OTP Wrong", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> resetForgotPwd(ResetPwdDto dto) {
+        try {
+            currentKeycloak = keycloakRealmChanger.changeRealm();
+            if (currentKeycloak == null) {
+                return serviceValidation();
+            }
+            Optional<NutrisyncUser> user = userRepository.findByForgotPwdOtpAndIsDeletedFalse(dto.getOtp());
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("Token Invalid", HttpStatus.BAD_REQUEST);
+            }
+
+            NutrisyncUser appUsers = user.get();
+            yamlConfig.setUserId(appUsers.getKeycloakUserId());
+            appUsers.setForgotPwdOtp(null);
+            appUsers.setPassword(dto.getNewPassword());
+            userRepository.save(appUsers);
+
+            currentKeycloak.realm(serviceName).users().get(user.get().getKeycloakUserId()).resetPassword(createPasswordCredentials(dto.getNewPassword()));
+            return new ResponseEntity<>("Password Changed Successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } finally {
+            currentKeycloak = null;
+        }
+    }
+
+    @Override
     public ResponseEntity<Object> updateProfile() {
         return null;
     }
@@ -108,10 +200,10 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     @Override
     public ResponseEntity<Object> getProfile(Long userId) {
         try {
-            if (!nutrisyncUserRepository.existsByUserIdAndIsDeletedFalse(userId)) {
+            if (!userRepository.existsByUserIdAndIsDeletedFalse(userId)) {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
-            NutrisyncUser user  = nutrisyncUserRepository.getReferenceById(userId);
+            NutrisyncUser user  = userRepository.getReferenceById(userId);
 
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception e) {
@@ -165,5 +257,31 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
         UserRepresentation user = userResource.toRepresentation();
         user.setRequiredActions(Collections.emptyList());
         userResource.update(user);
+    }
+
+    private String createOtp() {
+        int otp = new java.security.SecureRandom().nextInt(1_000_000);
+        return String.format("%06d", otp);
+    }
+
+    private void forgetPasswordEmail(NutrisyncUser appUser) {
+        EmailDetailsDTO emailDetailsDTO = new EmailDetailsDTO();
+        emailDetailsDTO.setRecipient(appUser.getEmail());
+        emailDetailsDTO.setSubject("Nutrisync Password Reset");
+        emailDetailsDTO.setMessageBody(emailTemplate.emailTemplateForgotPassword(appUser.getForgotPwdOtp()));
+        emailService.sendEmail(emailDetailsDTO);
+    }
+
+    public CredentialRepresentation createPasswordCredentials(String password) {
+        CredentialRepresentation passwordCredentials = new CredentialRepresentation();
+        passwordCredentials.setTemporary(false);
+        passwordCredentials.setType(CredentialRepresentation.PASSWORD);
+        passwordCredentials.setValue(password);
+        return passwordCredentials;
+    }
+
+    private ResponseEntity<Object> serviceValidation() {
+        return new ResponseEntity<>("Invalid Service Name", HttpStatus.BAD_REQUEST);
+
     }
 }

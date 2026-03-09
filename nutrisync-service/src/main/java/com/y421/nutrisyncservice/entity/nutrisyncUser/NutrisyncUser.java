@@ -97,5 +97,11 @@ public class NutrisyncUser extends AuditModel implements Serializable {
     @Column(name = "KEYCLOAK_USER_ID", nullable = false)
     private String keycloakUserId;
 
+    @Column(name = "FORGOT_PWD_OTP", nullable = true)
+    private String forgotPwdOtp;
+
+    @Column(name = "USER_NAME", nullable = false)
+    private String userName;
+
     // todo: add other fields as necessary
 }

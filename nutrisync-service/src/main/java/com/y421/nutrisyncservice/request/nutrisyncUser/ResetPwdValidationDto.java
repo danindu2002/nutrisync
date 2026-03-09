@@ -4,13 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDto {
-    private String userName;
-    private String password;
+public class ResetPwdValidationDto {
+    private String email;
+    private String otp;
 }
