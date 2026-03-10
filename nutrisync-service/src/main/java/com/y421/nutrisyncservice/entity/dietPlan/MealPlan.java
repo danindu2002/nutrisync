@@ -37,6 +37,15 @@ public class MealPlan extends AuditModel implements Serializable {
     @Column(name = "IS_ACTIVE", nullable = false)
     private Boolean isActive = true;
 
+    @Column(name = "DIET_PLAN_NAME")
+    private String dietPlanName;
+
+    @Column(name = "DIET_PLAN_DESCRIPTION")
+    private String dietPlanDescription;
+
+    @Column(name = "DIET_PLAN_IMAGE")
+    private String dietPlanImage;
+
     // CascadeType.ALL means when you save the MealPlan, it automatically saves the Days and Meals!
     @OneToMany(mappedBy = "mealPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference 
