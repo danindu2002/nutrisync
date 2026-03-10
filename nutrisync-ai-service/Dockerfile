@@ -15,7 +15,9 @@ RUN pip install --no-cache-dir \
     tensorflow==2.16.1 \
     tf-keras \
     pillow \
-    numpy
+    numpy \
+    python-dotenv \
+    google-genai
 
 EXPOSE 5000
 
