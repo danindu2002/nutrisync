@@ -21,53 +21,75 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          'assets/images/questionnaire/welcome.jpg',
-          fit: BoxFit.cover,
-        ),
-        Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, size: 50, color: Colors.grey),
-              const SizedBox(height: 20),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "Welcome To\n",
-                      style: AppTextStyles.welcomeText,
-                    ),
-                    TextSpan(text: "Nutri", style: AppTextStyles.welcomeText),
-                    TextSpan(text: "Sync", style: AppTextStyles.welcomeTextRed),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Your personal fitness AI Assistant",
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-              const SizedBox(height: 40),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: PrimaryButton(
-                  onTap: () => _continue(context),
-                  text: "Let's Go",
-                  isRed: true,
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background Image
+          Image.asset(
+            'assets/images/questionnaire/welcome.jpg',
+            fit: BoxFit.cover,
           ),
-        ),
-      ],
+          // Dark Overlay (Optional: helps text readability if the image is bright)
+          Container(
+            color: Colors.black.withOpacity(0.3),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.check_circle,
+                  size: 60,
+                  color: Colors.white70,
+                ),
+                const SizedBox(height: 24),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Welcome To\n",
+                        style: AppTextStyles.welcomeText,
+                      ),
+                      TextSpan(
+                        text: "Nutri",
+                        style: AppTextStyles.welcomeText,
+                      ),
+                      TextSpan(
+                        text: "Sync",
+                        style: AppTextStyles.welcomeTextRed,
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "Your personal fitness AI Assistant",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 48),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  child: PrimaryButton(
+                    onTap: () => _continue(context),
+                    text: "Let's Go",
+                    isRed: true,
+                  ),
+                ),
+                // Bottom spacing for better visual balance
+                const SizedBox(height: 60),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

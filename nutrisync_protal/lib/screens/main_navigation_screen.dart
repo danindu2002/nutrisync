@@ -6,6 +6,11 @@ import 'meal_log_screen.dart';
 import 'my_profile_screen.dart';
 import 'scan_meal_screen.dart';
 
+class NavigationService {
+  static final GlobalKey<NavigatorState> navigatorKey =
+  GlobalKey<NavigatorState>();
+}
+
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
