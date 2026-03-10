@@ -96,7 +96,4 @@ new-login-pwd:
   numbers: true
   length: 8
 
-google:
-  api-key:AIzaSyDVVUmzwlT6QCuapUQE_l9_b30oi3m0sLA
-
 python-service-url: http://nutrisync-ai-service:5000
