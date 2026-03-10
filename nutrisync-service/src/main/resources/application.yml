@@ -86,7 +86,7 @@ rest:
     client_id: client-user
     jwk_set_uri: ${rest.service.url}realms/${rest.nutrisync-service.realm}/${rest.service.jwk_path}
   service:
-    url: http://keycloak:8088/
+    url: http://keycloak:8080/
     username: admin
     password: Admin@1212
     jwk_path: protocol/openid-connect/certs
