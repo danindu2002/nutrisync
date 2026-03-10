@@ -8,10 +8,13 @@ import numpy as np
 import io
 import sys
 
+# Load the environment variables from the .env file
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 import json
 
+load_dotenv()
 app = Flask(__name__)
 
 # 1. Load the model from your folder
@@ -58,11 +61,12 @@ def predict():
     print(f"AI Identified: {food_label}")
     return food_label
 
-# Configure your API key (Get one free from Google AI Studio)
-# Initialize the new Client.
-# It's highly recommended to set this as an environment variable (GEMINI_API_KEY),
-# but you can pass it directly for testing.
-client = genai.Client(api_key="AIzaSyBK6MPP4z6KKbtrpWX1CKLhyj9SsJGNZt0")
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    print("CRITICAL ERROR: GEMINI_API_KEY not found in .env file!")
+    sys.exit(1)
+
+client = genai.Client(api_key=api_key)
 
 @app.route('/generate-meal-plan', methods=['POST'])
 def generate_meal_plan():
