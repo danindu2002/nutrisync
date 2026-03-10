@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../services/auth_service.dart';
 import '../widgets/common_widgets.dart';
 import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  String email;
+  String code;
+
+  ResetPasswordScreen({
+    super.key,
+    required this.email,
+    required this.code,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -13,8 +21,6 @@ class ResetPasswordScreen extends StatefulWidget {
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-
-  bool _isLoading = false;
 
   Future<void> _changePassword() async {
     FocusScope.of(context).unfocus();
@@ -32,35 +38,40 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    try {
+      LoadingIndicator.show(context);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
-    );
+      dynamic payload = {
+        "email": widget.email.trim(),
+        "otp": widget.code.trim(),
+        "newPassword": newPass,
+      };
 
-    await Future.delayed(const Duration(seconds: 2)); // TODO: API call
+      final ApiResponse response = await AuthService.resetPassword(payload);
 
-    if (!mounted) return;
+      if (mounted) LoadingIndicator.hide(context);
 
-    Navigator.pop(context);
-    setState(() => _isLoading = false);
+      if (response.status == 200) {
+        showModernToast(context, response.message, type: 'success');
 
-    showModernToast(
-      context,
-      "Password changed successfully!",
-      type: 'success',
-    );
+        showModernToast(
+          context,
+          "Password changed successfully!",
+          type: 'success',
+        );
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
-      ),
-    );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const LoginScreen(),
+          ),
+        );
+      } else {
+        showModernToast(context, response.message, type: 'error');
+      }
+    } catch (e) {
+      debugPrint("Error loading profile: $e");
+    }
   }
 
   @override
@@ -125,7 +136,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     const SizedBox(height: 24),
 
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _changePassword,
+                      onPressed: _changePassword,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         minimumSize: const Size(double.infinity, 54),

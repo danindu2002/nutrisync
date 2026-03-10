@@ -12,7 +12,7 @@ class LoginDTO {
   /// Convert to JSON for API
   Map<String, dynamic> toJson() {
     return {
-      "username": username,
+      "userName": username,
       "password": password,
       "rememberMe": rememberMe,
     };

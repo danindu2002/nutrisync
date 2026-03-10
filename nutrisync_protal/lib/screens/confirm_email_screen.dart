@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../core/constants.dart';
+import '../services/auth_service.dart';
+import '../widgets/common_widgets.dart';
 import 'submit_code_screen.dart';
 
 class ConfirmEmailScreen extends StatefulWidget {
@@ -35,6 +38,28 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
         setState(() => _secondsRemaining--);
       }
     });
+  }
+
+  Future<void> _sendResetLink() async {
+    FocusScope.of(context).unfocus();
+
+    try {
+      LoadingIndicator.show(context);
+
+      final ApiResponse response = await AuthService.sendPasswordResetLink(
+        widget.email.trim(),
+      );
+
+      if(mounted) LoadingIndicator.hide(context);
+
+      if (response.status == 200) {
+        showModernToast(context, response.message, type: 'success');
+      } else {
+        showModernToast(context, response.message, type: 'error');
+      }
+    } catch (e) {
+      debugPrint("Error loading profile: $e");
+    }
   }
 
   String _maskEmail(String email) {
@@ -122,7 +147,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                   onPressed: _secondsRemaining == 0
                       ? () {
                     _startTimer();
-                    // TODO: Call resend API
+                    _sendResetLink();
                   }
                       : null,
                   style: ElevatedButton.styleFrom(

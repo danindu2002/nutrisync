@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../screens/login_screen.dart';
+import '../screens/main_navigation_screen.dart';
+
+// A centralized class to manage all app colors for consistency across the app
 class AppColors {
   static const Color primary = Color(0xFFEF4444); // Red
   static const Color secondary = Color(0xFF393C43); // Dark Grey
@@ -10,6 +19,151 @@ class AppColors {
   static const Color textSub = Color(0xFF6B7280);
 }
 
+// API Constants to handle different environments (web, Android, iOS)
+class ApiConstants {
+  static String get baseUrl {
+    if (kIsWeb) {
+      return "http://localhost:8081/api/v1";
+    } else if (Platform.isAndroid) {
+      return "http://10.0.2.2:8081/api/v1";
+    } else {
+      return "http://localhost:8081/api/v1";
+    }
+  }
+}
+
+// A simple API client to handle HTTP requests
+class ApiClient {
+  static Future<Map<String, String>> getHeaders({
+    bool requiresAuth = true,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("accessToken");
+
+    final headers = {"Content-Type": "application/json"};
+
+    if (requiresAuth && token != null) {
+      headers["Authorization"] = "Bearer $token";
+    }
+
+    return headers;
+  }
+
+  static Future<void> _handleTokenExpired() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove("accessToken");
+    await prefs.setBool("rememberMe", false);
+
+    final context = NavigationService.navigatorKey.currentContext;
+
+    if (context != null) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+            (route) => false,
+      );
+    }
+    debugPrint("Token expired → user logged out");
+  }
+
+  /// GET
+  static Future<http.Response> get(
+    String endpoint, {
+    bool requiresAuth = true,
+  }) async {
+    final url = Uri.parse("${ApiConstants.baseUrl}$endpoint");
+
+    final response = await http.get(
+      url,
+      headers: await getHeaders(requiresAuth: requiresAuth),
+    );
+    // TOKEN EXPIRED
+    if (response.statusCode == 405) {
+      await _handleTokenExpired();
+    }
+    return response;
+  }
+
+  /// POST
+  static Future<http.Response> post(
+      String endpoint,
+      dynamic data, {
+        bool requiresAuth = true,
+      }) async {
+    final url = Uri.parse("${ApiConstants.baseUrl}$endpoint");
+
+    final headers = await getHeaders(requiresAuth: requiresAuth);
+    final response = await http.post(
+      url,
+      headers: headers,
+      body: data != null ? jsonEncode(data) : null,
+    );
+    // TOKEN EXPIRED
+    if (response.statusCode == 405) {
+      await _handleTokenExpired();
+    }
+    return response;
+  }
+
+  /// PUT
+  static Future<http.Response> put(
+    String endpoint,
+    dynamic data, {
+    bool requiresAuth = true,
+  }) async {
+    final url = Uri.parse("${ApiConstants.baseUrl}$endpoint");
+
+    final response = await http.put(
+      url,
+      headers: await getHeaders(requiresAuth: requiresAuth),
+      body: jsonEncode(data),
+    );
+    // TOKEN EXPIRED
+    if (response.statusCode == 405) {
+      await _handleTokenExpired();
+    }
+    return response;
+  }
+
+  /// DELETE
+  static Future<http.Response> delete(
+    String endpoint, {
+    bool requiresAuth = true,
+  }) async {
+    final url = Uri.parse("${ApiConstants.baseUrl}$endpoint");
+
+    final response = await http.delete(
+      url,
+      headers: await getHeaders(requiresAuth: requiresAuth),
+    );
+    // TOKEN EXPIRED
+    if (response.statusCode == 405) {
+      await _handleTokenExpired();
+    }
+    return response;
+  }
+}
+
+// A simple API response model to standardize responses from the server
+class ApiResponse {
+  final int status;
+  final String message;
+  final dynamic data;
+
+  ApiResponse({required this.status, required this.message, this.data});
+
+  factory ApiResponse.fromJson(Map<String, dynamic> json) {
+    return ApiResponse(
+      status: json['status'],
+      message: json['message'] ?? '',
+      data: json['data'],
+    );
+  }
+
+  bool get success => status >= 200 && status < 300;
+}
+
+// A centralized class to manage all text styles for consistency across the app
 class AppTextStyles {
   static final TextStyle header = GoogleFonts.workSans(
     fontSize: 26,

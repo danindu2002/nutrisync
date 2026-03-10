@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../widgets/common_widgets.dart';
 import 'challenges_screen.dart';
-import 'meal_log_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onMealLogTap;
@@ -38,6 +37,10 @@ class HomeScreen extends StatelessWidget {
                     _SectionTitle(title: "Challenges & Rewards"),
                     const SizedBox(height: 12),
                     _ChallengesRow(),
+                    const SizedBox(height: 24),
+                    _SectionTitle(title: "Generate Meal Plans"),
+                    const SizedBox(height: 12),
+                    _MealPlanCard(onTap: onMealLogTap),
                     const SizedBox(height: 24),
                     _SectionTitle(title: "Health Risks & Impacts"),
                     const SizedBox(height: 12),
@@ -105,7 +108,7 @@ class _MetricCard extends StatelessWidget {
     return Expanded(
       child: Container(
         height: 110,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(18),
@@ -113,7 +116,10 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(color: Colors.white70)),
+            Text(
+              title,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
             const Spacer(),
             Text(
               value,
@@ -191,10 +197,95 @@ class _MealLogCard extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     "Track your nutrition intake",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+
+            /// Action Indicator (Circular Arrow)
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: CircleAvatar(
+                backgroundColor: AppColors.primary,
+                radius: 20,
+                child: const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MealPlanCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _MealPlanCard({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 160,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          image: const DecorationImage(
+            image: AssetImage("assets/images/dashboard/workout.png"),
+            fit: BoxFit.cover,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            /// Dark Gradient Overlay for text readability
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.1),
+                    Colors.black.withOpacity(0.7),
+                  ],
+                ),
+              ),
+            ),
+
+            /// Text Content
+            Positioned(
+              bottom: 16,
+              left: 16,
+              right: 60, // Leave space for the action button
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    "Generate AI Meal Plans",
                     style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Personalized meal plans for your goals",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),

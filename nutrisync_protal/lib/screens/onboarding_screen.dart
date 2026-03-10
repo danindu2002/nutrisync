@@ -1,17 +1,32 @@
-import 'package:flutter/material.dart';
+import 'package:NutriSync/screens/login_screen.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../core/constants.dart';
 import '../models/onboarding_dto.dart';
-import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/common_widgets.dart';
 import 'package:flutter/services.dart';
-
-import 'dashboard_screen.dart';
 import 'main_navigation_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  final String email;
+  final String username;
+  final String password;
+  final String firstName;
+  final String lastName;
+  final String dob;
+
+  const OnboardingScreen({
+    super.key,
+    required this.email,
+    required this.username,
+    required this.password,
+    required this.firstName,
+    required this.lastName,
+    required this.dob,
+  });
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -61,12 +76,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _prevPage() {
     _hapticLight();
 
-    if (_currentPage == 0) {
-      setState(() {
-        _showWelcome = true;
-      });
-      return;
-    }
+    // if (_currentPage == 0) {
+    //   setState(() {
+    //     _showWelcome = true;
+    //   });
+    //   return;
+    // }
 
     if (_currentPage > 0) {
       _pageController.previousPage(
@@ -74,6 +89,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  String convertDateFormat(String dob) {
+    final inputFormat = DateFormat('d/M/yyyy');
+    final outputFormat = DateFormat('yyyy-MM-dd');
+
+    DateTime date = inputFormat.parse(dob);
+
+    return outputFormat.format(date);
   }
 
   Future<void> _submitData() async {
@@ -85,29 +109,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
 
-    bool success = await ApiService.submitOnboardingData(_data);
+    _data.email = widget.email;
+    _data.username = widget.username;
+    _data.password = widget.password;
+    _data.firstName = widget.firstName;
+    _data.lastName = widget.lastName;
+    _data.dateOfBirth = convertDateFormat(widget.dob);
+    _data.regDate = DateTime.now().toIso8601String();
+
+    final ApiResponse response = await AuthService.submitOnboardingData(_data);
     if (!mounted) return;
     Navigator.pop(context);
 
-    if (success) {
-      showModernToast(
-        context,
-        "Profile created successfully!",
-        type: 'success',
-      );
+    showModernToast(
+      context,
+      response.message,
+      type: response.success ? 'success' : 'error',
+    );
 
-      // Replace onboarding with dashboard
+    if (response.status == 200 || response.status == 201) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
       );
     } else {
-      showModernToast(
-        context,
-        "Failed to save data. Please try again.",
-        type: 'error',
-      );
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
   }

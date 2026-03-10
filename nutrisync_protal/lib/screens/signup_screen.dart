@@ -1,6 +1,6 @@
+import 'package:NutriSync/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common_widgets.dart';
-import '../core/constants.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -15,35 +15,59 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
-  TextEditingController();
+      TextEditingController();
+
+  DateTime? _selectedDob;
 
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
-  bool _isLoading = false;
+
+  Future<void> _pickDob() async {
+    DateTime now = DateTime.now();
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(now.year),
+      firstDate: DateTime(1950),
+      lastDate: now,
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDob = picked;
+        _dobController.text = "${picked.day}/${picked.month}/${picked.year}";
+      });
+    }
+  }
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
 
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    LoadingIndicator.show(context);
 
     await Future.delayed(const Duration(seconds: 2));
-    // TODO: Replace with API call
 
-    setState(() => _isLoading = false);
-
-    showModernToast(
-      context,
-      "Account Created Successfully!",
-      type: 'error',
-    );
+    if (mounted) LoadingIndicator.hide(context);
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(
+        builder: (_) => OnboardingScreen(
+          email: _emailController.text,
+          username: _usernameController.text,
+          password: _passwordController.text,
+          firstName: _firstNameController.text,
+          lastName: _lastNameController.text,
+          dob: _dobController.text,
+        ),
+      ),
     );
   }
 
@@ -51,6 +75,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void dispose() {
     _emailController.dispose();
     _usernameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _dobController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -67,8 +94,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       suffixIcon: suffix,
       filled: true,
       fillColor: Colors.grey.shade100,
-      contentPadding:
-      const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
@@ -97,7 +123,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       const Text(
                         "Sign up",
                         style: TextStyle(
@@ -111,9 +136,89 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                       const SizedBox(height: 24),
 
+                      /// First Name
+                      const Text(
+                        "First Name",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _firstNameController,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "First name required"
+                            : null,
+                        decoration: _inputDecoration(
+                          hint: "",
+                          icon: Icons.person_outline,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      /// Last Name
+                      const Text(
+                        "Last Name",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _lastNameController,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Last name required"
+                            : null,
+                        decoration: _inputDecoration(
+                          hint: "",
+                          icon: Icons.person_outline,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      /// Username
+                      const Text(
+                        "Username",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _usernameController,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Username required"
+                            : null,
+                        decoration: _inputDecoration(
+                          hint: "",
+                          icon: Icons.alternate_email,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      /// Date of Birth
+                      const Text(
+                        "Date of Birth",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _dobController,
+                        readOnly: true,
+                        onTap: _pickDob,
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Date of birth required"
+                            : null,
+                        decoration: _inputDecoration(
+                          hint: "",
+                          icon: Icons.cake_outlined,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
                       /// Email
-                      const Text("Email Address",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        "Email Address",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _emailController,
@@ -134,27 +239,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                       const SizedBox(height: 16),
 
-                      /// Username
-                      const Text("Username",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: _usernameController,
-                        validator: (value) =>
-                        value == null || value.isEmpty
-                            ? "Username required"
-                            : null,
-                        decoration: _inputDecoration(
-                          hint: "",
-                          icon: Icons.person_outline,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
                       /// Password
-                      const Text("Password",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        "Password",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _passwordController,
@@ -169,12 +258,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           hint: "",
                           icon: Icons.lock_outline,
                           suffix: IconButton(
-                            icon: Icon(_obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
                             onPressed: () {
-                              setState(() =>
-                              _obscurePassword = !_obscurePassword);
+                              setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              );
                             },
                           ),
                         ),
@@ -183,8 +275,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 16),
 
                       /// Confirm Password
-                      const Text("Confirm Password",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        "Confirm Password",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _confirmPasswordController,
@@ -199,12 +293,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           hint: "",
                           icon: Icons.lock_outline,
                           suffix: IconButton(
-                            icon: Icon(_obscureConfirm
-                                ? Icons.visibility_off
-                                : Icons.visibility),
+                            icon: Icon(
+                              _obscureConfirm
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
                             onPressed: () {
-                              setState(() =>
-                              _obscureConfirm = !_obscureConfirm);
+                              setState(
+                                () => _obscureConfirm = !_obscureConfirm,
+                              );
                             },
                           ),
                         ),
@@ -214,7 +311,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                       /// Create Account Button
                       ElevatedButton(
-                        onPressed: _isLoading ? null : _submit,
+                        onPressed: _submit,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           minimumSize: const Size(double.infinity, 55),
@@ -222,10 +319,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: _isLoading
-                            ? const CircularProgressIndicator(
-                            color: Colors.white)
-                            : const Text(
+                        child: const Text(
                           "Create Account",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -243,7 +337,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => const LoginScreen()),
+                                builder: (_) => const LoginScreen(),
+                              ),
                             );
                           },
                           child: RichText(
