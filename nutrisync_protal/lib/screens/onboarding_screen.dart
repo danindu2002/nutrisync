@@ -1124,7 +1124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // --- Screen 12: Medical Conditions ---
   Widget _buildMedicalConditionScreen() {
-    final List<String> conditions = [
+    final List<String> presetConditions = [
       "Diabetes",
       "Hypertension",
       "High Cholesterol",
@@ -1140,116 +1140,188 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ];
 
     const maxItems = 10;
+    // Ensure _conditionController is defined in your State class
+    // final TextEditingController _conditionController = TextEditingController();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Common allergy chips
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: conditions.map((allergy) {
-              final isSelected = _data.medicalConditions.contains(allergy);
-              return FilterChip(
-                label: Text(allergy),
-                selected: isSelected,
-                onSelected: (val) {
-                  setState(() {
-                    if (val) {
-                      if (!_data.medicalConditions.contains(allergy) &&
-                          _data.medicalConditions.length < maxItems) {
-                        _data.medicalConditions.add(allergy);
-                      }
-                    } else {
-                      _data.medicalConditions.remove(allergy);
-                    }
-                  });
-                },
-                backgroundColor: Colors.grey.shade100,
-                selectedColor: AppColors.primary,
-                labelStyle: TextStyle(
-                  color: isSelected ? AppColors.primary : Colors.black87,
-                ),
-                shape: StadiumBorder(
-                  side: BorderSide(
-                    color: isSelected
-                        ? AppColors.primary
-                        : Colors.grey.shade300,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 40),
-
-          /// Input-like container with selected chips
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary, width: 1.5),
+      child: SingleChildScrollView( // Added scroll for smaller screens
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              "Do you have any\nmedical conditions?",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF2D3142),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_data.medicalConditions.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      "No medical conditions selected. Tap chips above to add.",
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  )
-                else
+            const SizedBox(height: 30),
+
+            /// Preset Filter Chips
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.center,
+              children: presetConditions.map((condition) {
+                final isSelected = _data.medicalConditions.contains(condition);
+                return ChoiceChip(
+                  label: Text(condition),
+                  selected: isSelected,
+                  onSelected: (val) {
+                    setState(() {
+                      // Create a mutable copy if necessary
+                      List<String> mutableList = List<String>.from(_data.medicalConditions);
+                      if (val) {
+                        if (!mutableList.contains(condition) && mutableList.length < maxItems) {
+                          mutableList.add(condition);
+                        }
+                      } else {
+                        mutableList.remove(condition);
+                      }
+                      _data.medicalConditions = mutableList;
+                    });
+                  },
+                  backgroundColor: const Color(0xFFF2F2F2),
+                  selectedColor: const Color(0xFFF2544D), // Matching your allergy screen color
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  side: BorderSide.none,
+                  showCheckmark: false,
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 40),
+
+            /// Selection Container (Input Area)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFFF2544D).withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _data.medicalConditions.map((item) {
-                      return Chip(
-                        label: Text(item),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () {
-                          setState(() {
-                            _data.medicalConditions.remove(item);
-                          });
-                        },
-                        backgroundColor: AppColors.primary.withOpacity(0.15),
-                        labelStyle: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-
-                const SizedBox(height: 50),
-
-                /// Counter
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Icon(Icons.edit_note, size: 16, color: AppColors.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${_data.medicalConditions.length}/$maxItems",
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      // Selected Condition Tags
+                      ..._data.medicalConditions.map((item) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2544D).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                item,
+                                style: const TextStyle(
+                                  color: Color(0xFFF2544D),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () => setState(() => _data.medicalConditions.remove(item)),
+                                child: const Icon(Icons.close, size: 14, color: Color(0xFFF2544D)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+
+                      // Dynamic Input Field
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: _data.medicalConditions.isEmpty
+                              ? MediaQuery.of(context).size.width - 80
+                              : 120,
+                        ),
+                        child: TextField(
+                          controller: _conditionController,
+                          onChanged: (val) {
+                            if (val.length <= 1) setState(() {});
+                          },
+                          decoration: InputDecoration(
+                            hintText: _data.medicalConditions.isEmpty
+                                ? "No conditions selected. Pick above or type..."
+                                : "Add condition...",
+                            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                            border: InputBorder.none,
+                            isDense: true,
+                            suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                            suffixIcon: _conditionController.text.isNotEmpty
+                                ? TextButton(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {
+                                if (_conditionController.text.trim().isNotEmpty &&
+                                    _data.medicalConditions.length < maxItems) {
+                                  setState(() {
+                                    _data.medicalConditions.add(_conditionController.text.trim());
+                                    _conditionController.clear();
+                                  });
+                                }
+                              },
+                              child: const Text(
+                                "Add",
+                                style: TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold),
+                              ),
+                            )
+                                : null,
+                          ),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 30),
+
+                  /// Counter
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.edit_note, size: 16, color: Color(0xFFF2544D)),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${_data.medicalConditions.length}/$maxItems",
+                          style: const TextStyle(
+                            color: Color(0xFFF2544D),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
