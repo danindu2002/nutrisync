@@ -350,64 +350,65 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // --- Screen 4: Age ---
   Widget _buildAgeScreen() {
     int currentAge = _data.age ?? 20;
+    // Starting from 16, so index 0 = 16
     int initialIndex = currentAge - 16;
 
-    return SizedBox.expand(
-      child: CupertinoPicker(
-        scrollController: FixedExtentScrollController(
-          initialItem: initialIndex,
-        ),
-        itemExtent: 160,
-        diameterRatio: 1.8,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        
 
-        onSelectedItemChanged: (idx) {
-          _hapticLight();
-          setState(() => _data.age = idx + 16);
-        },
-        selectionOverlay: Container(),
-        children: List.generate(80, (index) {
-          final val = index + 16;
-          final isSelected = val == currentAge;
+        SizedBox(
+          height: 250, // Constrained height for mobile
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Visual highlight bar for the center selection
+              Container(
+                height: 70,
+                width: MediaQuery.of(context).size.width * 0.8,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
 
-          return Center(
-            child: isSelected
-                ? Container(
-                    width: 300,
-                    height: 380,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(40),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 0),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        "$val",
-                        style: const TextStyle(
-                          fontSize: 130,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.15,
-                        ),
+              CupertinoPicker(
+                scrollController: FixedExtentScrollController(
+                  initialItem: initialIndex,
+                ),
+                itemExtent: 70, // Reduced from 160
+                diameterRatio: 1.2,
+                onSelectedItemChanged: (idx) {
+                  _hapticLight();
+                  setState(() => _data.age = idx + 16);
+                },
+                // SelectionOverlay is handled by our Container in the Stack for better styling
+                selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
+                  capStartEdge: false,
+                  capEndEdge: false,
+                  background: Colors.transparent,
+                ),
+                children: List.generate(80, (index) {
+                  final val = index + 16;
+                  final isSelected = val == currentAge;
+
+                  return Center(
+                    child: Text(
+                      "$val",
+                      style: TextStyle(
+                        fontSize: isSelected ? 48 : 32, // Scaled down for mobile
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? AppColors.primary : Colors.grey.shade400,
                       ),
                     ),
-                  )
-                : Text(
-                    "$val",
-                    style: TextStyle(
-                      fontSize: 65,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-          );
-        }),
-      ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -1141,8 +1142,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ];
 
     const maxItems = 10;
-    // Ensure _conditionController is defined in your State class
-    // final TextEditingController _conditionController = TextEditingController();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
