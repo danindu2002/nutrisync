@@ -358,7 +358,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           initialItem: initialIndex,
         ),
         // Reduced from 160 to 110 for better mobile fit
-        itemExtent: 110,
+        itemExtent: 130,
         diameterRatio: 1.1, // Adjusted for a smoother curve at smaller scale
         onSelectedItemChanged: (idx) {
           _hapticLight();
@@ -374,7 +374,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ? Container(
               // Scaled width/height to fit mobile screens (e.g., iPhone SE)
               width: 180,
-              height: 90,
+              height: 100,
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(25),
@@ -403,7 +403,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               "$val",
               style: TextStyle(
                 // Reduced from 65 to 40
-                fontSize: 40,
+                fontSize: 60,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey.shade400,
               ),
