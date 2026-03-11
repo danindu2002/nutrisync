@@ -3,6 +3,8 @@ import '../core/constants.dart';
 import 'dashboard_screen.dart';
 import '../models/risk_model.dart';
 import '../widgets/risk_card.dart';
+import '../models/contributing_meal_model.dart';
+import '../widgets/risk_detail_sheet.dart';
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -12,7 +14,7 @@ class RiskPredictorScreen extends StatefulWidget {
 }
 
 class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
-  String? selectedPeriod;
+  String? selectedPeriod = '1 year';
 
   final List<String> periods = [
     '1 year',
@@ -29,27 +31,63 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
       description: "High saturated fat diet",
       riskLevel: 0.1,
       icon: Icons.monitor_heart,
+      subtitle: "Based on recent activity & meals",
+      warningText: "....",
+      contributingMeals: [
+        ContributingMealModel(
+          mealName: "Bacon Double Cheeseburger",
+          nutrientText: "90g Saturated Fat",
+          imagePath: "assets/images/risk/burger.png",
+        ),
+      ],
     ),
     RiskModel(
       name: "Obesity",
       description: "Sedentary lifestyle & excess calories.",
       riskLevel: 0.5,
       icon: Icons.balance,
+      subtitle: "Based on recent activity & meals",
+      warningText: "....",
+      contributingMeals: [
+        ContributingMealModel(
+          mealName: "Bacon Double Cheeseburger",
+          nutrientText: "90g Saturated Fat",
+          imagePath: "assets/images/risk/pasta.png",
+        ),
+      ],
     ),
     RiskModel(
       name: "Type 2 Diabetes",
       description: "Genetics & high sugar intake",
       riskLevel: 0.9,
       icon: Icons.water_drop,
+      subtitle: "Based on recent activity & meals",
+      warningText: "....",
+      contributingMeals: [
+        ContributingMealModel(
+          mealName: "Bacon Double Cheeseburger",
+          nutrientText: "90g Saturated Fat",
+          imagePath: "assets/images/risk/chicken.png",
+        ),
+      ],
     ),
   ];
+
+  void _showRiskDetails(RiskModel risk) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => RiskDetailSheet(risk: risk),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,6 +178,8 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                   isExpanded: true,
                                   menuMaxHeight: 200,
                                   isDense: true,
+                                  /// Call backend AI prediction API here
+                                  /// using the selected time period and update risks list
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       selectedPeriod = newValue;
@@ -222,7 +262,10 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                   children: mockRisks.map((risk) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: RiskCard(risk: risk),
+                      child: RiskCard(
+                        risk: risk,
+                        onTap: () => _showRiskDetails(risk),
+                      )
                     );
                   }).toList(),
                 ),
