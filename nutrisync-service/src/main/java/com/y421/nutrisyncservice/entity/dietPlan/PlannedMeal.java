@@ -52,4 +52,7 @@ public class PlannedMeal extends AuditModel implements Serializable {
 
     @Column(name = "image_search_term")
     private String imageSearchTerm;
+
+    @Column(name = "MEAL_IMAGE_URL", length = 1000)
+    private String mealImageUrl;
 }
