@@ -5,6 +5,7 @@ import com.y421.nutrisyncservice.mapper.NutrisyncUser.NutrisyncUserMapper;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
 import com.y421.nutrisyncservice.request.nutrisyncUser.*;
 import com.y421.nutrisyncservice.response.email.EmailDetailsDTO;
+import com.y421.nutrisyncservice.response.nutrisyncUser.LoginResDto;
 import com.y421.nutrisyncservice.util.EmailService;
 import com.y421.nutrisyncservice.util.EmailTemplate;
 import com.y421.nutrisyncservice.util.KeycloakRealmChanger;
@@ -99,11 +100,16 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
                         .build()
         ) {
             AccessTokenResponse accessToken = keycloak.tokenManager().getAccessToken();
-            return new ResponseEntity<>(accessToken, HttpStatus.OK);
+            Optional<NutrisyncUser> user = userRepository.findByKeycloakUserIdAndIsDeletedFalse(accessToken.getToken());
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+            }
+            LoginResDto loginResDto = new LoginResDto(accessToken, user.get().getUserId());
+            return new ResponseEntity<>(loginResDto, HttpStatus.OK);
         } catch (Exception e) {
             String message = e.getMessage();
             if (e.getMessage().contains("401")) {
-                message = "Password Incorrect";
+                message = "Credentials Incorrect";
             }
             return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
         }
@@ -193,8 +199,18 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     }
 
     @Override
-    public ResponseEntity<Object> updateProfile() {
-        return null;
+    public ResponseEntity<Object> updateProfile(Long userId) {
+        try {
+            if (!userRepository.existsByUserIdAndIsDeletedFalse(userId)) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+            NutrisyncUser user  = userRepository.getReferenceById(userId);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error occurred during get profile", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
