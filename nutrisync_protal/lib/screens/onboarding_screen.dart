@@ -21,6 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   final OnboardingDTO _data = OnboardingDTO();
   final TextEditingController _allergyController = TextEditingController();
+  final TextEditingController _conditionController = TextEditingController();
 
   int _currentPage = 0;
   final int _totalSteps = 15;
