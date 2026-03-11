@@ -1,7 +1,6 @@
 package com.y421.nutrisyncservice.controller.nutrisyncUser;
 
-import com.y421.nutrisyncservice.request.nutrisyncUser.LoginDto;
-import com.y421.nutrisyncservice.request.nutrisyncUser.NutrisyncUserRequestDto;
+import com.y421.nutrisyncservice.request.nutrisyncUser.*;
 import com.y421.nutrisyncservice.service.nutrisyncUser.NutrisyncUserService;
 import com.y421.nutrisyncservice.util.ResponseHandler;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,7 @@ public class NutrisyncUserControllerImpl implements NutrisyncUserController {
         try {
             ResponseEntity<Object> response = nutrisyncUserService.register(nutrisyncUserRequestDto);
             if (response.getStatusCode().isSameCodeAs(HttpStatus.CREATED)) {
-                return generateResponse("User Created Successfully", HttpStatus.OK, response.getBody());
+                return generateResponse("User Onboarded Successfully", HttpStatus.OK, response.getBody());
             } else {
                 return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
             }
@@ -46,6 +45,78 @@ public class NutrisyncUserControllerImpl implements NutrisyncUserController {
                 }
             } else {
                 return ResponseHandler.generateResponse("Username or Password null", HttpStatus.BAD_REQUEST, null);
+            }
+        } catch (Exception e) {
+            return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> logout() {
+        try {
+            if (Stream.of().noneMatch(Objects::isNull)) {
+                ResponseEntity<Object> response = nutrisyncUserService.logout();
+                if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                    return generateResponse("User Logout Success", HttpStatus.OK, response.getBody());
+                } else {
+                    return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
+                }
+            } else {
+                return ResponseHandler.generateResponse("Something went wrong", HttpStatus.BAD_REQUEST, null);
+            }
+        } catch (Exception e) {
+            return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> forgotPassword(String email) {
+        try {
+            if (Stream.of(email).noneMatch(Objects::isNull)) {
+                ResponseEntity<Object> response = nutrisyncUserService.forgotPassword(email);
+                if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                    return generateResponse("Forgot Password Success", HttpStatus.OK, response.getBody());
+                } else {
+                    return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
+                }
+            } else {
+                return ResponseHandler.generateResponse("Email null", HttpStatus.BAD_REQUEST, null);
+            }
+        } catch (Exception e) {
+            return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> validateForgotPwdOtp(ResetPwdValidationDto dto) {
+        try {
+            if (Stream.of(dto).noneMatch(Objects::isNull)) {
+                ResponseEntity<Object> response = nutrisyncUserService.validateForgotPwdOtp(dto);
+                if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                    return generateResponse("Forgot Password OTP Validation Success", HttpStatus.OK, response.getBody());
+                } else {
+                    return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
+                }
+            } else {
+                return ResponseHandler.generateResponse("Email or OTP null", HttpStatus.BAD_REQUEST, null);
+            }
+        } catch (Exception e) {
+            return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> resetForgotPwd(ResetPwdDto dto) {
+        try {
+            if (Stream.of(dto).noneMatch(Objects::isNull)) {
+                ResponseEntity<Object> response = nutrisyncUserService.resetForgotPwd(dto);
+                if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                    return generateResponse("Reset Forgot Password Success", HttpStatus.OK, response.getBody());
+                } else {
+                    return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
+                }
+            } else {
+                return ResponseHandler.generateResponse("Email or New Password null", HttpStatus.BAD_REQUEST, null);
             }
         } catch (Exception e) {
             return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
