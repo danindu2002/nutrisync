@@ -350,68 +350,71 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // --- Screen 4: Age ---
   Widget _buildAgeScreen() {
     int currentAge = _data.age ?? 20;
-    // Starting from 16, so index 0 = 16
     int initialIndex = currentAge - 16;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        
-
-        SizedBox(
-          height: 250, // Constrained height for mobile
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Visual highlight bar for the center selection
-              Container(
-                height: 70,
-                width: MediaQuery.of(context).size.width * 0.8,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-
-              CupertinoPicker(
-                scrollController: FixedExtentScrollController(
-                  initialItem: initialIndex,
-                ),
-                itemExtent: 70, // Reduced from 160
-                diameterRatio: 1.2,
-                onSelectedItemChanged: (idx) {
-                  _hapticLight();
-                  setState(() => _data.age = idx + 16);
-                },
-                // SelectionOverlay is handled by our Container in the Stack for better styling
-                selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
-                  capStartEdge: false,
-                  capEndEdge: false,
-                  background: Colors.transparent,
-                ),
-                children: List.generate(80, (index) {
-                  final val = index + 16;
-                  final isSelected = val == currentAge;
-
-                  return Center(
-                    child: Text(
-                      "$val",
-                      style: TextStyle(
-                        fontSize: isSelected ? 48 : 32, // Scaled down for mobile
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? AppColors.primary : Colors.grey.shade400,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ],
-          ),
+    return SizedBox.expand(
+      child: CupertinoPicker(
+        scrollController: FixedExtentScrollController(
+          initialItem: initialIndex,
         ),
-      ],
+        // Reduced from 160 to 110 for better mobile fit
+        itemExtent: 110,
+        diameterRatio: 1.1, // Adjusted for a smoother curve at smaller scale
+        onSelectedItemChanged: (idx) {
+          _hapticLight();
+          setState(() => _data.age = idx + 16);
+        },
+        selectionOverlay: Container(), // Keeps your custom overlay look
+        children: List.generate(80, (index) {
+          final val = index + 16;
+          final isSelected = val == currentAge;
+
+          return Center(
+            child: isSelected
+                ? Container(
+              // Scaled width/height to fit mobile screens (e.g., iPhone SE)
+              width: 180,
+              height: 90,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  "$val",
+                  style: const TextStyle(
+                    // Reduced from 130 to 70
+                    fontSize: 70,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+            )
+                : Text(
+              "$val",
+              style: TextStyle(
+                // Reduced from 65 to 40
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade400,
+              ),
+            ),
+          );
+        }),
+      ),
     );
   }
 
+  // --- Screen 5: Height ---
   Widget _buildHeightScreen() {
     double currentCm = _data.heightCm ?? 170.0;
     double minCm = 100.0;
