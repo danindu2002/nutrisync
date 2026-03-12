@@ -5,6 +5,8 @@ import '../models/risk_model.dart';
 import '../widgets/risk_card.dart';
 import '../models/contributing_meal_model.dart';
 import '../widgets/risk_detail_sheet.dart';
+import '../models/meal_swap_model.dart';
+import '../widgets/meal_swap_card.dart';
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -15,6 +17,7 @@ class RiskPredictorScreen extends StatefulWidget {
 
 class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
   String? selectedPeriod = '1 year';
+  int currentSwapIndex = 0;
 
   final List<String> periods = [
     '1 year',
@@ -72,6 +75,40 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
       ],
     ),
   ];
+
+
+  final List<MealSwapModel> mockMealSwaps = [
+    MealSwapModel(
+      currentMealName: "Fried Rice",
+      currentMealImagePath: "assets/images/risk/fried_rice.png",
+      currentMealMetric: "50g Saturated Fat",
+      suggestedMealName: "Quinoa Bowl",
+      suggestedMealImagePath: "assets/images/risk/quinoa_bowl.png",
+      suggestedMealMetric: "25g Saturated Fat",
+    ),
+    MealSwapModel(
+      currentMealName: "Cheese Burger",
+      currentMealImagePath: "assets/images/risk/burgerSwap.png",
+      currentMealMetric: "90g Saturated Fat",
+      suggestedMealName: "Grilled Chicken Wrap",
+      suggestedMealImagePath: "assets/images/risk/GrilledChickenWrapSwap.png",
+      suggestedMealMetric: "35g Saturated Fat",
+    ),
+    MealSwapModel(
+      currentMealName: "Creamy Pasta",
+      currentMealImagePath: "assets/images/risk/PastaSwap.png",
+      currentMealMetric: "65g Saturated Fat",
+      suggestedMealName: "Veggie Rice Bowl",
+      suggestedMealImagePath: "assets/images/risk/VeggieRiceBowlSwap.png",
+      suggestedMealMetric: "20g Saturated Fat",
+    ),
+  ];
+
+  void _nextSwap() {
+    setState(() {
+      currentSwapIndex = (currentSwapIndex + 1) % mockMealSwaps.length;
+    });
+  }
 
   void _showRiskDetails(RiskModel risk) {
     showModalBottomSheet(
@@ -269,6 +306,23 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                     );
                   }).toList(),
                 ),
+              ),
+
+              const SizedBox(height: 24),
+
+              Text(
+                "Suggested Meal Swaps",
+                style: AppTextStyles.subHeader.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textMain,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              MealSwapCard(
+                swap: mockMealSwaps[currentSwapIndex],
+                onNext: _nextSwap,
               ),
             ],
           ),
