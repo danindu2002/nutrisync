@@ -13,4 +13,5 @@ public class PlannedMealDTO {
     private Integer proteinG;
     private Integer carbsG;
     private Integer fatG;
+    private String mealImageUrl;
 }

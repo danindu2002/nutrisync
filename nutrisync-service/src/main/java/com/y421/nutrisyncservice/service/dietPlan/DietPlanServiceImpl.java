@@ -87,7 +87,7 @@ public class DietPlanServiceImpl implements DietPlanService {
                 meal.setCarbsG(mealDto.getCarbsG());
                 meal.setFatG(mealDto.getFatG());
                 meal.setImageSearchTerm(mealDto.getImageSearchTerm());
-
+                meal.setMealImageUrl(mealDto.getMealImageUrl());
                 dailyPlan.addPlannedMeal(meal);
             }
             mealPlan.addDailyPlan(dailyPlan);
@@ -178,6 +178,7 @@ public class DietPlanServiceImpl implements DietPlanService {
                 mealDto.setMealType(meal.getMealType().name()); // Converts Enum to String
                 mealDto.setRecipeName(meal.getRecipeName());
                 mealDto.setImageSearchTerm(meal.getImageSearchTerm());
+                mealDto.setMealImageUrl(meal.getMealImageUrl());
                 mealDto.setPrepTimeMin(meal.getPrepTimeMin());
                 mealDto.setCalories(meal.getCalories());
                 mealDto.setProteinG(meal.getProteinG());

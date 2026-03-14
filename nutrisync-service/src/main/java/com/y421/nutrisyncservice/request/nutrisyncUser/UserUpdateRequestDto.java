@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NutrisyncUserRequestDto {
+public class UserUpdateRequestDto {
     private String firstName;
     private String lastName;
     private String email;
@@ -33,5 +33,4 @@ public class NutrisyncUserRequestDto {
     private String sleepQuality;
     private String fitnessGoal;
     private String goalMotivation;
-    private Date regDate;
 }

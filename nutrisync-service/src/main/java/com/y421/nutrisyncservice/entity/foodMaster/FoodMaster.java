@@ -63,4 +63,7 @@ public class FoodMaster implements Serializable {
     
     @Column(name = "CATEGORY")
     private String category;
+
+    @Column(name = "IS_MANUAL")
+    private Boolean isManual = false;
 }

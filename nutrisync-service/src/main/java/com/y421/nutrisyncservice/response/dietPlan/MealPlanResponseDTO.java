@@ -23,5 +23,6 @@ public class MealPlanResponseDTO {
         private Integer carbsG;
         private Integer fatG;
         private String imageSearchTerm;
+        private String mealImageUrl;
     }
 }
