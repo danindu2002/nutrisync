@@ -231,7 +231,7 @@ class _MealLogScreenState extends State<MealLogScreen> {
                   child: Container(
                     width: 64,
                     margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.primary

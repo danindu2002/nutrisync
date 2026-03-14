@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
-import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/common_widgets.dart';
 import 'forgot_password_screen.dart';
-import 'onboarding_screen.dart';
+import 'main_navigation_screen.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _rememberMe = false;
-  bool _isLoading = false;
 
   Future<void> _submitData() async {
     FocusScope.of(context).unfocus();
@@ -40,42 +40,44 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    try {
+      LoadingIndicator.show(context);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
-    );
+      final ApiResponse response = await AuthService.onSubmitLogin(loginDTO);
 
-    // final bool success = await ApiService.onSubmitLogin(loginDTO);
-    final bool success = true;
+      if(mounted) LoadingIndicator.hide(context);
 
-    if (!mounted) return;
+      if (response.status == 200) {
+        final token = response.data["accessToken"]["access_token"];
+        final userId = response.data["userId"];
 
-    Navigator.pop(context);
-    setState(() => _isLoading = false);
+        /// Decode JWT
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
 
-    if (success) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      showModernToast(
-        context,
-        "Login successfully!",
-        type: 'success',
-      );
+        final prefs = await SharedPreferences.getInstance();
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-      );
-    } else {
-      showModernToast(
-        context,
-        "Failed to login. Please try again.",
-        type: 'error',
-      );
+        /// Save login state
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setBool('rememberMe', _rememberMe);
+
+        /// Save token and userId
+        await prefs.setString('accessToken', token);
+        await prefs.setInt('userId', userId);
+
+        /// Save user info from JWT
+        await prefs.setString('name', decodedToken['name'] ?? "");
+        await prefs.setString('email', decodedToken['email'] ?? "");
+        await prefs.setString('username', decodedToken['preferred_username'] ?? "");
+
+        /// Navigate to dashboard
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        );
+      } else {
+        showModernToast(context, response.message, type: 'error');
+      }
+    } catch (e) {
+      Logger.error("Error occurred: $e");
     }
   }
 
@@ -149,7 +151,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
+                              ),
                             );
                           },
                           child: const Text(
@@ -180,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     /// Login Button
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _submitData,
+                      onPressed: _submitData,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         minimumSize: const Size(double.infinity, 54),
@@ -242,4 +247,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

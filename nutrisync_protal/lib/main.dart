@@ -1,3 +1,4 @@
+import 'package:NutriSync/screens/main_navigation_screen.dart';
 import 'package:NutriSync/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,6 +23,7 @@ class NutriSyncApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
       ),
+      navigatorKey: NavigationService.navigatorKey,
       home: const SplashScreen(),
     );
   }

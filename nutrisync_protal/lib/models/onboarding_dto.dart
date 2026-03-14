@@ -1,4 +1,10 @@
 class OnboardingDTO {
+  String? username;
+  String? email;
+  String? password;
+  String? firstName;
+  String? lastName;
+  String? dateOfBirth;
   String? fitnessGoal;
   String? goalMotivation;
   String? gender;
@@ -14,8 +20,15 @@ class OnboardingDTO {
   List<String> medicalConditions = [];
   int? dailyCalorieGoal;
   String? sleepQuality;
+  String? regDate;
 
   OnboardingDTO({
+    this.username,
+    this.email,
+    this.firstName,
+    this.lastName,
+    this.dateOfBirth,
+    this.password,
     this.fitnessGoal,
     this.goalMotivation,
     this.gender,
@@ -31,10 +44,17 @@ class OnboardingDTO {
     this.medicalConditions = const [],
     this.dailyCalorieGoal = 2000,
     this.sleepQuality,
+    this.regDate,
   });
 
   Map<String, dynamic> toJson() {
     return {
+      'userName': username,
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
+      'dateOfBirth': dateOfBirth,
+      'password': password,
       'fitnessGoal': fitnessGoal,
       'goalMotivation': goalMotivation,
       'gender': gender,
@@ -50,6 +70,7 @@ class OnboardingDTO {
       'medicalConditions': medicalConditions,
       'dailyCalorieGoal': dailyCalorieGoal,
       'sleepQuality': sleepQuality,
+      'regDate': regDate,
     };
   }
 }
