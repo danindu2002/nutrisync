@@ -59,24 +59,63 @@ public class MealLogServiceImpl implements MealLogService {
     @Transactional
     public ResponseEntity<Object> saveMealLog(MealLogRequestDTO dto, MultipartFile image) throws IOException {
         try {
-            Optional<FoodMaster> food = foodRepository.findById(dto.getFoodId());
-            if (food.isEmpty()) {
-                return new ResponseEntity<>("Food not found", HttpStatus.NOT_FOUND);
-            }
             Optional<NutrisyncUser> user = userRepository.findById(dto.getUserId());
             if (user.isEmpty()) {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
+            FoodMaster foodToLog;
             float factor = dto.getWeight() / 100.0f;
+
+            if (dto.getFoodId() != null) {
+                // Existing Food
+                Optional<FoodMaster> foodOpt = foodRepository.findById(dto.getFoodId());
+                if (foodOpt.isEmpty()) {
+                    return new ResponseEntity<>("Food not found", HttpStatus.NOT_FOUND);
+                }
+                foodToLog = foodOpt.get();
+            } else {
+                // Manual Entry
+                if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+                    return new ResponseEntity<>("Food name is required for manual entry", HttpStatus.BAD_REQUEST);
+                }
+
+                FoodMaster newFood = new FoodMaster();
+                newFood.setName(dto.getName());
+                newFood.setIsManual(true);
+                newFood.setCategory("MANUAL_ENTRY");
+
+                float calcWeight = (dto.getWeight() != null && dto.getWeight() > 0) ? dto.getWeight() : 100f;
+                float reverseFactor = 100.0f / calcWeight;
+
+                if (dto.getTotalCalories() != null) {
+                    newFood.setCaloriesInKcal(String.valueOf(dto.getTotalCalories() * reverseFactor));
+                } else {
+                    newFood.setCaloriesInKcal("0");
+                }
+                if (dto.getTotalProtein() != null) {
+                    newFood.setProteinInG(String.valueOf(dto.getTotalProtein() * reverseFactor));
+                } else {
+                    newFood.setProteinInG("0");
+                }
+                if (dto.getTotalCarbs() != null) {
+                    newFood.setCarbohydratesInG(String.valueOf(dto.getTotalCarbs() * reverseFactor));
+                } else {
+                    newFood.setCarbohydratesInG("0");
+                }
+                foodToLog = foodRepository.save(newFood);
+            }
 
             MealLog log = new MealLog();
             log.setUser(user.get());
-            log.setFoodMaster(food.get());
-            log.setFoodName(dto.getName() != null ? dto.getName() : food.get().getName());
+            log.setFoodMaster(foodToLog); // Uses either the found food OR the newly created one
+            log.setFoodName(dto.getName() != null ? dto.getName() : foodToLog.getName());
             log.setConsumedQuantity(dto.getWeight());
-            log.setTotalCalories(dto.getTotalCalories() != null ? dto.getTotalCalories() : parseValue(food.get().getCaloriesInKcal()) * factor);
-            log.setTotalProtein(dto.getTotalProtein() != null ? dto.getTotalProtein() : parseValue(food.get().getProteinInG()) * factor);
-            log.setTotalCarbs(dto.getTotalCarbs() != null ? dto.getTotalCarbs() : parseValue(food.get().getCarbohydratesInG()) * factor);
+
+            // Calculate final log macros
+            log.setTotalCalories(dto.getTotalCalories() != null ? dto.getTotalCalories() : (parseValue(foodToLog.getCaloriesInKcal()) * factor));
+            log.setTotalProtein(dto.getTotalProtein() != null ? dto.getTotalProtein() : (parseValue(foodToLog.getProteinInG()) * factor));
+            log.setTotalCarbs(dto.getTotalCarbs() != null ? dto.getTotalCarbs() : (parseValue(foodToLog.getCarbohydratesInG()) * factor));
+
             log.setMealTime(MealTime.valueOf(dto.getMealTime().toUpperCase()));
             log.setSuggestRecommendations(dto.getSuggestRecommendations());
             log.setImage(image != null ? image.getBytes() : null);
