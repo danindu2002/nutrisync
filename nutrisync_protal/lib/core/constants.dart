@@ -23,7 +23,10 @@ class AppColors {
 class ApiConstants {
   static String get baseUrl {
     if (kIsWeb) {
+      /// Local Environment Base URL
       return "http://localhost:8081/api/v1";
+      /// Production Environment Base URL
+      // return "http://213.35.115.255:8081/api/v1";
     } else if (Platform.isAndroid) {
       return "http://10.0.2.2:8081/api/v1";
     } else {

@@ -49,7 +49,7 @@ class OnboardingDTO {
 
   Map<String, dynamic> toJson() {
     return {
-      'username': username,
+      'userName': username,
       'email': email,
       'firstName': firstName,
       'lastName': lastName,

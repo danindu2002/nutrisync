@@ -22,21 +22,22 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    // Wait for the first frame to build before loading the profile
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProfile();
+    });
   }
 
   Future<void> _loadProfile() async {
     try {
-      LoadingIndicator.show(context);
+      final prefs = await SharedPreferences.getInstance();
+      int? userId = prefs.getInt("userId");
 
-      // final prefs = await SharedPreferences.getInstance();
-      // final userId = prefs.getInt("userId");
-      //
-      // if (userId == null) throw Exception("User not found");
+      if (userId == null) {
+        return;
+      }
 
-      final ApiResponse response = await AuthService.getUserProfile(3);
-
-      if (mounted) LoadingIndicator.hide(context);
+      final ApiResponse response = await AuthService.getUserProfile(userId);
 
       if (response.status == 200) {
         setState(() => user = response.data);
@@ -44,7 +45,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         showModernToast(context, response.message, type: 'error');
       }
     } catch (e) {
-      debugPrint("Error loading profile: $e");
+      Logger.error("Error loading profile: $e");
     }
   }
 

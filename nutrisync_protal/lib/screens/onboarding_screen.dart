@@ -101,14 +101,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _submitData() async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
-    );
-
     _data.email = widget.email;
     _data.username = widget.username;
     _data.password = widget.password;
@@ -117,24 +109,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _data.dateOfBirth = convertDateFormat(widget.dob);
     _data.regDate = DateTime.now().toIso8601String();
 
-    final ApiResponse response = await AuthService.submitOnboardingData(_data);
-    if (!mounted) return;
-    Navigator.pop(context);
+    try {
+      LoadingIndicator.show(context);
 
-    showModernToast(
-      context,
-      response.message,
-      type: response.success ? 'success' : 'error',
-    );
+      final ApiResponse response = await AuthService.submitOnboardingData(_data);
 
-    if (response.status == 200 || response.status == 201) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      if(mounted) LoadingIndicator.hide(context);
+
+      showModernToast(
+        context,
+        response.message,
+        type: response.success ? 'success' : 'error',
       );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+
+      if (response.status == 200 || response.status == 201) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+    } catch (e) {
+      Logger.error("Error occurred: $e");
     }
   }
 

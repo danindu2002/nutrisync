@@ -48,7 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if(mounted) LoadingIndicator.hide(context);
 
       if (response.status == 200) {
-        final token = response.data["access_token"];
+        final token = response.data["accessToken"]["access_token"];
+        final userId = response.data["userId"];
 
         /// Decode JWT
         Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
@@ -59,14 +60,14 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setBool('isLoggedIn', true);
         await prefs.setBool('rememberMe', _rememberMe);
 
-        /// Save token
+        /// Save token and userId
         await prefs.setString('accessToken', token);
+        await prefs.setInt('userId', userId);
 
         /// Save user info from JWT
-        await prefs.setString('userId', decodedToken['sub']);
-        await prefs.setString('name', decodedToken['name']);
-        await prefs.setString('email', decodedToken['email']);
-        await prefs.setString('username', decodedToken['preferred_username']);
+        await prefs.setString('name', decodedToken['name'] ?? "");
+        await prefs.setString('email', decodedToken['email'] ?? "");
+        await prefs.setString('username', decodedToken['preferred_username'] ?? "");
 
         /// Navigate to dashboard
         Navigator.of(context).pushReplacement(
@@ -76,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
         showModernToast(context, response.message, type: 'error');
       }
     } catch (e) {
-      debugPrint("Error occurred: $e");
+      Logger.error("Error occurred: $e");
     }
   }
 

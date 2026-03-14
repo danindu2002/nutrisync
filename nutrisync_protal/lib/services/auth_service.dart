@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
 import '../models/onboarding_dto.dart';
+import '../widgets/common_widgets.dart';
 
 class AuthService {
 
@@ -11,11 +12,13 @@ class AuthService {
       final response = await ApiClient.post(
         "/user/register",
         data.toJson(),
+        requiresAuth: false,
       );
       final body = jsonDecode(response.body);
+      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
-      debugPrint("An error occurred: $e");
+      Logger.error("An error occurred: $e");
       return ApiResponse(
         status: 500,
         message: "Unexpected error occurred",
@@ -32,9 +35,10 @@ class AuthService {
         requiresAuth: false,
       );
       final body = jsonDecode(response.body);
+      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
-      debugPrint("An error occurred: $e");
+      Logger.error("An error occurred: $e");
       return ApiResponse(
         status: 500,
         message: "Unexpected error occurred",
@@ -48,9 +52,10 @@ class AuthService {
       final response = await ApiClient.get("/user/getProfile/$userId");
 
       final body = jsonDecode(response.body);
+      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
-      debugPrint("An error occurred: $e");
+      Logger.error("An error occurred: $e");
       return ApiResponse(
         status: 500,
         message: "An error occurred",
@@ -65,9 +70,10 @@ class AuthService {
         "/user/forgotPassword?email=$email", null);
 
       final body = jsonDecode(response.body);
+      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
-      debugPrint("An error occurred: $e");
+      Logger.error("An error occurred: $e");
       return ApiResponse(
         status: 500,
         message: "Unexpected error occurred",
@@ -81,9 +87,10 @@ class AuthService {
       final response = await ApiClient.post("/user/validateForgotPwdOtp", data);
 
       final body = jsonDecode(response.body);
+      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
-      debugPrint("An error occurred: $e");
+      Logger.error("An error occurred: $e");
       return ApiResponse(
         status: 500,
         message: "Unexpected error occurred",
@@ -97,9 +104,10 @@ class AuthService {
       final response = await ApiClient.post("/user/resetForgotPwd", data);
 
       final body = jsonDecode(response.body);
+      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
-      debugPrint("An error occurred: $e");
+      Logger.error("An error occurred: $e");
       return ApiResponse(
         status: 500,
         message: "Unexpected error occurred",
