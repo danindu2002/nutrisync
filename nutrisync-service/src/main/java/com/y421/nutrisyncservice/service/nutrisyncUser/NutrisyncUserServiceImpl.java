@@ -56,7 +56,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     @Override
     public ResponseEntity<Object> register(NutrisyncUserRequestDto dto) {
         try {
-            if (!userRepository.existsByUserNameAndIsDeletedFalse(dto.getUserName())) {
+            if (userRepository.existsByUserNameAndIsDeletedFalse(dto.getUserName())) {
                 return new ResponseEntity<>("User Name is taken. Please try another User Name.", HttpStatus.CONFLICT);
             }
             if (userRepository.existsByEmailAndIsDeletedFalse(dto.getEmail())) {
@@ -100,7 +100,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
                         .build()
         ) {
             AccessTokenResponse accessToken = keycloak.tokenManager().getAccessToken();
-            Optional<NutrisyncUser> user = userRepository.findByKeycloakUserIdAndIsDeletedFalse(accessToken.getToken());
+            Optional<NutrisyncUser> user = userRepository.findByUserNameAndIsDeletedFalse(dto.getUserName());
             if (user.isEmpty()) {
                 return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
             }
@@ -250,7 +250,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
 
     private UserRepresentation getUserRepresentation(NutrisyncUserRequestDto userCreateDTO) {
         UserRepresentation userKeycloak = new UserRepresentation();
-        userKeycloak.setUsername(userCreateDTO.getEmail());
+        userKeycloak.setUsername(userCreateDTO.getUserName());
         userKeycloak.setFirstName(userCreateDTO.getFirstName());
         userKeycloak.setLastName(userCreateDTO.getLastName());
         userKeycloak.setEmail(userCreateDTO.getEmail());
