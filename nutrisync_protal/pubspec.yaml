@@ -28,6 +28,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  syncfusion_flutter_gauges: ^21.1.35
   google_fonts: ^6.1.0  # For modern typography
   provider: ^6.1.1      # For state management
   http: ^1.2.0          # For API calls
@@ -69,6 +70,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/images/
     - assets/images/questionnaire/
     - assets/images/dashboard/
     - assets/images/authentication/
