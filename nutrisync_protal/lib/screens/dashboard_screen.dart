@@ -39,7 +39,14 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-class _CaloriesLineChart extends StatelessWidget {
+class _CaloriesLineChart extends StatefulWidget {
+  @override
+  State<_CaloriesLineChart> createState() => _CaloriesLineChartState();
+}
+
+class _CaloriesLineChartState extends State<_CaloriesLineChart> {
+
+  String selectedRange = "1d";
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -54,7 +61,19 @@ class _CaloriesLineChart extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ["1d", "1w", "1m", "1y", "All"].map((t) => _TimeTab(t, t == "1d")).toList(),
+            children: ["1d", "1w", "1m", "1y", "All"].map((t) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedRange = t;
+                  });
+
+                  // later we will call the backend API here
+                  // fetchCalories(selectedRange);
+                },
+                child: _TimeTab(t, selectedRange == t),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 20),
           SizedBox(
