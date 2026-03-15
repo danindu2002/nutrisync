@@ -2,10 +2,14 @@ package com.y421.nutrisyncservice.service.riskPredictor;
 
 import com.y421.nutrisyncservice.entity.mealLog.MealLog;
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
+import com.y421.nutrisyncservice.mapper.meal.MealLogRiskMapper;
 import com.y421.nutrisyncservice.mapper.meal.MealMapper;
 import com.y421.nutrisyncservice.repository.foodMaster.FoodMasterRepository;
 import com.y421.nutrisyncservice.repository.mealLog.MealLogRepository;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
+import com.y421.nutrisyncservice.request.meal.MealLogRiskRequestDTO;
+import com.y421.nutrisyncservice.response.riskPredictor.RiskPredictorResponseDTO;
+import com.y421.nutrisyncservice.service.ai.AIServiceClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +25,8 @@ public class RiskPredictorServiceImpl implements RiskPredictorService {
     private final FoodMasterRepository foodRepository;
     private final MealLogRepository mealLogRepository;
     private final NutrisyncUserRepository userRepository;
-    private final MealMapper mealMapper;
+    private final MealLogRiskMapper mealLogRiskMapper;
+    private final AIServiceClient aiServiceClient;
 
     @Override
     public ResponseEntity<Object> predictRisk(Long userId) {
@@ -34,8 +39,13 @@ public class RiskPredictorServiceImpl implements RiskPredictorService {
             if (mealLog.isEmpty()) {
                 return new ResponseEntity<>("Meal Logs Not Found", HttpStatus.NOT_FOUND);
             }
+            MealLogRiskRequestDTO mealLogRiskRequestDTO = mealLogRiskMapper.toMealLogRiskRequestDTO(user.get(), mealLog);
+            RiskPredictorResponseDTO riskPrediction = aiServiceClient.predictRisk(mealLogRiskRequestDTO);
+            if (riskPrediction == null) {
+                return new ResponseEntity<>("Error Predicting Risk", HttpStatus.CONFLICT);
+            }
 
-            return new ResponseEntity<>("Risk Predicted Successfully", HttpStatus.OK);
+            return new ResponseEntity<>(riskPrediction, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error Occurred", HttpStatus.INTERNAL_SERVER_ERROR);
