@@ -130,19 +130,56 @@ class ApiClient {
 
   /// DELETE
   static Future<http.Response> delete(
-    String endpoint, {
-    bool requiresAuth = true,
-  }) async {
+      String endpoint, {
+        dynamic data,
+        bool requiresAuth = true,
+      }) async {
     final url = Uri.parse("${ApiConstants.baseUrl}$endpoint");
 
     final response = await http.delete(
       url,
       headers: await getHeaders(requiresAuth: requiresAuth),
+      body: data != null ? jsonEncode(data) : null,
     );
+
     // TOKEN EXPIRED
     if (response.statusCode == 405) {
       await _handleTokenExpired();
     }
+    return response;
+  }
+
+  /// POST MULTIPART (For File Uploads)
+  static Future<http.Response> postMultipart(
+      String endpoint,
+      File file,
+      String fileField, {
+        Map<String, String>? fields, // ADD THIS PARAMETER
+        bool requiresAuth = true,
+      }) async {
+    final url = Uri.parse("${ApiConstants.baseUrl}$endpoint");
+    final request = http.MultipartRequest('POST', url);
+
+    final headers = await getHeaders(requiresAuth: requiresAuth);
+    headers.remove("Content-Type");
+    request.headers.addAll(headers);
+
+    request.files.add(
+      await http.MultipartFile.fromPath(fileField, file.path),
+    );
+
+    // ADD THIS BLOCK to attach JSON data
+    if (fields != null) {
+      request.fields.addAll(fields);
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 405) {
+      await _handleTokenExpired();
+    }
+
     return response;
   }
 }
