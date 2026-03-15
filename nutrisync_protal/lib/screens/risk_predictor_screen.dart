@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-import 'dashboard_screen.dart';
+import '../core/theme.dart';
 import '../models/risk_model.dart';
-import '../widgets/risk_card.dart';
 import '../models/contributing_meal_model.dart';
-import '../widgets/risk_detail_sheet.dart';
 import '../models/meal_swap_model.dart';
-import '../widgets/meal_swap_card.dart';
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -136,14 +132,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                   IconButton(
                     icon: const Icon(Icons.arrow_back_ios, size: 18),
                     color: AppColors.textMain,
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const DashboardScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: 8),
 
@@ -325,6 +314,432 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                 onNext: _nextSwap,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MealSwapCard extends StatelessWidget {
+  final MealSwapModel swap;
+  final VoidCallback onNext;
+
+  const MealSwapCard({
+    super.key,
+    required this.swap,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+
+          /// CURRENT MEAL
+          Expanded(
+            child: Column(
+              children: [
+                ClipOval(
+                  child: Image.asset(
+                    swap.currentMealImagePath,
+                    height: 70,
+                    width: 70,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  swap.currentMealName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  swap.currentMealMetric,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// SWAP AREA
+          Column(
+            children: [
+              const Icon(
+                Icons.arrow_forward,
+                size: 28,
+                color: Colors.teal,
+              ),
+
+              const SizedBox(height: 10),
+
+              GestureDetector(
+                onTap: onNext,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    "Swap Meal",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(width: 12),
+
+          /// SUGGESTED MEAL
+          Expanded(
+            child: Column(
+              children: [
+                ClipOval(
+                  child: Image.asset(
+                    swap.suggestedMealImagePath,
+                    height: 70,
+                    width: 70,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  swap.suggestedMealName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  swap.suggestedMealMetric,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// NEXT ARROW
+          IconButton(
+            onPressed: onNext,
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RiskCard extends StatelessWidget {
+  final RiskModel risk;
+  final VoidCallback onTap;
+
+  const RiskCard({
+    super.key,
+    required this.risk,
+    required this.onTap,
+  });
+
+  Color getRiskColor(double value) {
+    if (value < 0.3) {
+      return Colors.green;
+    } else if (value < 0.6) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.cardBg,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                risk.icon,
+                color: AppColors.secondary,
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    risk.name,
+                    style: AppTextStyles.subHeader.copyWith(
+                      color: AppColors.textMain,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: risk.riskLevel,
+                      minHeight: 8,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: AlwaysStoppedAnimation(
+                        getRiskColor(risk.riskLevel),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    risk.description,
+                    style: AppTextStyles.subHeader.copyWith(
+                      color: AppColors.textSub,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RiskDetailSheet extends StatelessWidget {
+  final RiskModel risk;
+
+  const RiskDetailSheet({
+    super.key,
+    required this.risk,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(28),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// top handle + close
+                Row(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          width: 48,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 12),
+                        child: Icon(
+                          Icons.close,
+                          color: AppColors.textMain,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                /// title block
+                Text(
+                  "Predicted Risk:",
+                  style: AppTextStyles.subHeader.copyWith(
+                    color: AppColors.textSub,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 22,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  risk.name,
+                  style: AppTextStyles.header.copyWith(
+                    fontSize: 24,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  risk.subtitle,
+                  style: AppTextStyles.subHeader.copyWith(
+                    color: AppColors.textSub,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                /// warning card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2),
+                        child: Icon(
+                          Icons.warning_amber_rounded,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          risk.warningText,
+                          style: AppTextStyles.subHeader.copyWith(
+                            color: AppColors.textMain,
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                /// meals title
+                Text(
+                  "Top Contributed Meals",
+                  style: AppTextStyles.subHeader.copyWith(
+                    color: AppColors.textMain,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                /// meals list
+                Column(
+                  children: risk.contributingMeals.map((meal) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.asset(
+                              meal.imagePath,
+                              width: 56,
+                              height: 56,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  meal.mealName,
+                                  style: AppTextStyles.subHeader.copyWith(
+                                    color: AppColors.textMain,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  meal.nutrientText,
+                                  style: AppTextStyles.subHeader.copyWith(
+                                    color: AppColors.textSub,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,9 +1,10 @@
 import 'package:NutriSync/screens/rewards_screen.dart';
 import 'package:NutriSync/screens/risk_predictor_screen.dart';
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
+import '../core/theme.dart';
 import '../widgets/common_widgets.dart';
 import 'challenges_screen.dart';
+import 'impact_simulator/bmi_results_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onMealLogTap;
@@ -363,7 +364,7 @@ class _NutritionRow extends StatelessWidget {
           imagePath: "assets/images/dashboard/salad_eggs.png",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ChallengesScreen()),
+            MaterialPageRoute(builder: (_) => const BmiResultsScreen()),
           ),
         ),
       ],

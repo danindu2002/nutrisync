@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:NutriSync/core/theme/app_theme.dart';
+import 'package:NutriSync/core/theme.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 
 class ImpactOverviewScreen extends StatelessWidget {

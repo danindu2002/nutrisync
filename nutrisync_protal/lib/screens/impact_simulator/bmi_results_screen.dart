@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:NutriSync/core/theme/app_theme.dart';
+import 'package:NutriSync/core/theme.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 
 class BmiResultsScreen extends StatefulWidget {
@@ -34,7 +34,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                   children: [
                     const SizedBox(height: 24),
                     _buildTabSwitcher(),
-                    const SizedBox(height: 24),
                     if (_selectedTab == 0) ...[
                       _buildGaugeCard(),
                       const SizedBox(height: 16),
@@ -64,7 +63,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       child: Row(
         children: [
           GestureDetector(
-            onTap: () {},
+            onTap: () => Navigator.pop(context),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 22,
