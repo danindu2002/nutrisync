@@ -102,6 +102,11 @@ public class MealLogServiceImpl implements MealLogService {
                 } else {
                     newFood.setCarbohydratesInG("0");
                 }
+                if (dto.getTotalFats() != null) {
+                    newFood.setTotalFatsInG(String.valueOf(dto.getTotalFats() * reverseFactor));
+                } else {
+                    newFood.setTotalFatsInG("0");
+                }
                 foodToLog = foodRepository.save(newFood);
             }
 
@@ -115,6 +120,7 @@ public class MealLogServiceImpl implements MealLogService {
             log.setTotalCalories(dto.getTotalCalories() != null ? dto.getTotalCalories() : (parseValue(foodToLog.getCaloriesInKcal()) * factor));
             log.setTotalProtein(dto.getTotalProtein() != null ? dto.getTotalProtein() : (parseValue(foodToLog.getProteinInG()) * factor));
             log.setTotalCarbs(dto.getTotalCarbs() != null ? dto.getTotalCarbs() : (parseValue(foodToLog.getCarbohydratesInG()) * factor));
+            log.setTotalFats(dto.getTotalFats() != null ? dto.getTotalFats() : (parseValue(foodToLog.getTotalFatsInG()) * factor));
 
             log.setMealTime(MealTime.valueOf(dto.getMealTime().toUpperCase()));
             log.setSuggestRecommendations(dto.getSuggestRecommendations());
