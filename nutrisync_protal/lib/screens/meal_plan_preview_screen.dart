@@ -90,6 +90,7 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                 ],
               ),
             ),
+            _buildBottomAction(),
           ],
         ),
       ),
@@ -297,6 +298,40 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBottomAction() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 0,
+          ),
+          onPressed: () {
+            // Handle save meal plan
+          },
+          child: const Text(
+            "Save Meal Plan",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }
