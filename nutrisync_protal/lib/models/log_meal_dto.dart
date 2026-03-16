@@ -8,6 +8,7 @@ class LogMealDTO {
   final String name;
   final double totalProtein;
   final double totalCarbs;
+  final double totalFats;
   final double totalCalories;
 
   LogMealDTO({
@@ -20,6 +21,7 @@ class LogMealDTO {
     required this.name,
     required this.totalProtein,
     required this.totalCarbs,
+    required this.totalFats,
     required this.totalCalories,
   });
 
@@ -34,6 +36,7 @@ class LogMealDTO {
       "name": name,
       "totalProtein": totalProtein,
       "totalCarbs": totalCarbs,
+      "totalFats": totalFats,
       "totalCalories": totalCalories,
     };
   }

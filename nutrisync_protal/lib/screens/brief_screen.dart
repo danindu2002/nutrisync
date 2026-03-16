@@ -123,6 +123,7 @@ class _BriefScreenState extends State<BriefScreen> {
                       calories: parseVal(_mealData?['caloriesInKcal']),
                       protein: parseVal(_mealData?['proteinInG']),
                       carbs: parseVal(_mealData?['carbohydratesInG']),
+                      fats: parseVal(_mealData?['totalFatsInG']),
                       mealName: _mealData?['name'],
                     ),
                   ),

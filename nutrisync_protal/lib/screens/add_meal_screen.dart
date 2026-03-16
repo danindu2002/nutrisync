@@ -14,6 +14,7 @@ class AddMealScreen extends StatefulWidget {
   final String? calories;
   final String? protein;
   final String? carbs;
+  final String? fats;
   final String? mealName;
 
   const AddMealScreen({
@@ -24,6 +25,7 @@ class AddMealScreen extends StatefulWidget {
     this.calories,
     this.protein,
     this.carbs,
+    this.fats,
     this.mealName,
   });
 
@@ -42,6 +44,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
   final TextEditingController _caloriesController = TextEditingController();
   final TextEditingController _proteinController = TextEditingController();
   final TextEditingController _carbsController = TextEditingController();
+  final TextEditingController _fatsController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
@@ -57,6 +60,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
       _caloriesController.text = widget.calories ?? "";
       _proteinController.text = widget.protein ?? "";
       _carbsController.text = widget.carbs ?? "";
+      _fatsController.text = widget.fats ?? "";
     }
   }
 
@@ -67,6 +71,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
     _caloriesController.dispose();
     _proteinController.dispose();
     _carbsController.dispose();
+    _fatsController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -93,7 +98,8 @@ class _AddMealScreenState extends State<AddMealScreen> {
         _weightController.text.trim().isEmpty ||
         _caloriesController.text.trim().isEmpty ||
         _proteinController.text.trim().isEmpty ||
-        _carbsController.text.trim().isEmpty) {
+        _carbsController.text.trim().isEmpty ||
+        _fatsController.text.trim().isEmpty) {
       showModernToast(context, "Please fill in all required fields", type: 'error');
       return;
     }
@@ -127,6 +133,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
         name: _nameController.text.trim(),
         totalProtein: double.tryParse(_proteinController.text.trim()) ?? 0.0,
         totalCarbs: double.tryParse(_carbsController.text.trim()) ?? 0.0,
+        totalFats: double.tryParse(_fatsController.text.trim()) ?? 0.0,
         totalCalories: double.tryParse(_caloriesController.text.trim()) ?? 0.0,
       );
       final ApiResponse response = await MealService.logMeal(_currentImage!, logMealDTO.toJson());
@@ -187,6 +194,11 @@ class _AddMealScreenState extends State<AddMealScreen> {
                   _buildLabel("Carbohydrates (g) *"),
                   const SizedBox(height: 12),
                   _buildTextField("Enter carbohydrates amount", Icons.bakery_dining, _carbsController, isNumber: true),
+                  const SizedBox(height: 24),
+
+                  _buildLabel("Fats (g) *"),
+                  const SizedBox(height: 12),
+                  _buildTextField("Enter fats amount", Icons.emoji_food_beverage, _fatsController, isNumber: true),
                   const SizedBox(height: 24),
 
                   _buildLabel("Meal Thumbnail *"),
