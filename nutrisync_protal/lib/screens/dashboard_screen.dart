@@ -3,6 +3,10 @@ import 'package:flutter/services.dart';
 import '../core/constants.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../widgets/common_widgets.dart';
+import 'dart:convert';
+import '../models/dashboard_calories_chart_dto.dart';
+
+
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -40,70 +44,210 @@ class DashboardScreen extends StatelessWidget {
 }
 
 class _CaloriesLineChart extends StatefulWidget {
-  @override
-  State<_CaloriesLineChart> createState() => _CaloriesLineChartState();
+@override
+State<_CaloriesLineChart> createState() => _CaloriesLineChartState();
 }
 
 class _CaloriesLineChartState extends State<_CaloriesLineChart> {
-
   String selectedRange = "1d";
+  bool isLoading = true;
+  String? errorMessage;
+
+  DashboardCaloriesChartDto? chartData;
+
+  // temporary fixed userId for testing
+  final int userId = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCaloriesChart(selectedRange);
+  }
+
+  Future<void> fetchCaloriesChart(String range) async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final endpoint = "/dashboard/calories?userId=$userId&range=$range";
+      final response = await ApiClient.get(endpoint);
+
+      final Map<String, dynamic> body = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && body["data"] != null) {
+        setState(() {
+          chartData = DashboardCaloriesChartDto.fromJson(body["data"]);
+          selectedRange = range;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = body["message"] ?? "Failed to load chart data";
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = "Error loading chart data";
+        isLoading = false;
+      });
+    }
+  }
+
+  List<FlSpot> buildSpots() {
+    final values = chartData?.values ?? [];
+    if (values.isEmpty) {
+      return const [FlSpot(0, 0)];
+    }
+
+    // Clamp negatives to zero so the line never renders below the baseline.
+    return values
+        .asMap()
+        .entries
+        .map((entry) => FlSpot(entry.key.toDouble(), entry.value < 0 ? 0 : entry.value))
+        .toList();
+  }
+
+  double calculateMaxY() {
+    final values = chartData?.values ?? [];
+    if (values.isEmpty) return 1000;
+
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
+
+    if (maxValue <= 500) return 500;
+    if (maxValue <= 1000) return 1000;
+    if (maxValue <= 1500) return 1500;
+    if (maxValue <= 2000) return 2000;
+    return maxValue + 200;
+  }
+
+  double calculateInterval() {
+    final maxY = calculateMaxY();
+
+    if (maxY <= 500) return 100;
+    if (maxY <= 1000) return 200;
+    if (maxY <= 2000) return 500;
+    return 1000;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final labels = chartData?.labels ?? [];
+    final totalCalories = chartData?.totalCalories ?? 0.0;
+    final spots = buildSpots();
+
+    final tabs = [
+      {"label": "1d", "value": "1d"},
+      {"label": "1w", "value": "1w"},
+      {"label": "1m", "value": "1m"},
+      {"label": "1y", "value": "1y"},
+      {"label": "All", "value": "all"},
+    ];
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ["1d", "1w", "1m", "1y", "All"].map((t) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedRange = t;
-                  });
+            children: tabs.map((tab) {
+              final label = tab["label"]!;
+              final value = tab["value"]!;
 
-                  // later we will call the backend API here
-                  // fetchCalories(selectedRange);
-                },
-                child: _TimeTab(t, selectedRange == t),
+              return GestureDetector(
+                onTap: () => fetchCaloriesChart(value),
+                child: _TimeTab(label, selectedRange == value),
               );
             }).toList(),
           ),
           const SizedBox(height: 20),
           SizedBox(
-            height: 180,
-            child: LineChart(
+            height: 220,
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : errorMessage != null
+                ? Center(
+              child: Text(
+                errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            )
+                : LineChart(
               LineChartData(
-                gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: 500),
+                clipData: const FlClipData.all(),
+                minX: 0,
+                maxX: spots.isNotEmpty ? (spots.length - 1).toDouble() : 0,
+                minY: 0,
+                maxY: calculateMaxY(),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: calculateInterval(),
+                ),
                 titlesData: FlTitlesData(
                   show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index < 0 || index >= labels.length) {
+                          return const SizedBox.shrink();
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            labels[index],
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 10,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 500,
-                      getTitlesWidget: (val, _) => Text(val.toInt().toString(), style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                      interval: calculateInterval(),
+                      getTitlesWidget: (val, meta) => Text(
+                        val.toInt().toString(),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
                   LineChartBarData(
-                    spots: const [
-                      FlSpot(0, 1400), FlSpot(1, 1450), FlSpot(2, 1000), FlSpot(3, 1500),
-                      FlSpot(4, 1867), FlSpot(5, 1300), FlSpot(6, 400), FlSpot(7, 800), FlSpot(8, 1600),
-                    ],
-                    isCurved: true,
+                    spots: spots,
+                    isCurved: spots.length > 2,
+                    preventCurveOverShooting: true,
+                    curveSmoothness: 0.18,
                     color: AppColors.primary,
-                    barWidth: 4,
+                    barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
@@ -111,7 +255,10 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [AppColors.primary.withOpacity(0.3), AppColors.primary.withOpacity(0)],
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.2),
+                          AppColors.primary.withValues(alpha: 0),
+                        ],
                       ),
                     ),
                   ),
@@ -120,7 +267,10 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text("1867 kcal", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+          Text(
+            "${totalCalories.toStringAsFixed(0)} kcal",
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -135,7 +285,7 @@ class _NutritionsBarChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
       ),
       child: Column(
         children: [
