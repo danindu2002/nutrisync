@@ -47,18 +47,20 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (userOpt.isEmpty()) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
+        NutrisyncUser user = userOpt.get();
 
         List<Challenge> allChallenges = challengeRepository.findAll();
 
-        List<UserChallenge> userChallenges =
-                userChallengeRepository.findByUser(userOpt.get());
+        // Only get ACTIVE challenges
+        List<UserChallenge> activeChallenges =
+                userChallengeRepository.findByUserAndStatus(user, ChallengeStatus.ACTIVE);
 
-        Set<Long> joinedIds = userChallenges.stream()
+        Set<Long> activeChallengeIds = activeChallenges.stream()
                 .map(uc -> uc.getChallenge().getChallengeId())
                 .collect(Collectors.toSet());
 
         List<Challenge> available = allChallenges.stream()
-                .filter(c -> !joinedIds.contains(c.getChallengeId()))
+                .filter(c -> !activeChallengeIds.contains(c.getChallengeId()))
                 .toList();
 
         return new ResponseEntity<>(available, HttpStatus.OK);

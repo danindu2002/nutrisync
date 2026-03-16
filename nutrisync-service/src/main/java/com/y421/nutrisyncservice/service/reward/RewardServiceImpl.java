@@ -57,6 +57,7 @@ public class RewardServiceImpl implements RewardService {
 
         userRepository.save(user);
         userRewardRepository.save(userReward);
+        System.err.println("Premium Duration: " + reward.getPremiumDurationDays());
 
         if (reward.getPremiumDurationDays() != null) {
 
@@ -68,12 +69,15 @@ public class RewardServiceImpl implements RewardService {
                         user.getPremiumExpireDate().plusDays(reward.getPremiumDurationDays())
                 );
             } else {
+                System.err.println("Premium Expire: " + now.plusDays(reward.getPremiumDurationDays()));
                 // start new premium
                 user.setPremiumExpireDate(
                         now.plusDays(reward.getPremiumDurationDays())
                 );
             }
+            userRepository.save(user);
         }
+
 
         return new ResponseEntity<>("Reward claimed successfully", HttpStatus.OK);
     }

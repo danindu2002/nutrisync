@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -246,6 +247,38 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     @Override
     public ResponseEntity<Object> getHealthStatus() {
         return null;
+    }
+
+    @Override
+    public ResponseEntity<Object> subscribePremium(SubscribePremiumDTO dto) {
+        Optional<NutrisyncUser> userOpt = userRepository.findById(dto.getUserId());
+
+        if (userOpt.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        NutrisyncUser user = userOpt.get();
+
+        if (dto.getDaysCount() == null || dto.getDaysCount() <= 0) {
+            return new ResponseEntity<>("Invalid days count", HttpStatus.BAD_REQUEST);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (user.getPremiumExpireDate() != null &&
+                user.getPremiumExpireDate().isAfter(now)) {
+            // Extend existing premium
+            user.setPremiumExpireDate(
+                    user.getPremiumExpireDate().plusDays(dto.getDaysCount())
+            );
+        } else {
+            // Start new premium
+            user.setPremiumExpireDate(
+                    now.plusDays(dto.getDaysCount())
+            );
+        }
+        userRepository.save(user);
+        return new ResponseEntity<>("Premium subscribed successfully", HttpStatus.OK);
     }
 
     private UserRepresentation getUserRepresentation(NutrisyncUserRequestDto userCreateDTO) {
