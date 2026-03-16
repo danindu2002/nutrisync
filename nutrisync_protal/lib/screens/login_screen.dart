@@ -1,9 +1,13 @@
+import 'package:NutriSync/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
-import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../widgets/common_widgets.dart';
-import 'onboarding_screen.dart';
+import 'forgot_password_screen.dart';
+import 'main_navigation_screen.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _rememberMe = false;
-  bool _isLoading = false;
 
   Future<void> _submitData() async {
     FocusScope.of(context).unfocus();
@@ -37,40 +40,44 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    try {
+      LoadingIndicator.show(context);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
-    );
+      final ApiResponse response = await AuthService.onSubmitLogin(loginDTO);
 
-    // final bool success = await ApiService.onSubmitLogin(loginDTO);
-    final bool success = true;
+      if(mounted) LoadingIndicator.hide(context);
 
-    if (!mounted) return;
+      if (response.status == 200) {
+        final token = response.data["accessToken"]["access_token"];
+        final userId = response.data["userId"];
 
-    Navigator.pop(context);
-    setState(() => _isLoading = false);
+        /// Decode JWT
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
 
-    if (success) {
-      showModernToast(
-        context,
-        "Login successfully!",
-        type: 'success',
-      );
+        final prefs = await SharedPreferences.getInstance();
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-      );
-    } else {
-      showModernToast(
-        context,
-        "Failed to login. Please try again.",
-        type: 'error',
-      );
+        /// Save login state
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setBool('rememberMe', _rememberMe);
+
+        /// Save token and userId
+        await prefs.setString('accessToken', token);
+        await prefs.setInt('userId', userId);
+
+        /// Save user info from JWT
+        await prefs.setString('name', decodedToken['name'] ?? "");
+        await prefs.setString('email', decodedToken['email'] ?? "");
+        await prefs.setString('username', decodedToken['preferred_username'] ?? "");
+
+        /// Navigate to dashboard
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        );
+      } else {
+        showModernToast(context, response.message, type: 'error');
+      }
+    } catch (e) {
+      Logger.error("Error occurred: $e");
     }
   }
 
@@ -89,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const _LoginHeader(),
+              const AuthHeader(),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -110,8 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
 
                     /// Username
-                    const _InputLabel("Username"),
-                    _InputField(
+                    const InputLabel("Username"),
+                    InputField(
                       controller: _usernameController,
                       icon: Icons.email_outlined,
                     ),
@@ -119,8 +126,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
 
                     /// Password
-                    const _InputLabel("Password"),
-                    _InputField(
+                    const InputLabel("Password"),
+                    InputField(
                       controller: _passwordController,
                       icon: Icons.lock_outline,
                       isPassword: true,
@@ -141,7 +148,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text("Remember Me"),
                         const Spacer(),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             "Forgot Password?",
                             style: TextStyle(color: Colors.red),
@@ -170,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     /// Login Button
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _submitData,
+                      onPressed: _submitData,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         minimumSize: const Size(double.infinity, 54),
@@ -193,15 +208,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     /// Sign Up
                     Center(
                       child: RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           text: "Don't have an Account? ",
-                          style: TextStyle(color: Colors.grey),
+                          style: const TextStyle(color: Colors.grey),
                           children: [
-                            TextSpan(
-                              text: "Sign up",
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
+                            WidgetSpan(
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const SignUpScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Sign up",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -220,121 +247,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-class _LoginHeader extends StatelessWidget {
-  const _LoginHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: _BottomCurveClipper(),
-      child: Container(
-        height: 300,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/authentication/login_bg.png"),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InputLabel extends StatelessWidget {
-  final String text;
-  const _InputLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(fontWeight: FontWeight.w600),
-    );
-  }
-}
-
-class _InputField extends StatefulWidget {
-  final IconData icon;
-  final bool isPassword;
-  final TextEditingController controller;
-
-  const _InputField({
-    required this.icon,
-    required this.controller,
-    this.isPassword = false,
-  });
-
-  @override
-  State<_InputField> createState() => _InputFieldState();
-}
-
-class _InputFieldState extends State<_InputField> {
-  bool _obscure = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      obscureText: widget.isPassword ? _obscure : false,
-      decoration: InputDecoration(
-        prefixIcon: Icon(widget.icon),
-        suffixIcon: widget.isPassword
-            ? IconButton(
-          icon: Icon(
-            _obscure ? Icons.visibility_off : Icons.visibility,
-          ),
-          onPressed: () => setState(() => _obscure = !_obscure),
-        )
-            : null,
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.red),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomCurveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-
-    // Start top-left
-    path.lineTo(0, size.height - 20);
-
-    // 🔼 First half curve (upwards)
-    path.quadraticBezierTo(
-      size.width * 0.25,
-      size.height - 80,
-      size.width * 0.5,
-      size.height - 40,
-    );
-
-    // 🔽 Second half curve (downwards)
-    path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height,
-      size.width,
-      size.height - 20,
-    );
-
-    // Finish shape
-    path.lineTo(size.width, 0);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-
