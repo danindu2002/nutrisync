@@ -224,7 +224,38 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     );
   }
 
-
+  Widget _buildEmptyState() {
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/MealPlan.png',
+            height: 220,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No Meal Plans Yet',
+            style: AppTextStyles.header.copyWith(fontSize: 24),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Create personalized meal plans tailored to your goals and nutrition needs.',
+            style: AppTextStyles.subHeader,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          _buildFeaturePoint(Icons.schedule, 'Full Daily Coverage'),
+          const SizedBox(height: 12),
+          _buildFeaturePoint(Icons.flag, 'Goal-Oriented'),
+          const SizedBox(height: 12),
+          _buildFeaturePoint(Icons.local_dining, 'Nutrient Dense'),
+        ],
+      ),
+    );
+  }
 
   Widget _buildFeaturePoint(IconData icon, String text) {
     return Container(
@@ -403,7 +434,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
               const SizedBox(height: 24),
 
-              
+              hasMealPlans ? _buildMealPlanListState() : _buildEmptyState(),
 
               const SizedBox(height: 20),
 
