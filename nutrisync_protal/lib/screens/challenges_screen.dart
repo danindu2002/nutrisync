@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
-import '../widgets/common_widgets.dart'; // Import for PrimaryButton
+import '../widgets/common_widgets.dart';
 
 class ChallengesScreen extends StatefulWidget {
   const ChallengesScreen({super.key});
