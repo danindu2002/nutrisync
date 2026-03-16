@@ -40,9 +40,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       final ApiResponse response = await AuthService.getUserProfile(userId);
 
       if (response.status == 200) {
-        final premiumExpireDate = response.data["premiumExpireDate"];
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('premiumExpireDate', premiumExpireDate ?? "");
         setState(() => user = response.data);
       } else {
         showModernToast(context, response.message, type: 'error');

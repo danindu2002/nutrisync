@@ -115,5 +115,22 @@ class AuthService {
       );
     }
   }
+
+  static Future<ApiResponse> subscribe(int userId, int daysCount) async {
+    try {
+      final response = await ApiClient.post(
+        "/user/subscribePremium",
+        {
+          "userId": userId,
+          "daysCount": daysCount,
+        },
+        requiresAuth: false,
+      );
+      return ApiResponse.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      Logger.error("Error subscribing: $e");
+      return ApiResponse(status: 500, message: "Unexpected error occurred");
+    }
+  }
 }
 
