@@ -85,6 +85,8 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                   _buildSubtitle(),
                   const SizedBox(height: 24),
                   _buildNameInput(),
+                  const SizedBox(height: 32),
+                  ...mealGroups.map((group) => _buildMealGroup(group)),
                 ],
               ),
             ),
@@ -164,6 +166,138 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMealGroup(Map<String, dynamic> group) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          group["date"],
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...List.generate(
+          (group["meals"] as List).length,
+          (index) => _buildMealCard(group["meals"][index]),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildMealCard(Map<String, dynamic> meal) {
+    Color badgeColor;
+    Color badgeTextColor;
+
+    switch (meal["type"]) {
+      case "BREAKFAST":
+        badgeColor = const Color(0xFFFEF3C7);
+        badgeTextColor = const Color(0xFFD97706);
+        break;
+      case "LUNCH":
+        badgeColor = const Color(0xFFFFEDD5);
+        badgeTextColor = const Color(0xFFC2410C);
+        break;
+      case "DINNER":
+        badgeColor = const Color(0xFFDBEAFE);
+        badgeTextColor = const Color(0xFF1D4ED8);
+        break;
+      default:
+        badgeColor = Colors.grey.shade200;
+        badgeTextColor = Colors.grey.shade700;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Row(
+        children: [
+          // Meal Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              meal["imageUrl"],
+              width: 70,
+              height: 70,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 70,
+                height: 70,
+                color: Colors.grey.shade200,
+                child: const Icon(Icons.image, color: Colors.grey),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Meal Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    meal["type"],
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: badgeTextColor,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  meal["name"],
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Swap Button
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDF4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.sync, color: Color(0xFF10B981)),
+              onPressed: () {
+                // Handle swap action
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
