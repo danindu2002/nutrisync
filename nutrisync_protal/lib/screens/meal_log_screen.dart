@@ -201,14 +201,9 @@ class _MealLogScreenState extends State<MealLogScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                ),
+                // Invisible placeholder
+                const SizedBox(width: 48),
+                // Centered Title
                 const Text(
                   "Meal Log",
                   style: TextStyle(
