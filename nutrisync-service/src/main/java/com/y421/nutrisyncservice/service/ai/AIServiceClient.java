@@ -64,7 +64,6 @@ public class AIServiceClient {
             // 3. Call the Python API
             ResponseEntity<RiskPredictDTO[]> response = restTemplate.postForEntity(baseUrl + "/risk-prediction", requestEntity, RiskPredictDTO[].class);
 
-            System.out.println(response.getBody());
             if (response.getStatusCode() == HttpStatus.OK) {
                 List<RiskPredictDTO> riskList = Arrays.asList(response.getBody());
 
