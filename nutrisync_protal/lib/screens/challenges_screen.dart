@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
-import '../widgets/common_widgets.dart'; // Import for PrimaryButton
+import '../widgets/common_widgets.dart';
+import '../services/challenge_service.dart';
 
 class ChallengesScreen extends StatefulWidget {
   const ChallengesScreen({super.key});
@@ -11,12 +13,110 @@ class ChallengesScreen extends StatefulWidget {
 
 class _ChallengesScreenState extends State<ChallengesScreen> {
   bool isShowingActive = true;
+  bool _isLoading = true;
+
+  int _userPoints = 0;
+  List<dynamic> _activeChallenges = [];
+  List<dynamic> _availableChallenges = [];
+
+  // Tracks which userChallengeIds have been logged during this app session
+  final Set<int> _loggedTodayIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllData();
+  }
+
+  String _getTodayDateString() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month}-${now.day}";
+  }
+
+  Future<void> _loadAllData() async {
+    setState(() => _isLoading = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt("userId");
+
+    if (userId == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    // Load locally saved logged IDs for TODAY
+    final todayKey = "logged_challenges_${_getTodayDateString()}";
+    final savedLoggedIds = prefs.getStringList(todayKey) ?? [];
+
+    // Convert the saved String list back to a Set of Ints
+    _loggedTodayIds.clear();
+    _loggedTodayIds.addAll(savedLoggedIds.map((id) => int.parse(id)));
+
+    // Fetch all 3 endpoints concurrently for better performance
+    final results = await Future.wait([
+      ChallengeService.getUserPoints(userId),
+      ChallengeService.getActiveChallenges(userId),
+      ChallengeService.getAvailableChallenges(userId),
+    ]);
+
+    if (mounted) {
+      setState(() {
+        _userPoints = results[0].data ?? 0;
+        _activeChallenges = results[1].data ?? [];
+        _availableChallenges = results[2].data ?? [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleJoinChallenge(int challengeId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt("userId") ?? 0;
+
+    LoadingIndicator.show(context);
+    final response = await ChallengeService.joinChallenge(userId, challengeId);
+    if (mounted) LoadingIndicator.hide(context);
+
+    if (response.success) {
+      showModernToast(context, "Successfully joined challenge!", type: 'success');
+      _loadAllData(); // Refresh lists and points
+      setState(() => isShowingActive = true); // Switch to active tab to see it
+    } else {
+      showModernToast(context, response.message, type: 'error');
+    }
+  }
+
+  Future<void> _handleLogProgress(int userChallengeId) async {
+    LoadingIndicator.show(context);
+    final response = await ChallengeService.logProgress(userChallengeId);
+    if (mounted) LoadingIndicator.hide(context);
+
+    if (response.success) {
+      showModernToast(context, "Progress logged! Keep it up!", type: 'success');
+
+      // Save the ID to SharedPreferences for TODAY
+      final prefs = await SharedPreferences.getInstance();
+      final todayKey = "logged_challenges_${_getTodayDateString()}";
+
+      // Get existing list, add the new one, and save it back
+      final savedLoggedIds = prefs.getStringList(todayKey) ?? [];
+      savedLoggedIds.add(userChallengeId.toString());
+      await prefs.setStringList(todayKey, savedLoggedIds);
+
+      setState(() {
+        _loggedTodayIds.add(userChallengeId); // Disable button locally
+      });
+
+      _loadAllData(); // Refresh to get updated daysLeft and progress %
+    } else {
+      showModernToast(context, response.message, type: 'error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
-      // Custom AppBar to match Figma
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -30,26 +130,28 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         ),
         centerTitle: false,
         actions: [
-          _buildPointsBadge(), // Points badge from Figma
+          _buildPointsBadge(),
         ],
       ),
       body: Column(
         children: [
           const SizedBox(height: 10),
-          // Figma-styled Segmented Tab Switcher
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: _buildFigmaTabSwitcher(),
           ),
-
           const SizedBox(height: 25),
 
-          // Main Content Area
           Expanded(
-            child: ListView(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.redAccent))
+                : ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
-                if (isShowingActive) ..._buildActiveChallenges() else ..._buildAvailableChallenges(),
+                if (isShowingActive)
+                  ..._buildActiveChallenges()
+                else
+                  ..._buildAvailableChallenges(),
                 const SizedBox(height: 20),
               ],
             ),
@@ -59,7 +161,6 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     );
   }
 
-  // Figma Style: Points badge in the top right
   Widget _buildPointsBadge() {
     return Padding(
       padding: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
@@ -68,17 +169,15 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.stars_rounded, color: Colors.redAccent, size: 18),
-            SizedBox(width: 4),
+            const Icon(Icons.stars_rounded, color: Colors.redAccent, size: 18),
+            const SizedBox(width: 4),
             Text(
-              "1240",
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              "$_userPoints",
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -86,7 +185,6 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     );
   }
 
-  // Figma Style: Segmented switch with light grey background and red active state
   Widget _buildFigmaTabSwitcher() {
     return Container(
       height: 50,
@@ -141,75 +239,75 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   }
 
   List<Widget> _buildActiveChallenges() {
-    return const [
-      ChallengeCard(
-        title: "30-Day Calorie Control",
-        subtitle: "Stay under 2000 calories daily for 30 days",
-        daysLeft: 11,
-        points: 500,
-        progress: 0.65,
-        dayCount: "19/30",
-        icon: Icons.fitness_center,
+    if (_activeChallenges.isEmpty) {
+      return [
+        const Padding(
+          padding: EdgeInsets.only(top: 50),
+          child: Center(child: Text("No active challenges. Join one today!", style: TextStyle(color: Colors.grey))),
+        )
+      ];
+    }
+
+    return _activeChallenges.map((challenge) {
+      final userChallengeId = challenge['userChallengeId'] as int;
+      final isLoggedToday = _loggedTodayIds.contains(userChallengeId);
+
+      return ChallengeCard(
+        title: challenge['challengeName'] ?? "Challenge",
+        subtitle: challenge['description'] ?? "",
+        daysLeft: challenge['daysLeft'] ?? 0,
+        points: challenge['pointsReward'] ?? 0,
+        progress: (challenge['progressPercentage'] ?? 0.0) / 100.0,
+        dayCount: "${challenge['completedDays']}/${challenge['durationDays']}",
+        icon: Icons.emoji_events, // Default icon
         iconColor: Colors.orange,
         isAvailableView: false,
-      ),
-      ChallengeCard(
-        title: "Hydration Hero",
-        subtitle: "Drink 8 glasses of water daily for 7 days",
-        daysLeft: 3,
-        points: 200,
-        progress: 0.85,
-        dayCount: "6/7",
-        icon: Icons.water_drop,
-        iconColor: Colors.blueAccent,
-        isAvailableView: false,
-      ),
-      ChallengeCard(
-        title: "Veggies Week",
-        subtitle: "Include vegetables in every meal for 7 days",
-        daysLeft: 7,
-        points: 250,
-        progress: 0.0,
-        dayCount: "1/7",
-        icon: Icons.restaurant,
-        iconColor: Colors.green,
-        isAvailableView: false,
-      ),
-    ];
+        isActionDisabled: isLoggedToday, // Disable if logged today
+        buttonText: isLoggedToday ? "Logged Today" : "Log Progress",
+        onActionTap: () => _handleLogProgress(userChallengeId),
+      );
+    }).toList();
   }
 
   List<Widget> _buildAvailableChallenges() {
-    return const [
-      ChallengeCard(
-        title: "15-Day Calorie Control",
-        subtitle: "Stay under 1000 calories daily for 15 days",
-        daysLeft: 15,
-        points: 250,
-        icon: Icons.fitness_center,
+    if (_availableChallenges.isEmpty) {
+      return [
+        const Padding(
+          padding: EdgeInsets.only(top: 50),
+          child: Center(child: Text("No new challenges available right now.", style: TextStyle(color: Colors.grey))),
+        )
+      ];
+    }
+
+    return _availableChallenges.map((challenge) {
+      final challengeId = challenge['challengeId'] as int;
+
+      return ChallengeCard(
+        title: challenge['name'] ?? "Challenge",
+        subtitle: challenge['description'] ?? "",
+        daysLeft: challenge['durationDays'] ?? 0,
+        points: challenge['pointsReward'] ?? 0,
+        icon: Icons.local_fire_department, // Default icon
         iconColor: Colors.deepPurple,
         isAvailableView: true,
-      ),
-      ChallengeCard(
-        title: "Sugar Detox Challenge",
-        subtitle: "Avoid added sugar for 14 days straight",
-        daysLeft: 14,
-        points: 800,
-        icon: Icons.local_fire_department,
-        iconColor: Colors.orange,
-        isAvailableView: true,
-      ),
-    ];
+        isActionDisabled: false,
+        buttonText: "Join Challenge",
+        onActionTap: () => _handleJoinChallenge(challengeId),
+      );
+    }).toList();
   }
 }
 
 class ChallengeCard extends StatelessWidget {
-  final String title, subtitle;
+  final String title, subtitle, buttonText;
   final String? dayCount;
   final int daysLeft, points;
   final double? progress;
   final IconData icon;
   final Color iconColor;
   final bool isAvailableView;
+  final bool isActionDisabled;
+  final VoidCallback onActionTap;
 
   const ChallengeCard({
     super.key,
@@ -222,6 +320,9 @@ class ChallengeCard extends StatelessWidget {
     this.progress,
     this.dayCount,
     required this.isAvailableView,
+    required this.isActionDisabled,
+    required this.buttonText,
+    required this.onActionTap,
   });
 
   @override
@@ -264,7 +365,7 @@ class ChallengeCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _info(Icons.access_time_filled, "$daysLeft days left", AppColors.primary),
+              _info(Icons.access_time_filled, "$daysLeft days ${isAvailableView ? 'duration' : 'left'}", AppColors.primary),
               _info(Icons.card_giftcard, "$points points", Colors.orange),
             ],
           ),
@@ -292,10 +393,26 @@ class ChallengeCard extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          PrimaryButton(
-              onTap: () {},
-              text: isAvailableView ? "Join Challenge" : "Log Progress",
-              isRed: true
+          // Custom button styling to handle Disabled State smoothly
+          GestureDetector(
+            onTap: isActionDisabled ? null : onActionTap,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: isActionDisabled ? Colors.grey.shade300 : AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                buttonText,
+                style: TextStyle(
+                  color: isActionDisabled ? Colors.grey.shade600 : Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),

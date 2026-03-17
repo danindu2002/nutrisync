@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
 import '../models/onboarding_dto.dart';
@@ -113,6 +112,23 @@ class AuthService {
         message: "Unexpected error occurred",
         data: null,
       );
+    }
+  }
+
+  static Future<ApiResponse> subscribe(int userId, int daysCount) async {
+    try {
+      final response = await ApiClient.post(
+        "/user/subscribePremium",
+        {
+          "userId": userId,
+          "daysCount": daysCount,
+        },
+        requiresAuth: false,
+      );
+      return ApiResponse.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      Logger.error("Error subscribing: $e");
+      return ApiResponse(status: 500, message: "Unexpected error occurred");
     }
   }
 }
