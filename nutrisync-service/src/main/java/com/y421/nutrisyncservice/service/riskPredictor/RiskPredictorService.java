@@ -4,5 +4,5 @@ import org.springframework.http.ResponseEntity;
 
 public interface RiskPredictorService {
 
-    ResponseEntity<Object> predictRisk(Long userId);
+    ResponseEntity<Object> predictRisk(Long userId, Integer years);
 }

@@ -23,9 +23,9 @@ public class RiskPredictorControllerImpl implements RiskPredictorController {
     private final RiskPredictorService riskPredictorService;
 
     @Override
-    public ResponseEntity<Object> predictRisk(Long userId) {
+    public ResponseEntity<Object> predictRisk(Long userId, Integer years) {
         try {
-            ResponseEntity<Object> response = riskPredictorService.predictRisk(userId);
+            ResponseEntity<Object> response = riskPredictorService.predictRisk(userId, years);
             if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
                 return generateResponse("Risk Predicted Successfully", HttpStatus.OK, response.getBody());
             } else {
