@@ -254,7 +254,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -607,11 +607,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 });
               },
             ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   // --- Screen 7: Activity Level ---
   Widget _buildActivityScreen() {
