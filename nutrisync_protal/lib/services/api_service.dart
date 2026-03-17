@@ -96,33 +96,32 @@ class ApiService {
           // Let's assume `data` is a map with a `riskPredictList` or it just sends back an array directly in data if it's not a map
 
           List<dynamic> listToParse = [];
-          if (data is List) {
-            listToParse = data;
-          } else if (data is Map && data.containsKey('risks')) {
-            listToParse = data['risks'];
-          } else {
-            // Fallback if data contains the array somewhere (since sample was partially cut off but shows an array bracket)
-            // The sample showed `],mealSwapList:[]` meaning data is an object like `{ "risks": [...], "mealSwapList": [] }`
-            // Wait, the user JSON snippet showed `[ { ... }, { ... } ], mealSwapList: [] }` which is structurally invalid JSON string if literal,
-            // it usually means `{"predictedRisks": [...], "mealSwapList": [] }` or similar. Let's try to extract any List item.
-            var possibleList = data.values.firstWhere(
-              (v) => v is List,
-              orElse: () => null,
-            );
-            if (possibleList != null) {
-              listToParse = possibleList as List;
+          if (data is Map<String, dynamic>) {
+            if (data.containsKey('riskPredictList')) {
+              listToParse = data['riskPredictList'];
+            } else if (data.containsKey('risks')) {
+              listToParse = data['risks'];
+            } else {
+              var possibleList = data.values.firstWhere(
+                (v) => v is List,
+                orElse: () => null,
+              );
+              if (possibleList != null) {
+                listToParse = possibleList as List;
+              }
             }
+          } else if (data is List) {
+            listToParse = data;
           }
 
           return listToParse.map((json) => RiskModel.fromJson(json)).toList();
         }
         return [];
-      } else {
-        debugPrint("Predict risk error: \${response.body}");
+        debugPrint("Predict risk error: ${response.statusCode} - ${response.body}");
         return [];
       }
     } catch (e) {
-      debugPrint("Predict risk exception: \$e");
+      debugPrint("Predict risk exception: $e");
       return [];
     }
   }

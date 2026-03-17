@@ -542,8 +542,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ? displayVal.toStringAsFixed(0)
         : displayVal.toStringAsFixed(1);
 
-    return Column(
-      children: [
+    return SingleChildScrollView(
+      child: Column(
+        children: [
         const SizedBox(height: 30),
         UnitSwitch(
           isLeftSelected: _isKg,

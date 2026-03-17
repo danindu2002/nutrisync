@@ -135,17 +135,53 @@ class RiskDetailSheet extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Icon(
-                              Icons.fastfood,
-                              color: Colors.grey,
-                            ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: meal.image != null && meal.image!.isNotEmpty
+                                ? (meal.image!.startsWith('http')
+                                      ? Image.network(
+                                          meal.image!,
+                                          width: 56,
+                                          height: 56,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                                    width: 56,
+                                                    height: 56,
+                                                    color: Colors.grey.shade300,
+                                                    child: const Icon(
+                                                      Icons.fastfood,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                        )
+                                      : Image.asset(
+                                          meal.image!,
+                                          width: 56,
+                                          height: 56,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                                    width: 56,
+                                                    height: 56,
+                                                    color: Colors.grey.shade300,
+                                                    child: const Icon(
+                                                      Icons.fastfood,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                        ))
+                                : Container(
+                                    width: 56,
+                                    height: 56,
+                                    color: Colors.grey.shade300,
+                                    child: const Icon(
+                                      Icons.fastfood,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
