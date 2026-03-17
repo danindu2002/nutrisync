@@ -163,4 +163,19 @@ public class NutrisyncUserControllerImpl implements NutrisyncUserController {
             return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
         }
     }
+
+    @Override
+    public ResponseEntity<Object> updateProfile(Long userId, UpdateProfileRequestDto dto) {
+        try {
+            ResponseEntity<Object> response = nutrisyncUserService.updateProfile(userId, dto);
+
+            if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                return generateResponse("Profile Updated Successfully", HttpStatus.OK, response.getBody());
+            } else {
+                return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
+            }
+        } catch (Exception e) {
+            return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
+        }
+    }
 }
