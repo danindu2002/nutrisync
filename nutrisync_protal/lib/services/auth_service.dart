@@ -115,6 +115,23 @@ class AuthService {
     }
   }
 
+  static Future<ApiResponse> getUserData(int userId) async {
+    try {
+      final response = await ApiClient.get("/user/userDetails/$userId");
+
+      final body = jsonDecode(response.body);
+      Logger.info("Response: $body");
+      return ApiResponse.fromJson(body);
+    } catch (e) {
+      Logger.error("An error occurred: $e");
+      return ApiResponse(
+        status: 500,
+        message: "An error occurred",
+        data: null,
+      );
+    }
+  }
+
   static Future<ApiResponse> subscribe(int userId, int daysCount) async {
     try {
       final response = await ApiClient.post(
