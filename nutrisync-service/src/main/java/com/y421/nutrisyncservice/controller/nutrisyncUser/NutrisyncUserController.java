@@ -31,4 +31,7 @@ public interface NutrisyncUserController {
 
     @PostMapping("/subscribePremium")
     ResponseEntity<Object> subscribePremium(@RequestBody SubscribePremiumDTO dto);
+
+    @GetMapping("/userDetails/{userId}")
+    ResponseEntity<Object> getUserDetails(@PathVariable Long userId);
 }
