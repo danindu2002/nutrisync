@@ -16,4 +16,5 @@ public interface NutrisyncUserRepository extends JpaRepository<NutrisyncUser, Lo
     Optional<NutrisyncUser> findByForgotPwdOtpAndIsDeletedFalse(String email);
     Optional<NutrisyncUser> findByKeycloakUserIdAndIsDeletedFalse(String keycloakUserId);
     Optional<NutrisyncUser> findByUserNameAndIsDeletedFalse(String userName);
+    Optional<NutrisyncUser> findByUserIdAndIsDeletedFalse(Long userId);
 }
