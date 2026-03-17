@@ -1479,6 +1479,7 @@ class LoadingIndicator {
     showDialog(
       context: context,
       barrierDismissible: false,
+      useRootNavigator: true,
       builder: (_) {
         return const Center(
           child: CircularProgressIndicator(
@@ -1494,8 +1495,6 @@ class LoadingIndicator {
 
     _isShowing = false;
 
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    }
+    Navigator.of(context, rootNavigator: true).pop();
   }
 }
