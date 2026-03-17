@@ -205,17 +205,62 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     }
 
     @Override
-    public ResponseEntity<Object> updateProfile(Long userId) {
+    public ResponseEntity<Object> updateProfile(Long userId, UpdateProfileRequestDto dto) {
         try {
-            if (!userRepository.existsByUserIdAndIsDeletedFalse(userId)) {
+
+            Optional<NutrisyncUser> optionalUser = userRepository.findByUserIdAndIsDeletedFalse(userId);
+
+            if (optionalUser.isEmpty()) {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
-            NutrisyncUser user  = userRepository.getReferenceById(userId);
+
+            NutrisyncUser user = optionalUser.get();
+
+            // Update First Name
+            if (dto.getFirstName() != null) {
+                user.setFirstName(dto.getFirstName());
+            }
+
+            // Update Last Name
+            if (dto.getLastName() != null) {
+                user.setLastName(dto.getLastName());
+            }
+
+            // Update Email (with validation)
+            if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
+
+                if (userRepository.existsByEmailAndIsDeletedFalse(dto.getEmail())) {
+                    return new ResponseEntity<>("Email already in use", HttpStatus.CONFLICT);
+                }
+
+                user.setEmail(dto.getEmail());
+
+                // ALSO UPDATE KEYCLOAK
+                currentKeycloak = keycloakRealmChanger.changeRealm();
+                UserResource userResource = currentKeycloak.realm(serviceName)
+                        .users()
+                        .get(user.getKeycloakUserId());
+
+                UserRepresentation kcUser = userResource.toRepresentation();
+                kcUser.setEmail(dto.getEmail());
+                kcUser.setUsername(dto.getEmail()); // optional (depends on your design)
+                userResource.update(kcUser);
+            }
+
+            // Update Profile Image
+            if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
+                user.setProfileImage(dto.getProfileImage().getBytes());
+            }
+
+            userRepository.save(user);
 
             return new ResponseEntity<>(user, HttpStatus.OK);
+
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Error occurred during get profile", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Error occurred during profile update", HttpStatus.BAD_REQUEST);
+        } finally {
+            currentKeycloak = null;
         }
     }
 
