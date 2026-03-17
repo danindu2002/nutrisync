@@ -20,4 +20,6 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
     List<UserChallenge> findByUser(NutrisyncUser user);
 
     List<UserChallenge> findByUserAndStatus(NutrisyncUser user, ChallengeStatus status);
+
+    Integer countByUserUserIdAndStatus(Long userId, ChallengeStatus status);
 }

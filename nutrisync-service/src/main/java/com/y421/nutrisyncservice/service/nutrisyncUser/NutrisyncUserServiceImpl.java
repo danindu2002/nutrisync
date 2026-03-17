@@ -1,11 +1,15 @@
 package com.y421.nutrisyncservice.service.nutrisyncUser;
 
+import com.y421.nutrisyncservice.entity.challenge.ChallengeStatus;
+import com.y421.nutrisyncservice.entity.challenge.UserChallenge;
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
 import com.y421.nutrisyncservice.mapper.nutrisyncUser.NutrisyncUserMapper;
+import com.y421.nutrisyncservice.repository.challenge.UserChallengeRepository;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
 import com.y421.nutrisyncservice.request.nutrisyncUser.*;
 import com.y421.nutrisyncservice.response.email.EmailDetailsDTO;
 import com.y421.nutrisyncservice.response.nutrisyncUser.LoginResDto;
+import com.y421.nutrisyncservice.response.nutrisyncUser.UserDetailsDTO;
 import com.y421.nutrisyncservice.util.EmailService;
 import com.y421.nutrisyncservice.util.EmailTemplate;
 import com.y421.nutrisyncservice.util.KeycloakRealmChanger;
@@ -39,6 +43,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     private final YamlConfig yamlConfig;
     private final NutrisyncUserRepository userRepository;
     private final NutrisyncUserMapper nutrisyncUserMapper;
+    private final UserChallengeRepository userChallengeRepository;
     private final EmailTemplate emailTemplate;
     private final EmailService emailService;
 
@@ -279,6 +284,86 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
         }
         userRepository.save(user);
         return new ResponseEntity<>("Premium subscribed successfully", HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Object> getUserDetails(Long userId) {
+        try {
+            if (!userRepository.existsByUserIdAndIsDeletedFalse(userId)) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+            NutrisyncUser user  = userRepository.getReferenceById(userId);
+            Integer activeChallenges = userChallengeRepository.countByUserUserIdAndStatus(userId, ChallengeStatus.ACTIVE);
+            Integer failedChallenges = userChallengeRepository.countByUserUserIdAndStatus(userId, ChallengeStatus.FAILED);
+            Integer completedChallenges = userChallengeRepository.countByUserUserIdAndStatus(userId, ChallengeStatus.COMPLETED);
+            Integer score = calculateHealthScore(user, activeChallenges, completedChallenges, failedChallenges);
+
+            UserDetailsDTO dto = nutrisyncUserMapper.toUserDetailsDTO(user);
+            dto.setActiveChallenges(activeChallenges);
+            dto.setFailedChallenges(failedChallenges);
+            dto.setCompletedChallenges(completedChallenges);
+            dto.setScore(score);
+
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error occurred during get profile", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private Integer calculateHealthScore(NutrisyncUser user, int active, int completed, int failed) {
+        int totalScore = 0;
+
+        // 1. BMI Score (Max 40)
+        if (user.getBmi() != null) {
+            float bmi = user.getBmi();
+            if (bmi >= 18.5f && bmi <= 24.9f) {
+                totalScore += 40;
+            } else if ((bmi >= 17.0f && bmi < 18.5f) || (bmi >= 25.0f && bmi <= 29.9f)) {
+                totalScore += 30;
+            } else if (bmi >= 30.0f && bmi <= 34.9f) {
+                totalScore += 20;
+            } else {
+                totalScore += 10;
+            }
+        } else {
+            // Fallback if BMI is null (average middle ground)
+            totalScore += 20;
+        }
+
+        // 2. Lifestyle Score (Max 30)
+        if (user.getActivityLevel() != null) {
+            String activity = user.getActivityLevel().toUpperCase();
+            if (activity.contains("EXTRA") || activity.contains("VERY")) totalScore += 15;
+            else if (activity.contains("MODERATE")) totalScore += 10;
+            else if (activity.contains("LIGHT")) totalScore += 5;
+            // SEDENTARY gets 0
+        }
+
+        if (user.getSleepQuality() != null) {
+            String sleep = user.getSleepQuality().toUpperCase();
+            if (sleep.equals("EXCELLENT")) totalScore += 15;
+            else if (sleep.equals("GOOD")) totalScore += 10;
+            else if (sleep.equals("FAIR")) totalScore += 5;
+            // POOR gets 0
+        }
+
+        // 3. Challenge Engagement Score (Max 20)
+        int challengePoints = (completed * 3) + (active * 1) - failed;
+        // Ensure the score is bounded between 0 and 20
+        challengePoints = Math.max(0, Math.min(20, challengePoints));
+        totalScore += challengePoints;
+
+        // 4. Medical Risk Score (Max 10)
+        int medicalCount = (user.getMedicalConditions() != null) ? user.getMedicalConditions().size() : 0;
+        if (medicalCount == 0) {
+            totalScore += 10;
+        } else if (medicalCount == 1) {
+            totalScore += 5;
+        }
+        // 2 or more conditions get 0
+
+        return totalScore;
     }
 
     private UserRepresentation getUserRepresentation(NutrisyncUserRequestDto userCreateDTO) {
