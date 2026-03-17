@@ -6,13 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//This DTO is used to send post processed meal risk contribution details to the FE
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MealRiskContributionDTO {
+public class MealRiskContributionResDTO {
 
-    @JsonProperty("mealLogId")
     private Long logId; // meal log id contributed to the risk
+    private String foodName;
+    private byte[] image;
     private String contribution;
 }

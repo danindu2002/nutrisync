@@ -3,11 +3,12 @@ package com.y421.nutrisyncservice.service.riskPredictor;
 import com.y421.nutrisyncservice.entity.mealLog.MealLog;
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
 import com.y421.nutrisyncservice.mapper.meal.MealLogRiskMapper;
-import com.y421.nutrisyncservice.mapper.meal.MealMapper;
 import com.y421.nutrisyncservice.repository.foodMaster.FoodMasterRepository;
 import com.y421.nutrisyncservice.repository.mealLog.MealLogRepository;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
 import com.y421.nutrisyncservice.request.meal.MealLogRiskRequestDTO;
+import com.y421.nutrisyncservice.response.riskPredictor.MealRiskContribution;
+import com.y421.nutrisyncservice.response.riskPredictor.MealRiskContributionResDTO;
 import com.y421.nutrisyncservice.response.riskPredictor.RiskPredictorResponseDTO;
 import com.y421.nutrisyncservice.service.ai.AIServiceClient;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,17 +46,20 @@ public class RiskPredictorServiceImpl implements RiskPredictorService {
             if (riskPrediction == null) {
                 return new ResponseEntity<>("Error Predicting Risk", HttpStatus.CONFLICT);
             }
-
+            riskPrediction.getRiskPredictionList().stream().forEach(prediction -> {
+                List<MealRiskContributionResDTO> processedDTOList = new ArrayList<>();
+                prediction.getMealRiskContributionList().stream().forEach(mealContribution -> {
+                    MealLog mLog = mealLog.stream().filter(m->m.getLogId().equals((mealContribution.getLogId()))).findFirst().orElse(null);
+                    MealRiskContributionResDTO dto = new MealRiskContributionResDTO(mLog.getLogId(), mLog.getFoodName(), mLog.getImage(), mealContribution.getContribution());
+                    processedDTOList.add(dto);
+                });
+                prediction.setContibutedMealList(processedDTOList);
+                prediction.setMealRiskContributionList(null);
+            });
             return new ResponseEntity<>(riskPrediction, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error Occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    // Helper to extract numeric value from strings like "9.00 mg" or "381"
-    private Float parseValue(String value) {
-        if (value == null || value.isEmpty()) return 0.0f;
-        return Float.parseFloat(value.replaceAll("[^0-9.]", ""));
     }
 }
