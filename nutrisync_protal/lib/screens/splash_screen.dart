@@ -1,9 +1,10 @@
+import 'package:NutriSync/screens/main_navigation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import 'login_screen.dart';
 import 'welcome_screen.dart';
-import 'onboarding_screen.dart'; // or HomeScreen
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,10 +13,40 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    ));
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    ));
+
+    _controller.forward();
+
     _checkAppState();
   }
 
@@ -25,7 +56,8 @@ class _SplashScreenState extends State<SplashScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     bool hasSeenWelcome = prefs.getBool('hasSeenWelcome') ?? false;
-    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    bool rememberMe = prefs.getBool('rememberMe') ?? false;
+    String? token = prefs.getString("accessToken");
 
     if (!mounted) return;
 
@@ -34,10 +66,10 @@ class _SplashScreenState extends State<SplashScreen> {
         context,
         MaterialPageRoute(builder: (_) => const WelcomeScreen()),
       );
-    } else if (isLoggedIn) {
+    } else if (rememberMe && token != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
       );
     } else {
       Navigator.pushReplacement(
@@ -48,16 +80,34 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: "Nutri", style: AppTextStyles.welcomeText),
-              TextSpan(text: "Sync", style: AppTextStyles.welcomeTextRed),
-            ],
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Nutri",
+                    style: AppTextStyles.welcomeText,
+                  ),
+                  TextSpan(
+                    text: "Sync",
+                    style: AppTextStyles.welcomeTextRed,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

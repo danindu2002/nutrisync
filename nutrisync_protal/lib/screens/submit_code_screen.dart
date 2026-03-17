@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../core/constants.dart';
+import '../services/auth_service.dart';
 import '../widgets/common_widgets.dart';
 import 'reset_password_screen.dart';
 
@@ -16,24 +19,66 @@ class SubmitCodeScreen extends StatefulWidget {
 }
 
 class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
+
   final List<TextEditingController> _controllers =
   List.generate(6, (_) => TextEditingController());
 
   final List<FocusNode> _focusNodes =
   List.generate(6, (_) => FocusNode());
 
-  bool _isLoading = false;
+  int _secondsRemaining = 30;
+  Timer? _timer;
 
-  String get _enteredCode =>
-      _controllers.map((c) => c.text).join();
+  String get _enteredCode => _controllers.map((c) => c.text).join();
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _secondsRemaining = 30;
+    _timer?.cancel();
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining == 0) {
+        timer.cancel();
+      } else {
+        setState(() => _secondsRemaining--);
+      }
+    });
+  }
 
   String _maskEmail(String email) {
     final parts = email.split("@");
     if (parts.length != 2) return email;
+
     return "${parts[0].substring(0, 2)}****@${parts[1]}";
   }
 
+  Future<void> _sendResetLink() async {
+    LoadingIndicator.show(context);
+    try {
+      final ApiResponse response =
+      await AuthService.sendPasswordResetLink(
+        widget.email.trim(),
+      );
+
+      if (mounted) LoadingIndicator.hide(context);
+
+      if (response.status == 200) {
+        showModernToast(context, response.message, type: 'success');
+      } else {
+        showModernToast(context, response.message, type: 'error');
+      }
+    } catch (e) {
+      debugPrint("Send link error: $e");
+    }
+  }
+
   Future<void> _verifyCode() async {
+
     if (_enteredCode.length != 6) {
       showModernToast(
         context,
@@ -43,25 +88,35 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    try {
+      LoadingIndicator.show(context);
 
-    await Future.delayed(const Duration(seconds: 2));
+      final payload = {
+        "email": widget.email.trim(),
+        "otp": _enteredCode,
+      };
 
-    setState(() => _isLoading = false);
+      final ApiResponse response = await AuthService.validateResetToken(payload);
 
-    if (_enteredCode == "123456") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const ResetPasswordScreen(),
-        ),
-      );
-    } else {
-      showModernToast(
-        context,
-        "Invalid verification code",
-        type: 'error',
-      );
+      if (mounted) LoadingIndicator.hide(context);
+
+      if (response.status == 200) {
+        showModernToast(context, response.message, type: 'success');
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResetPasswordScreen(
+              email: widget.email.trim(),
+              code: _enteredCode,
+            ),
+          ),
+        );
+      } else {
+        showModernToast(context, response.message, type: 'error');
+      }
+    } catch (e) {
+      debugPrint("Verify error: $e");
     }
   }
 
@@ -69,61 +124,62 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
     return SizedBox(
       width: 50,
       height: 60,
-      child: RawKeyboardListener(
-        focusNode: FocusNode(), // separate listener focus
-        onKey: (event) {
-          if (event is RawKeyDownEvent &&
-              event.logicalKey == LogicalKeyboardKey.backspace) {
-            if (_controllers[index].text.isEmpty && index > 0) {
-              FocusScope.of(context)
-                  .requestFocus(_focusNodes[index - 1]);
-              _controllers[index - 1].clear();
+      child: TextField(
+        controller: _controllers[index],
+        focusNode: _focusNodes[index],
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 1,
+        style: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        decoration: InputDecoration(
+          counterText: "",
+          filled: true,
+          fillColor: Colors.grey.shade100,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+        ),
+        onChanged: (value) {
+
+          if (value.isNotEmpty) {
+            if (index < 5) {
+              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+            } else {
+              FocusScope.of(context).unfocus();
             }
           }
+
         },
-        child: TextField(
-          controller: _controllers[index],
-          focusNode: _focusNodes[index],
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          maxLength: 1,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          decoration: InputDecoration(
-            counterText: "",
-            filled: true,
-            fillColor: Colors.grey.shade100,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
-            ),
-          ),
-          onChanged: (value) {
-            if (value.isNotEmpty) {
-              if (index < 5) {
-                FocusScope.of(context)
-                    .requestFocus(_focusNodes[index + 1]);
-              } else {
-                FocusScope.of(context).unfocus();
-              }
-            }
-          },
-        ),
       ),
     );
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    for (var c in _controllers) {
+      c.dispose();
+    }
+    for (var f in _focusNodes) {
+      f.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     final maskedEmail = _maskEmail(widget.email);
 
     return Scaffold(
@@ -175,7 +231,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
                 const SizedBox(height: 10),
 
                 Text(
-                  "Code sent to $maskedEmail",
+                  "We sent a one-time password to\n$maskedEmail\nEnter it below.",
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.grey),
                 ),
@@ -183,16 +239,14 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
                 const SizedBox(height: 25),
 
                 Row(
-                  mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
-                  children: List.generate(
-                      6, (index) => _buildOtpBox(index)),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(6, (i) => _buildOtpBox(i)),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 25),
 
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _verifyCode,
+                  onPressed: _verifyCode,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     minimumSize: const Size(double.infinity, 55),
@@ -200,10 +254,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                      color: Colors.white)
-                      : const Text(
+                  child: const Text(
                     "Verify Code",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -211,6 +262,24 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 15),
+
+                TextButton(
+                  onPressed: _secondsRemaining == 0
+                      ? () {
+                    _startTimer();
+                    _sendResetLink();
+                  }
+                      : null,
+                  child: Text(
+                    _secondsRemaining == 0
+                        ? "Didn't receive code? Send again"
+                        : "Resend in $_secondsRemaining s",
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+
               ],
             ),
           ),

@@ -28,14 +28,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-  google_fonts: ^6.2.1
   syncfusion_flutter_gauges: ^21.1.35
+  google_fonts: ^6.1.0  # For modern typography
   provider: ^6.1.1      # For state management
   http: ^1.2.0          # For API calls
-  intl: ^0.19.0         # For date/time formatting
+  intl: ^0.19.0        # For date/time formatting
+  cupertino_icons: ^1.0.8
   shared_preferences: ^2.2.2
   image_picker: ^1.0.7
+  fl_chart: ^1.1.1
+  path_provider: ^2.1.2
+  jwt_decoder: ^2.0.1
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +55,13 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/nutrisync_logo.png"
+  adaptive_icon_foreground: "assets/icons/icon_foreground.png"
+  adaptive_icon_background: "#000000"
+
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -58,12 +69,12 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-  # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/
     - assets/images/questionnaire/
     - assets/images/dashboard/
     - assets/images/authentication/
+    - assets/images/risk_predictor/
+    - assets/images/impact_simulator/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

@@ -1,7 +1,8 @@
 import 'dart:math' as math;
+import 'package:NutriSync/screens/impact_simulator/impact_simulation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:NutriSync/core/theme/app_theme.dart';
+import 'package:NutriSync/core/theme.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 
 class BmiResultsScreen extends StatefulWidget {
@@ -34,7 +35,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                   children: [
                     const SizedBox(height: 24),
                     _buildTabSwitcher(),
-                    const SizedBox(height: 24),
                     if (_selectedTab == 0) ...[
                       _buildGaugeCard(),
                       const SizedBox(height: 16),
@@ -43,6 +43,22 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                       _buildCategoryCard(),
                       const SizedBox(height: 24),
                       _buildBannerCard(),
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                        child: PrimaryButton(
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ImpactSimulationScreen(),
+                              ),
+                            );
+                          },
+                          text: "Impact Simulation",
+                          isRed: true,
+                        ),
+                      ),
                     ] else ...[
                       _buildHistogramPlaceholder(),
                     ],
@@ -64,7 +80,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       child: Row(
         children: [
           GestureDetector(
-            onTap: () {},
+            onTap: () => Navigator.pop(context),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 22,
@@ -268,7 +284,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             // Background image
             Positioned.fill(
               child: Image.asset(
-                'assets/images/overview image.png',
+                'assets/images/impact_simulator/overview image.png',
                 fit: BoxFit.cover,
               ),
             ),
