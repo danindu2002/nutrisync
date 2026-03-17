@@ -22,6 +22,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isPremium = false;
 
+  // --- NEW: State variables to hold user data ---
+  String firstName = "";
+  int dailyCalorieGoal = 0;
+  int activeChallenges = 0;
+  int score = 0;
+  dynamic profileImageData;
+
   @override
   void initState() {
     super.initState();
@@ -29,30 +36,39 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeData() async {
-    await _loadProfile();
+    await _loadUserData();
     await _checkPremiumStatus();
   }
 
-  Future<void> _loadProfile() async {
+  Future<void> _loadUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
       int? userId = prefs.getInt("userId");
 
-      if (userId == null) {
-        return;
-      }
+      if (userId == null) return;
+
       LoadingIndicator.show(context);
-      final ApiResponse response = await AuthService.getUserProfile(userId);
+      final ApiResponse response = await AuthService.getUserData(userId);
       if (mounted) LoadingIndicator.hide(context);
 
       if (response.status == 200) {
-        final premiumExpireDate = response.data["premiumExpireDate"];
-        final prefs = await SharedPreferences.getInstance();
+        final data = response.data;
+
+        final premiumExpireDate = data["premiumExpiryDate"];
         await prefs.setString('premiumExpireDate', premiumExpireDate ?? "");
+
+        if (mounted) {
+          setState(() {
+            firstName = data["firstName"] ?? "User";
+            dailyCalorieGoal = data["dailyCalorieGoal"] ?? 0;
+            activeChallenges = data["activeChallenges"] ?? 0;
+            score = data["score"] ?? 0;
+            profileImageData = data["profileImage"];
+          });
+        }
       }
     } catch (e) {
-      Logger.error("Error loading profile: $e");
+      Logger.error("Error loading data: $e");
     }
   }
 
@@ -62,7 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (expireDateStr != null && expireDateStr.isNotEmpty) {
       final expireDate = DateTime.tryParse(expireDateStr);
-      // Check if the expire date is in the future
       if (expireDate != null && expireDate.isAfter(DateTime.now())) {
         setState(() => isPremium = true);
         return;
@@ -71,13 +86,12 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => isPremium = false);
   }
 
-  // Route to the premium screen and refresh status when returning
   void _navigateToPremium() async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const PremiumSubscriptionScreen()),
     );
-    _initializeData(); // Re-check status
+    _initializeData();
   }
 
   Future<void> _navigateToRewards() async {
@@ -85,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(builder: (_) => const RewardsScreen()),
     );
-    // data to see if their premiumExpireDate changed!
     _initializeData();
   }
 
@@ -95,7 +108,11 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          HomeHeader(),
+          HomeHeader(
+            userName: firstName,
+            profileImageData: profileImageData,
+            score: score,
+          ),
 
           Expanded(
             child: SafeArea(
@@ -108,7 +125,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
                     const _SectionTitle(title: "Your Metrics"),
                     const SizedBox(height: 12),
-                    _MetricsRow(),
+
+                    // --- UPDATED: Pass the fetched metrics down ---
+                    _MetricsRow(
+                      score: score,
+                      calories: dailyCalorieGoal,
+                      challenges: activeChallenges,
+                    ),
+
                     const SizedBox(height: 24),
                     const _SectionTitle(title: "Meal Log"),
                     const SizedBox(height: 12),
@@ -128,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (!isPremium) {
                           _navigateToPremium();
                         } else {
-                          widget.onMealLogTap(); // Or wherever this should actually go
+                          // TODO: Navigate to Meal Plan Screen
                         }
                       },
                     ),
@@ -166,15 +190,25 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _MetricsRow extends StatelessWidget {
+  final int score;
+  final int calories;
+  final int challenges;
+
+  const _MetricsRow({
+    required this.score,
+    required this.calories,
+    required this.challenges,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: const [
-        _MetricCard(title: "Score", value: "88%", color: Colors.red),
-        SizedBox(width: 12),
-        _MetricCard(title: "Calories", value: "1200", color: Colors.blue),
-        SizedBox(width: 12),
-        _MetricCard(title: "Challenges", value: "24", color: Colors.grey),
+      children: [
+        _MetricCard(title: "Score", value: "$score%", color: Colors.red),
+        const SizedBox(width: 12),
+        _MetricCard(title: "Calorie Goal", value: "$calories", color: Colors.blue),
+        const SizedBox(width: 12),
+        _MetricCard(title: "Challenges", value: "$challenges", color: Colors.grey),
       ],
     );
   }
