@@ -124,7 +124,15 @@ class ApiService {
       }
       return [];
     } catch (e) {
-      debugPrint("Predict risk exception: $e");
+      if (kIsWeb) {
+        debugPrint(
+          "Predict risk exception: $e. "
+          "If this is a 'Failed to fetch' error, it's likely a CORS issue. "
+          "Try running with: flutter run -d chrome --web-browser-flag \"--disable-web-security\"",
+        );
+      } else {
+        debugPrint("Predict risk exception: $e");
+      }
       return [];
     }
   }

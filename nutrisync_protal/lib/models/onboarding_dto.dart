@@ -26,12 +26,14 @@ class OnboardingDTO {
     this.activityLevel,
     this.goalSpeed,
     this.dietaryPreference,
-    this.allergies = const [],
-    this.mealTimes = const {},
-    this.medicalConditions = const [],
+    List<String>? allergies,
+    Map<String, String>? mealTimes,
+    List<String>? medicalConditions,
     this.dailyCalorieGoal = 2000,
     this.sleepQuality,
-  });
+  })  : allergies = allergies ?? [],
+        mealTimes = mealTimes ?? {},
+        medicalConditions = medicalConditions ?? [];
 
   Map<String, dynamic> toJson() {
     return {
