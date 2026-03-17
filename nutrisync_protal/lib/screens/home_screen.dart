@@ -8,6 +8,7 @@ import '../widgets/common_widgets.dart';
 import 'challenges_screen.dart';
 import 'impact_simulator/bmi_results_screen.dart';
 import 'premium_subscription_screen.dart';
+import 'meal_plan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onMealLogTap;
