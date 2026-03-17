@@ -75,7 +75,7 @@ public class EmailTemplate {
     }
 
     // Forgot Password Email
-    public String emailTemplateForgotPassword(String resetPath) {
+    public String emailTemplateForgotPassword(String otp) {
         String title = "Reset Your Password";
         String content =
                 "<p style=\"color: " + BRAND_DARK + "; font-size: 16px; line-height: 24px; margin-bottom: 20px;\">" +
@@ -85,18 +85,10 @@ public class EmailTemplate {
                         "We received a request to reset the password for your NutriSync account. If you did not make this request, please ignore this email." +
                         "</p>" +
                         "<p style=\"color: " + BRAND_DARK + "; font-size: 16px; line-height: 24px; margin-bottom: 30px;\">" +
-                        "To reset your password, click the button below. This link will expire in 15 minutes." +
+                        "To reset your password, enter this One Time Passcode(OTP). This OTP will expire in 15 minutes." +
                         "</p>" +
-                        // Button
-                        "<table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">" +
-                        "<tr>" +
-                        "<td align=\"center\">" +
-                        "<a href=\"" + resetPath + "\" style=\"background-color: " + BRAND_RED + "; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 16px; padding: 12px 30px; border-radius: 50px; display: inline-block; mso-padding-alt:0;\">" +
-                        "Reset Password" +
-                        "</a>" +
-                        "</td>" +
-                        "</tr>" +
-                        "</table>";
+                        // OTP below
+                        "<p style=\"color: " + BRAND_DARK + "; font-size: 16px; line-height: 24px; margin-bottom: 20px;\">" + otp + "</p>";
 
         return getHtmlWrapper(title, content);
     }
