@@ -48,7 +48,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                         padding: const EdgeInsets.symmetric(horizontal: 0.0),
                         child: PrimaryButton(
                           onTap: () {
-                            Navigator.pushReplacement(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => const ImpactSimulationScreen(),
@@ -60,6 +60,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                         ),
                       ),
                     ] else ...[
+                      const SizedBox(height: 24),
                       _buildHistogramPlaceholder(),
                     ],
                     const SizedBox(height: 32),
@@ -75,6 +76,29 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
 
   // ─── App Bar ─────────────────────────────────────────
   Widget _buildAppBar() {
+    String badgeText;
+    Color badgeColor;
+
+    if (_bmiValue < 18.5) {
+      badgeText = 'Low';
+      badgeColor = const Color(0xFF00B0FF); // Light Blue
+    } else if (_bmiValue >= 18.5 && _bmiValue <= 24.9) {
+      badgeText = 'Healthy';
+      badgeColor = const Color(0xFF4CAF50); // Green
+    } else if (_bmiValue >= 25.0 && _bmiValue <= 29.9) {
+      badgeText = 'Warning';
+      badgeColor = const Color(0xFFFF9800); // Orange
+    } else if (_bmiValue >= 30.0 && _bmiValue <= 34.9) {
+      badgeText = 'High Risk';
+      badgeColor = const Color(0xFFF44336); // Red
+    } else {
+      badgeText = 'Critical!';
+      badgeColor = const Color(0xFFB71C1C); // Dark Red
+    }
+
+    // Create a soft background color using 15% opacity of the main color
+    Color badgeBgColor = badgeColor.withValues(alpha: 0.15);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
@@ -84,7 +108,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 22,
-              color: AppTheme.textPrimary,
+              color: AppTheme.textPrimary, // Assuming you have this in your theme
             ),
           ),
           const SizedBox(width: 14),
@@ -98,30 +122,34 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               ),
             ),
           ),
+
+          // 2. Dynamic Badge Container
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: AppTheme.statusCriticalBg,
+              color: badgeBgColor, // Dynamic Background
               borderRadius: BorderRadius.circular(50),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Glowing Dot
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primary,
+                  decoration: BoxDecoration(
+                    color: badgeColor, // Dynamic Dot Color
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
+                // Badge Text
                 Text(
-                  'Critical!',
+                  badgeText, // Dynamic Text
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.statusCriticalText,
+                    color: badgeColor, // Dynamic Text Color
                   ),
                 ),
               ],
@@ -201,6 +229,45 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
 
   // ─── Category Card ───────────────────────────────────
   Widget _buildCategoryCard() {
+    String category;
+    String message;
+    IconData icon;
+    Color themeColor;
+    String emoji;
+
+    if (_bmiValue < 18.5) {
+      category = 'Underweight';
+      message = 'Needs Attention!';
+      icon = Icons.info_outline_rounded;
+      themeColor = const Color(0xFF00B0FF); // Light Blue
+      emoji = '😕';
+    } else if (_bmiValue >= 18.5 && _bmiValue <= 24.9) {
+      category = 'Normal Weight';
+      message = 'Great Job!';
+      icon = Icons.check_circle_outline_rounded;
+      themeColor = const Color(0xFF4CAF50); // Green
+      emoji = '😊';
+    } else if (_bmiValue >= 25.0 && _bmiValue <= 29.9) {
+      category = 'Overweight';
+      message = 'Take Care!';
+      icon = Icons.warning_amber_rounded;
+      themeColor = const Color(0xFFFF9800); // Orange
+      emoji = '😐';
+    } else if (_bmiValue >= 30.0 && _bmiValue <= 34.9) {
+      category = 'Obese';
+      message = 'Attention Required!';
+      icon = Icons.warning_amber_rounded;
+      themeColor = const Color(0xFFF44336); // Red
+      emoji = '😞';
+    } else {
+      category = 'Extremely Obese';
+      message = 'Critical Action Needed!';
+      icon = Icons.error_outline_rounded;
+      themeColor = const Color(0xFFB71C1C); // Dark Red
+      emoji = '😫';
+    }
+
+    // 2. Build the UI using the dynamic properties
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -225,7 +292,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Obese Class I',
+                  category, // Dynamic Category
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -235,18 +302,18 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(
-                      Icons.warning_amber_rounded,
+                    Icon(
+                      icon, // Dynamic Icon
                       size: 18,
-                      color: AppTheme.primary,
+                      color: themeColor, // Dynamic Color
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Attention Required!',
+                      message, // Dynamic Message
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.primary,
+                        color: themeColor, // Dynamic Color
                       ),
                     ),
                   ],
@@ -254,16 +321,17 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               ],
             ),
           ),
-          // Right side: sad face emoji in pale red rounded square
+          // Right side: dynamic face emoji in tinted rounded square
           Container(
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: AppTheme.statusCriticalBg,
+              // Use a light 15% opacity of the theme color for the background
+              color: themeColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Center(
-              child: Text('😞', style: TextStyle(fontSize: 28)),
+            child: Center(
+              child: Text(emoji, style: const TextStyle(fontSize: 28)), // Dynamic Emoji
             ),
           ),
         ],
@@ -312,7 +380,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 children: [
                   // Heading
                   Text(
-                    'Shed the weight,\nTake Less\nBreaks!',
+                    'Change your diet,\nChange your \nlife!',
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -409,7 +477,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-/// A beautiful, accurate semi-circular BMI gauge using CustomPaint.
+/// Semi-circular BMI gauge using CustomPaint.
 ///
 /// Two concentric arc-bands display category names (outer) and BMI ranges
 /// (inner), each label rotated so it follows the arc direction exactly.

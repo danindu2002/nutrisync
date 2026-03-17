@@ -28,9 +28,9 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                     children: [
                       const SizedBox(height: 32),
                       _buildBodyComparison(),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 20),
                       _buildDetailsPanel(),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -69,31 +69,6 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFCC00).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.info_rounded,
-                  color: Color(0xFFFFCC00),
-                  size: 14,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Attention!',
-                  style: GoogleFonts.workSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFFFCC00),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -116,11 +91,14 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Image.asset(
-                'assets/images/impact_simulator/now image.png',
-                height: 200,
-                fit: BoxFit.contain,
+
+              // NEW: Dynamic Widget for "NOW"
+              // BMI 32.1 -> Wider body. 35% Body Fat -> Filled 35% up.
+              const DynamicBodySilhouette(
+                bmi: 32.1,
+                bodyFatPercentage: 0.35,
               ),
+
               const SizedBox(height: 16),
               Text(
                 'BMI',
@@ -175,11 +153,14 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Image.asset(
-                'assets/images/impact_simulator/after image.png',
-                height: 200,
-                fit: BoxFit.contain,
+
+              // NEW: Dynamic Widget for "AFTER"
+              // BMI 24.0 -> Thinner body. 21% Body Fat -> Filled 21% up.
+              const DynamicBodySilhouette(
+                bmi: 24.0,
+                bodyFatPercentage: 0.21,
               ),
+
               const SizedBox(height: 16),
               Text(
                 'BMI',
@@ -294,4 +275,59 @@ class _BubbleClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class DynamicBodySilhouette extends StatelessWidget {
+  final double bmi;
+  final double bodyFatPercentage; // e.g., 0.35 for 35%
+  final double height;
+
+  const DynamicBodySilhouette({
+    super.key,
+    required this.bmi,
+    required this.bodyFatPercentage,
+    this.height = 200,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // 1. Calculate Width Scale based on BMI
+    // Assume BMI 22 is a "normal" 1.0 scale.
+    // Every 1 point of BMI adds 3.5% width. You can tweak the 0.035 multiplier!
+    double scaleX = 1.0 + ((bmi - 22.0).clamp(0, 50) * 0.035);
+
+    return Transform.scale(
+      scaleX: scaleX, // Stretches only the width!
+      alignment: Alignment.center,
+      child: ShaderMask(
+        blendMode: BlendMode.srcATop,
+        shaderCallback: (Rect bounds) {
+          // 2. Create a gradient fill based on Body Fat %
+          return LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: const [
+              Color(0xFFFFA726), // Orange (Feet/Legs)
+              Color(0xFFEE3638), // Red (Midsection)
+              Color(0xFF333333), // Dark Gray (Empty/Upper body)
+              Color(0xFF333333),
+            ],
+            stops: [
+              0.0,
+              bodyFatPercentage * 0.5, // Blends orange to red
+              bodyFatPercentage,       // The sharp cutoff line
+              bodyFatPercentage + 0.01 // Forces a hard edge instead of a smooth gradient fade
+            ],
+          ).createShader(bounds);
+        },
+        child: Image.asset(
+          'assets/images/impact_simulator/silhouette.png', // Your solid mask image
+          height: height,
+          fit: BoxFit.contain,
+          // Color is required for the mask to correctly apply the gradient over the pixels
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
 }
