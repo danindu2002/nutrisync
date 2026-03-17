@@ -9,10 +9,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 
-@RequestMapping("/api/v1/riskPredictor")
+@RequestMapping("/api/v1/risk-predictor")
 public interface RiskPredictorController {
 
-    @PostMapping("/predictRisk")
-    ResponseEntity<Object> predictRisk(@RequestParam("userId") Long userId);
+    @PostMapping("/predict-risk/{userId}")
+    ResponseEntity<Object> predictRisk(@PathVariable("userId") Long userId);
 
 }

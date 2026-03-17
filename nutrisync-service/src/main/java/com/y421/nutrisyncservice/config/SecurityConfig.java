@@ -59,7 +59,7 @@ public class SecurityConfig {
             "/api/v1/diet-plan/**",
             "/api/v1/challenges/**",
             "/api/v1/rewards/**",
-            "/api/v1/riskPredictor/**",
+            "/api/v1/risk-predictor/**",
     };
 
     @Bean
