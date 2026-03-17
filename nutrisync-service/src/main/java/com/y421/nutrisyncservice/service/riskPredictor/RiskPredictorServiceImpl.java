@@ -7,7 +7,6 @@ import com.y421.nutrisyncservice.repository.foodMaster.FoodMasterRepository;
 import com.y421.nutrisyncservice.repository.mealLog.MealLogRepository;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
 import com.y421.nutrisyncservice.request.meal.MealLogRiskRequestDTO;
-import com.y421.nutrisyncservice.response.riskPredictor.MealRiskContribution;
 import com.y421.nutrisyncservice.response.riskPredictor.MealRiskContributionResDTO;
 import com.y421.nutrisyncservice.response.riskPredictor.RiskPredictorResponseDTO;
 import com.y421.nutrisyncservice.service.ai.AIServiceClient;
