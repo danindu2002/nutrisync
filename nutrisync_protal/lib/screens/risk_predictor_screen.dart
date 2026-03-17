@@ -31,12 +31,12 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
       riskLevel: 0.1,
       icon: Icons.monitor_heart,
       subtitle: "Based on recent activity & meals",
-      warningText: "....",
+      warningText: "Based on your current patterns, your cholesterol risk score is relatively low. However, it's important to maintain a balanced diet and regular exercise to keep it that way",
       contributingMeals: [
         ContributingMealModel(
           mealName: "Bacon Double Cheeseburger",
           nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk/burger.png",
+          imagePath: "assets/images/risk_predictor/burger.png",
         ),
       ],
     ),
@@ -46,12 +46,12 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
       riskLevel: 0.5,
       icon: Icons.balance,
       subtitle: "Based on recent activity & meals",
-      warningText: "....",
+      warningText: "Based on your current patterns, your obesity risk score is moderate. This suggests that there are some areas in your lifestyle that could be improved to reduce this risk",
       contributingMeals: [
         ContributingMealModel(
           mealName: "Bacon Double Cheeseburger",
           nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk/pasta.png",
+          imagePath: "assets/images/risk_predictor/pasta.png",
         ),
       ],
     ),
@@ -61,12 +61,12 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
       riskLevel: 0.9,
       icon: Icons.water_drop,
       subtitle: "Based on recent activity & meals",
-      warningText: "....",
+      warningText: "Based on your current patterns, your type 2 diabetes risk score is high. This indicates that there are significant factors in your lifestyle that may be contributing to an increased risk of developing diabetes.",
       contributingMeals: [
         ContributingMealModel(
           mealName: "Bacon Double Cheeseburger",
           nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk/chicken.png",
+          imagePath: "assets/images/risk_predictor/chicken.png",
         ),
       ],
     ),
@@ -76,26 +76,26 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
   final List<MealSwapModel> mockMealSwaps = [
     MealSwapModel(
       currentMealName: "Fried Rice",
-      currentMealImagePath: "assets/images/risk/fried_rice.png",
+      currentMealImagePath: "assets/images/risk_predictor/fried_rice.png",
       currentMealMetric: "50g Saturated Fat",
       suggestedMealName: "Quinoa Bowl",
-      suggestedMealImagePath: "assets/images/risk/quinoa_bowl.png",
+      suggestedMealImagePath: "assets/images/risk_predictor/quinoa_bowl.png",
       suggestedMealMetric: "25g Saturated Fat",
     ),
     MealSwapModel(
       currentMealName: "Cheese Burger",
-      currentMealImagePath: "assets/images/risk/burgerSwap.png",
+      currentMealImagePath: "assets/images/risk_predictor/burgerSwap.png",
       currentMealMetric: "90g Saturated Fat",
       suggestedMealName: "Grilled Chicken Wrap",
-      suggestedMealImagePath: "assets/images/risk/GrilledChickenWrapSwap.png",
+      suggestedMealImagePath: "assets/images/risk_predictor/GrilledChickenWrapSwap.png",
       suggestedMealMetric: "35g Saturated Fat",
     ),
     MealSwapModel(
       currentMealName: "Creamy Pasta",
-      currentMealImagePath: "assets/images/risk/PastaSwap.png",
+      currentMealImagePath: "assets/images/risk_predictor/PastaSwap.png",
       currentMealMetric: "65g Saturated Fat",
       suggestedMealName: "Veggie Rice Bowl",
-      suggestedMealImagePath: "assets/images/risk/VeggieRiceBowlSwap.png",
+      suggestedMealImagePath: "assets/images/risk_predictor/VeggieRiceBowlSwap.png",
       suggestedMealMetric: "20g Saturated Fat",
     ),
   ];
