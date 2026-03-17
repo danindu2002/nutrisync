@@ -115,11 +115,14 @@ class ApiService {
           }
 
           return listToParse.map((json) => RiskModel.fromJson(json)).toList();
+        } else {
+          debugPrint(
+            "Predict risk error: ${response.statusCode} - ${response.body}",
+          );
         }
         return [];
-        debugPrint("Predict risk error: ${response.statusCode} - ${response.body}");
-        return [];
       }
+      return [];
     } catch (e) {
       debugPrint("Predict risk exception: $e");
       return [];
