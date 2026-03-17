@@ -147,20 +147,30 @@ def risk_prediction():
 
     You MUST return the response ONLY in valid JSON format using the following structure:
 
-    [
-      {{
-        "predictedRisk": "",
-        "reasonTitle": "",
-        "probability": "",
-        "warning": "",
-        "contributedMeals": [
+    {{
+        "riskPredictionList":[
           {{
-            "mealLogId": "",
-            "contribution": ""
+            "predictedRisk": "",
+            "reasonTitle": "",
+            "probability": "",
+            "warning": "",
+            "contributedMeals": [
+              {{
+                "mealLogId": "",
+                "contribution": ""
+              }}
+            ]
           }}
+        ],
+        "mealSwapList": [
+            {{
+              "riskyMealName": "",
+              "riskyMealFact": "",
+              "healthyMealName": "",
+              "healthyMealFact": ""
+            }}
         ]
-      }}
-    ]
+    }}
 
     IMPORTANT RULES
 
@@ -251,7 +261,7 @@ def risk_prediction():
 
     RISK PREDICTION GUIDELINES
 
-    Predict possible risks within the next 1–5 years if habits continue.
+    Predict possible risks within the next {user_data.get('predictionPeriod')} years if habits continue.
 
     Focus on risks such as:
 
@@ -294,6 +304,83 @@ def risk_prediction():
     {meal_logs}
 
     -----------------------------------------------------
+
+    TOP UNHEALTHY MEAL IDENTIFICATION
+
+    Identify up to 3 most unhealthy meals from MEAL_LOG_ID_TABLE.
+
+    Rank meals based on:
+    - high carbohydrates (especially for diabetes)
+    - high calories vs daily goal
+    - high sugar
+    - high sodium
+    - high fat
+    - mismatch with dietaryPreferences
+    - conflicts with medicalConditions
+
+    Select the TOP 1–3 meals that contribute most to health risks.
+
+    -----------------------------------------------------------------
+
+    HEALTHY SWAP REQUIREMENTS
+
+    The healthy meal must:
+    - reduce at least one major risk factor (carbs, sugar, sodium, fat)
+    - provide better nutrient balance
+    - not introduce new health risks
+
+    -----------------------------------------------------------------
+
+    MEAL SWAP ID RULES
+
+    - riskyMealName MUST match to meal from MEAL_LOGS
+    - Do NOT generate new risky meal names
+    - Only use meals identified as unhealthy
+
+    -----------------------------------------------------------------
+
+    EXPLANATION RULES
+
+    riskyMealFact:
+    - explain why the meal is unhealthy
+
+    healthyMealFact:
+    - explain why the replacement is better
+    - reference improved nutrients (e.g., lower carbs, higher fiber)
+
+    -----------------------------------------------------------------
+
+    MEAL SWAP GENERATION RULES
+
+    For each selected risky meal:
+
+    1. Provide a healthier alternative meal.
+    2. The alternative MUST:
+       - align with dietaryPreferences
+       - respect allergies (strictly avoid allergens)
+       - be suitable for medicalConditions
+       - improve nutritional balance (lower carbs, sugar, sodium, etc.)
+
+    3. Keep swaps realistic (not extreme or unrealistic meals).
+    4. Maintain similar meal context (e.g., lunch → lunch).
+
+    MEAL SWAP TASK
+
+    Based on the identified risks and meal analysis:
+
+    1. Identify top unhealthy meals.
+    2. Generate healthy alternatives.
+
+    -------------------------------------
+
+    OUTPUT REQUIREMENTS
+
+    - Include both:
+      - riskPredictionList
+      - mealSwapList
+    - If no unhealthy meals found, return empty mealSwapList: []
+
+    -------------------------------------
 
     Now analyze the user data and return the JSON response.
     """
