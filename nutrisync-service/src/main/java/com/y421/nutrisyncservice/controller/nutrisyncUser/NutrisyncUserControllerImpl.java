@@ -135,4 +135,18 @@ public class NutrisyncUserControllerImpl implements NutrisyncUserController {
             return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
         }
     }
+
+    @Override
+    public ResponseEntity<Object> subscribePremium(SubscribePremiumDTO dto) {
+        try {
+            ResponseEntity<Object> response = nutrisyncUserService.subscribePremium(dto);
+            if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                return generateResponse("Premium Subscribed Successfully", HttpStatus.OK, response.getBody());
+            } else {
+                return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
+            }
+        } catch (Exception e) {
+            return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
+        }
+    }
 }

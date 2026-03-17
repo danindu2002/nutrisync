@@ -17,4 +17,5 @@ public interface NutrisyncUserService {
     ResponseEntity<Object> calculateBMI();
     ResponseEntity<Object> updateMetrics();
     ResponseEntity<Object> getHealthStatus();
+    ResponseEntity<Object> subscribePremium(SubscribePremiumDTO dto);
 }
