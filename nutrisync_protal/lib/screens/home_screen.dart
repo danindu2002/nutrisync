@@ -5,6 +5,7 @@ import '../core/constants.dart';
 import '../widgets/common_widgets.dart';
 import 'challenges_screen.dart';
 import 'impact_simulator/bmi_results_screen.dart';
+import 'meal_plan_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onMealLogTap;
@@ -42,7 +43,14 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _SectionTitle(title: "Generate Meal Plans"),
                     const SizedBox(height: 12),
-                    _MealPlanCard(onTap: onMealLogTap),
+                    _MealPlanCard(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MealPlanScreen(),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     _SectionTitle(title: "Health Risks & Impacts"),
                     const SizedBox(height: 12),
