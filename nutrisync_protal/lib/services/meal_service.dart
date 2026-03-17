@@ -83,10 +83,30 @@ class MealService {
 
       return ApiResponse.fromJson(body);
     } catch (e) {
-      Logger.error("An error occurred deleting meal log: $e");
+      Logger.error("An error occurred deleting meal: $e");
       return ApiResponse(
         status: 500,
         message: "Unexpected error occurred",
+        data: null,
+      );
+    }
+  }
+    
+  static Future<ApiResponse> updateMealNutrition(UpdateMealDto data) async {
+    try {
+      final response = await ApiClient.put(
+        "/meal/updateNutrition",
+        data.toJson(),
+        requiresAuth: true,
+      );
+      final body = jsonDecode(response.body);
+      debugPrint("Meal Update Response: $body");
+      return ApiResponse.fromJson(body);
+    } catch (e) {
+      debugPrint("Meal Update Error: $e");
+      return ApiResponse(
+        status: 500,
+        message: "An unexpected error occurred while updating the meal.",
         data: null,
       );
     }

@@ -1,8 +1,11 @@
 import 'package:NutriSync/screens/rewards_screen.dart';
+import 'package:NutriSync/screens/risk_predictor_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../widgets/common_widgets.dart';
 import 'challenges_screen.dart';
+import 'impact_simulator/bmi_results_screen.dart';
+import 'meal_plan_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onMealLogTap;
@@ -40,7 +43,14 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _SectionTitle(title: "Generate Meal Plans"),
                     const SizedBox(height: 12),
-                    _MealPlanCard(onTap: onMealLogTap),
+                    _MealPlanCard(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MealPlanScreen(),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     _SectionTitle(title: "Health Risks & Impacts"),
                     const SizedBox(height: 12),
@@ -352,7 +362,7 @@ class _NutritionRow extends StatelessWidget {
           imagePath: "assets/images/dashboard/salad_eggs.png",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ChallengesScreen()),
+            MaterialPageRoute(builder: (_) => const RiskPredictorScreen()),
           ),
         ),
         const SizedBox(width: 12),
@@ -362,7 +372,7 @@ class _NutritionRow extends StatelessWidget {
           imagePath: "assets/images/dashboard/salad_eggs.png",
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ChallengesScreen()),
+            MaterialPageRoute(builder: (_) => const BmiResultsScreen()),
           ),
         ),
       ],
