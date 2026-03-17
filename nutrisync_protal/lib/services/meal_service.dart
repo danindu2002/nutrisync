@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import '../core/constants.dart';
+import '../models/update_meal_dto.dart';
 import '../widgets/common_widgets.dart';
 
 class MealService {
@@ -100,10 +101,10 @@ class MealService {
         requiresAuth: true,
       );
       final body = jsonDecode(response.body);
-      debugPrint("Meal Update Response: $body");
+      Logger.info("Meal Update Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
-      debugPrint("Meal Update Error: $e");
+      Logger.error("Meal Update Error: $e");
       return ApiResponse(
         status: 500,
         message: "An unexpected error occurred while updating the meal.",
