@@ -31,8 +31,6 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                       const SizedBox(height: 32),
                       _buildDetailsPanel(),
                       const SizedBox(height: 48),
-                      _buildActionButton(),
-                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -119,7 +117,7 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
               ),
               const SizedBox(height: 16),
               Image.asset(
-                'assets/images/now image.png',
+                'assets/images/impact_simulator/now image.png',
                 height: 200,
                 fit: BoxFit.contain,
               ),
@@ -178,7 +176,7 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
               ),
               const SizedBox(height: 8),
               Image.asset(
-                'assets/images/after image.png',
+                'assets/images/impact_simulator/after image.png',
                 height: 200,
                 fit: BoxFit.contain,
               ),
@@ -266,10 +264,6 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildActionButton() {
-    return PrimaryButton(text: 'Impact Overview', isRed: true, onTap: () {});
   }
 }
 

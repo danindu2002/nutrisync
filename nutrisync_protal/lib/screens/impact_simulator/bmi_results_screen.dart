@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:NutriSync/screens/impact_simulator/impact_simulation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:NutriSync/core/theme.dart';
@@ -42,6 +43,22 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                       _buildCategoryCard(),
                       const SizedBox(height: 24),
                       _buildBannerCard(),
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                        child: PrimaryButton(
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ImpactSimulationScreen(),
+                              ),
+                            );
+                          },
+                          text: "Impact Simulation",
+                          isRed: true,
+                        ),
+                      ),
                     ] else ...[
                       _buildHistogramPlaceholder(),
                     ],
@@ -267,7 +284,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             // Background image
             Positioned.fill(
               child: Image.asset(
-                'assets/images/overview image.png',
+                'assets/images/impact_simulator/overview image.png',
                 fit: BoxFit.cover,
               ),
             ),
