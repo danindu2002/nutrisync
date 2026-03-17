@@ -192,10 +192,7 @@ class _MealLogCard extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     "Track your nutrition intake",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),

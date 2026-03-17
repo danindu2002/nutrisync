@@ -43,7 +43,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         title: const Text("Logout"),
         content: const Text("Are you sure you want to logout?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text("Logout", style: TextStyle(color: Colors.white)),
@@ -52,7 +55,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               await prefs.setBool("isLoggedIn", false);
               if (mounted) {
                 Navigator.pop(context);
-                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
               }
             },
           ),
@@ -90,7 +97,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   ),
                 ),
                 child: SafeArea(
-                  bottom: false, // Allows content to hug the notch while keeping it safe
+                  bottom:
+                      false, // Allows content to hug the notch while keeping it safe
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 30),
                     child: Column(
@@ -107,16 +115,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             backgroundColor: Colors.grey.shade800,
                             backgroundImage: imagePath != null
                                 ? FileImage(File(imagePath!))
-                                : const AssetImage("assets/images/profile.jpg") as ImageProvider,
+                                : const AssetImage("assets/images/profile.jpg")
+                                      as ImageProvider,
                           ),
                         ),
                         const SizedBox(height: 15),
                         Text(
                           "$firstName $lastName",
                           style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -124,17 +133,30 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           onPressed: () async {
                             final result = await Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                              MaterialPageRoute(
+                                builder: (_) => const EditProfileScreen(),
+                              ),
                             );
                             if (result == true) _loadProfile();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30,
+                              vertical: 12,
+                            ),
                           ),
-                          child: const Text("Edit Profile", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            "Edit Profile",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -159,10 +181,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   onPressed: _showLogoutDialog,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                     minimumSize: const Size(double.infinity, 55),
                   ),
-                  child: const Text("Logout", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Logout",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 40),
@@ -182,14 +213,24 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 4))
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Row(
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            ),
             const Spacer(),
-            Text(value, style: const TextStyle(color: Colors.grey, fontSize: 15)),
+            Text(
+              value,
+              style: const TextStyle(color: Colors.grey, fontSize: 15),
+            ),
           ],
         ),
       ),

@@ -61,11 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
-      showModernToast(
-        context,
-        "Login successfully!",
-        type: 'success',
-      );
+      showModernToast(context, "Login successfully!", type: 'success');
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
@@ -149,7 +145,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
+                              ),
                             );
                           },
                           child: const Text(
@@ -242,4 +241,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

@@ -12,7 +12,8 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isLoading = false;
 
@@ -49,17 +50,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     Navigator.pop(context);
     setState(() => _isLoading = false);
 
-    showModernToast(
-      context,
-      "Password changed successfully!",
-      type: 'success',
-    );
+    showModernToast(context, "Password changed successfully!", type: 'success');
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
     );
   }
 
@@ -85,7 +80,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     const Text(
                       "Reset\nPassword",
                       style: TextStyle(

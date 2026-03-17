@@ -28,9 +28,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _onTap(int index) {
     if (index == 2) {
       // Open Add Meal Screen as a full screen
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const ScanMealScreen()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => const ScanMealScreen()));
       return;
     }
 
@@ -50,7 +50,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
-        final NavigatorState? currentNav = _navigatorKeys[_currentIndex].currentState;
+        final NavigatorState? currentNav =
+            _navigatorKeys[_currentIndex].currentState;
         if (currentNav != null && currentNav.canPop()) {
           currentNav.pop();
         } else {
@@ -69,9 +70,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         body: IndexedStack(
           index: _currentIndex,
           children: [
-            _buildTabNavigator(0, HomeScreen(onMealLogTap: () {
-              setState(() => _currentIndex = 3);
-            })),
+            _buildTabNavigator(
+              0,
+              HomeScreen(
+                onMealLogTap: () {
+                  setState(() => _currentIndex = 3);
+                },
+              ),
+            ),
             _buildTabNavigator(1, const DashboardScreen()),
             const SizedBox.shrink(), // Placeholder for center button
             _buildTabNavigator(3, const MealLogScreen()),
@@ -91,9 +97,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Navigator(
       key: _navigatorKeys[index],
       onGenerateRoute: (routeSettings) {
-        return MaterialPageRoute(
-          builder: (context) => rootPage,
-        );
+        return MaterialPageRoute(builder: (context) => rootPage);
       },
     );
   }
@@ -103,10 +107,7 @@ class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const _BottomNavBar({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _BottomNavBar({required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -149,11 +150,7 @@ class _BottomNavBar extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  child: const Icon(Icons.add, color: Colors.white, size: 28),
                 ),
               ),
 
@@ -172,9 +169,7 @@ class _BottomNavBar extends StatelessWidget {
       child: Icon(
         icon,
         size: 26,
-        color: currentIndex == index
-            ? AppColors.primary
-            : Colors.grey.shade500,
+        color: currentIndex == index ? AppColors.primary : Colors.grey.shade500,
       ),
     );
   }

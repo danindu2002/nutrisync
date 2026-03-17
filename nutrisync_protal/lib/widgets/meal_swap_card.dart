@@ -6,11 +6,7 @@ class MealSwapCard extends StatelessWidget {
   final MealSwapModel swap;
   final VoidCallback onNext;
 
-  const MealSwapCard({
-    super.key,
-    required this.swap,
-    required this.onNext,
-  });
+  const MealSwapCard({super.key, required this.swap, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +25,6 @@ class MealSwapCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-
           /// CURRENT MEAL
           Expanded(
             child: Column(
@@ -58,10 +53,7 @@ class MealSwapCard extends StatelessWidget {
 
                 Text(
                   swap.currentMealMetric,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.red,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
                 ),
               ],
             ),
@@ -70,18 +62,17 @@ class MealSwapCard extends StatelessWidget {
           /// SWAP AREA
           Column(
             children: [
-              const Icon(
-                Icons.arrow_forward,
-                size: 28,
-                color: Colors.teal,
-              ),
+              const Icon(Icons.arrow_forward, size: 28, color: Colors.teal),
 
               const SizedBox(height: 10),
 
               GestureDetector(
                 onTap: onNext,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(10),
@@ -129,20 +120,14 @@ class MealSwapCard extends StatelessWidget {
 
                 Text(
                   swap.suggestedMealMetric,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.green,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.green),
                 ),
               ],
             ),
           ),
 
           /// NEXT ARROW
-          IconButton(
-            onPressed: onNext,
-            icon: const Icon(Icons.chevron_right),
-          ),
+          IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right)),
         ],
       ),
     );

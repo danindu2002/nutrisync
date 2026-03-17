@@ -7,6 +7,7 @@ import '../models/contributing_meal_model.dart';
 import '../widgets/risk_detail_sheet.dart';
 import '../models/meal_swap_model.dart';
 import '../widgets/meal_swap_card.dart';
+import '../services/api_service.dart';
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -16,66 +17,16 @@ class RiskPredictorScreen extends StatefulWidget {
 }
 
 class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
-  String? selectedPeriod = '1 year';
+  String selectedPeriod = '1 year';
   int currentSwapIndex = 0;
 
-  final List<String> periods = [
-    '1 year',
-    '2 years',
-    '5 years',
-    '10 years'
-  ];
+  bool isLoading = false;
+  String? errorMessage;
+  List<RiskModel> risks = [];
 
-  /// MOCK DATA
-  /// Replace this later with API response
-  final List<RiskModel> mockRisks = [
-    RiskModel(
-      name: "High Cholesterol",
-      description: "High saturated fat diet",
-      riskLevel: 0.1,
-      icon: Icons.monitor_heart,
-      subtitle: "Based on recent activity & meals",
-      warningText: "....",
-      contributingMeals: [
-        ContributingMealModel(
-          mealName: "Bacon Double Cheeseburger",
-          nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk/burger.png",
-        ),
-      ],
-    ),
-    RiskModel(
-      name: "Obesity",
-      description: "Sedentary lifestyle & excess calories.",
-      riskLevel: 0.5,
-      icon: Icons.balance,
-      subtitle: "Based on recent activity & meals",
-      warningText: "....",
-      contributingMeals: [
-        ContributingMealModel(
-          mealName: "Bacon Double Cheeseburger",
-          nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk/pasta.png",
-        ),
-      ],
-    ),
-    RiskModel(
-      name: "Type 2 Diabetes",
-      description: "Genetics & high sugar intake",
-      riskLevel: 0.9,
-      icon: Icons.water_drop,
-      subtitle: "Based on recent activity & meals",
-      warningText: "....",
-      contributingMeals: [
-        ContributingMealModel(
-          mealName: "Bacon Double Cheeseburger",
-          nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk/chicken.png",
-        ),
-      ],
-    ),
-  ];
+  final List<String> periods = ['1 year', '2 years', '5 years', '10 years'];
 
+  // Mock risks removed. Now using API risks state list.
 
   final List<MealSwapModel> mockMealSwaps = [
     MealSwapModel(
@@ -108,6 +59,42 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
     setState(() {
       currentSwapIndex = (currentSwapIndex + 1) % mockMealSwaps.length;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRisks();
+  }
+
+  Future<void> _fetchRisks() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    int years = 1;
+    if (selectedPeriod.contains('2')) years = 2;
+    if (selectedPeriod.contains('5')) years = 5;
+    if (selectedPeriod.contains('10')) years = 10;
+
+    int userId = 7; // Hardcoded for now based on API example
+
+    try {
+      final fetchedRisks = await ApiService.predictRisk(userId, years);
+      setState(() {
+        risks = fetchedRisks;
+        isLoading = false;
+        if (risks.isEmpty) {
+          errorMessage = "No risks found.";
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = "Failed to fetch risks. Please try again.";
+      });
+    }
   }
 
   void _showRiskDetails(RiskModel risk) {
@@ -148,10 +135,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                   const SizedBox(width: 8),
 
                   /// Title
-                  Text(
-                    "Risk Predictor",
-                    style: AppTextStyles.header,
-                  ),
+                  Text("Risk Predictor", style: AppTextStyles.header),
                 ],
               ),
 
@@ -171,7 +155,10 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(
-                            left: 20, top: 12, bottom: 12),
+                          left: 20,
+                          top: 12,
+                          bottom: 12,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -192,7 +179,8 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                               height: 28,
                               width: 133,
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12),
+                                horizontal: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
@@ -215,27 +203,30 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                   isExpanded: true,
                                   menuMaxHeight: 200,
                                   isDense: true,
+
                                   /// Call backend AI prediction API here
                                   /// using the selected time period and update risks list
                                   onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedPeriod = newValue;
-                                    });
+                                    if (newValue != null) {
+                                      setState(() {
+                                        selectedPeriod = newValue;
+                                      });
+                                    }
                                   },
-                                  items: periods
-                                      .map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                  items: periods.map<DropdownMenuItem<String>>((
+                                    String value,
+                                  ) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ),
                             ),
@@ -246,9 +237,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
 
                     /// Right Side: Predict Risks Button (Black Box)
                     GestureDetector(
-                      onTap: () {
-                        // Prediction logic goes here
-                      },
+                      onTap: _fetchRisks,
                       child: Container(
                         width: 120,
                         height: 100,
@@ -289,24 +278,50 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
 
               const SizedBox(height: 16),
 
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(24),
+              if (isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                )
+              else if (errorMessage != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Center(
+                    child: Text(
+                      errorMessage!,
+                      style: AppTextStyles.subHeader.copyWith(
+                        color: AppColors.primary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    children: risks.map((risk) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: RiskCard(
+                          risk: risk,
+                          onTap: () => _showRiskDetails(risk),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
-                child: Column(
-                  children: mockRisks.map((risk) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: RiskCard(
-                        risk: risk,
-                        onTap: () => _showRiskDetails(risk),
-                      )
-                    );
-                  }).toList(),
-                ),
-              ),
 
               const SizedBox(height: 24),
 

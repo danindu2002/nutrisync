@@ -52,7 +52,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_imagePath != null) await prefs.setString('profileImage', _imagePath!);
 
     if (mounted) {
-      Navigator.pop(context, true); // Return true to trigger refresh in MyProfileScreen
+      Navigator.pop(
+        context,
+        true,
+      ); // Return true to trigger refresh in MyProfileScreen
     }
   }
 
@@ -93,12 +96,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                               onPressed: () => Navigator.pop(context),
                             ),
                             const Text(
                               "Edit Profile",
-                              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(width: 40), // Spacer for balance
                           ],
@@ -114,14 +125,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white24, width: 2),
+                                  border: Border.all(
+                                    color: Colors.white24,
+                                    width: 2,
+                                  ),
                                 ),
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundColor: Colors.grey.shade800,
                                   backgroundImage: _imagePath != null
                                       ? FileImage(File(_imagePath!))
-                                      : const AssetImage("assets/images/profile.jpg") as ImageProvider,
+                                      : const AssetImage(
+                                              "assets/images/profile.jpg",
+                                            )
+                                            as ImageProvider,
                                 ),
                               ),
                               Positioned(
@@ -129,8 +146,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 right: 0,
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
-                                  child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.redAccent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
                                 ),
                               ),
                             ],
@@ -151,8 +175,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   children: [
                     _buildInputField("First Name", _firstNameController),
                     _buildInputField("Last Name", _lastNameController),
-                    _buildInputField("Email", _emailController, keyboardType: TextInputType.emailAddress),
-                    _buildInputField("Date of Birth", _dobController, isDate: true),
+                    _buildInputField(
+                      "Email",
+                      _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    _buildInputField(
+                      "Date of Birth",
+                      _dobController,
+                      isDate: true,
+                    ),
 
                     const SizedBox(height: 10),
 
@@ -161,13 +193,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       onPressed: _saveProfile,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         minimumSize: const Size(double.infinity, 55),
                         elevation: 0,
                       ),
                       child: const Text(
                         "Save Changes",
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -181,38 +219,58 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller, {TextInputType? keyboardType, bool isDate = false}) {
+  Widget _buildInputField(
+    String label,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+    bool isDate = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: controller,
             keyboardType: keyboardType,
             readOnly: isDate,
-            onTap: isDate ? () async {
-              DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime(2000),
-                firstDate: DateTime(1950),
-                lastDate: DateTime.now(),
-              );
-              if (pickedDate != null) {
-                setState(() => controller.text = "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}");
-              }
-            } : null,
+            onTap: isDate
+                ? () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime(2000),
+                      firstDate: DateTime(1950),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      setState(
+                        () => controller.text =
+                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
+                      );
+                    }
+                  }
+                : null,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
               hintText: "Enter $label",
               contentPadding: const EdgeInsets.all(18),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
               focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(color: Colors.redAccent, width: 1)
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Colors.redAccent, width: 1),
               ),
             ),
           ),

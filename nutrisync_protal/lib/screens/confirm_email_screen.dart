@@ -5,10 +5,7 @@ import 'submit_code_screen.dart';
 class ConfirmEmailScreen extends StatefulWidget {
   final String email;
 
-  const ConfirmEmailScreen({
-    super.key,
-    required this.email,
-  });
+  const ConfirmEmailScreen({super.key, required this.email});
 
   @override
   State<ConfirmEmailScreen> createState() => _ConfirmEmailScreenState();
@@ -80,7 +77,6 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 Container(
                   height: 70,
                   width: 70,
@@ -99,10 +95,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
 
                 const Text(
                   "Confirm Your Email",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 12),
@@ -110,10 +103,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                 Text(
                   "We’ve sent a one time password to\n$maskedEmail",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    height: 1.5,
-                  ),
+                  style: const TextStyle(color: Colors.grey, height: 1.5),
                 ),
 
                 const SizedBox(height: 25),
@@ -121,9 +111,9 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                 ElevatedButton(
                   onPressed: _secondsRemaining == 0
                       ? () {
-                    _startTimer();
-                    // TODO: Call resend API
-                  }
+                          _startTimer();
+                          // TODO: Call resend API
+                        }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
@@ -150,8 +140,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            SubmitCodeScreen(email: widget.email),
+                        builder: (_) => SubmitCodeScreen(email: widget.email),
                       ),
                     );
                   },

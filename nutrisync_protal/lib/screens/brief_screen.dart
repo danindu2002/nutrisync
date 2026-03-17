@@ -18,14 +18,11 @@ class BriefScreen extends StatelessWidget {
         ),
         title: const Text(
           "Brief",
-          style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -34,9 +31,7 @@ class BriefScreen extends StatelessWidget {
 
             const Text(
               "Nutrition",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
 
@@ -45,9 +40,7 @@ class BriefScreen extends StatelessWidget {
 
             const Text(
               "Micro-Nutrients (mg)",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
 
@@ -61,8 +54,7 @@ class BriefScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                    const AddMealScreen(),
+                    builder: (context) => const AddMealScreen(),
                   ),
                 );
               },
@@ -84,29 +76,20 @@ class BriefScreen extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             image: const DecorationImage(
-              image: AssetImage(
-                  "assets/images/dashboard/salad_eggs.png"),
+              image: AssetImage("assets/images/dashboard/salad_eggs.png"),
               fit: BoxFit.cover,
             ),
           ),
         ),
         const SizedBox(width: 16),
         const Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               "Apple",
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            Text(
-              "Fruit",
-              style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16),
-            ),
+            Text("Fruit", style: TextStyle(color: Colors.grey, fontSize: 16)),
           ],
         ),
       ],
@@ -119,63 +102,56 @@ class BriefScreen extends StatelessWidget {
         "label": "Calories",
         "val": "99.5 Kcal",
         "icon": Icons.local_fire_department,
-        "color": Colors.orange
+        "color": Colors.orange,
       },
       {
         "label": "Proteins",
         "val": "99.5 g",
         "icon": Icons.bakery_dining,
-        "color": Colors.red
+        "color": Colors.red,
       },
       {
         "label": "Carbs",
         "val": "99.5 g",
         "icon": Icons.grain,
-        "color": Colors.brown
+        "color": Colors.brown,
       },
       {
         "label": "Fiber",
         "val": "99.5 g",
         "icon": Icons.eco,
-        "color": Colors.green
+        "color": Colors.green,
       },
       {
         "label": "Fats",
         "val": "99.5 g",
         "icon": Icons.water_drop,
-        "color": Colors.orangeAccent
+        "color": Colors.orangeAccent,
       },
       {
         "label": "Water",
         "val": "99.5 ml",
         "icon": Icons.opacity,
-        "color": Colors.blue
+        "color": Colors.blue,
       },
     ];
 
     return GridView.builder(
       shrinkWrap: true,
-      physics:
-      const NeverScrollableScrollPhysics(),
-      gridDelegate:
-      const SliverGridDelegateWithFixedCrossAxisCount(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         childAspectRatio: 2.2,
       ),
       itemCount: items.length,
-      itemBuilder: (context, index) =>
-          _NutrientTile(
-            title: items[index]['label']
-            as String,
-            value:
-            items[index]['val'] as String,
-            icon:
-            items[index]['icon'] as IconData,
-            color:
-            items[index]['color'] as Color,
-          ),
+      itemBuilder: (context, index) => _NutrientTile(
+        title: items[index]['label'] as String,
+        value: items[index]['val'] as String,
+        icon: items[index]['icon'] as IconData,
+        color: items[index]['color'] as Color,
+      ),
     );
   }
 
@@ -185,68 +161,52 @@ class BriefScreen extends StatelessWidget {
         "title": "Vitamin C",
         "val": "99.5 mg",
         "label": "C",
-        "color": Colors.orange
+        "color": Colors.orange,
       },
       {
         "title": "Vitamin B6",
         "val": "99.5 mg",
         "label": "B6",
-        "color": Colors.purple
+        "color": Colors.purple,
       },
       {
         "title": "Vitamin A",
         "val": "99.5 mg",
         "label": "A",
-        "color": Colors.redAccent
+        "color": Colors.redAccent,
       },
       {
         "title": "Vitamin E",
         "val": "99.5 mg",
         "label": "E",
-        "color": Colors.green
+        "color": Colors.green,
       },
       {
         "title": "Calcium",
         "val": "99.5 mg",
         "label": "Ca",
-        "color": Colors.blueAccent
+        "color": Colors.blueAccent,
       },
-      {
-        "title": "Iron",
-        "val": "99.5 mg",
-        "label": "Fe",
-        "color": Colors.brown
-      },
+      {"title": "Iron", "val": "99.5 mg", "label": "Fe", "color": Colors.brown},
     ];
 
     return GridView.builder(
       shrinkWrap: true,
-      physics:
-      const NeverScrollableScrollPhysics(),
-      gridDelegate:
-      const SliverGridDelegateWithFixedCrossAxisCount(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         childAspectRatio: 2.2,
       ),
       itemCount: microItems.length,
-      itemBuilder: (context, index) =>
-          _NutrientTile(
-            title:
-            microItems[index]['title']
-            as String,
-            value:
-            microItems[index]['val']
-            as String,
-            color:
-            microItems[index]['color']
-            as Color,
-            isMicro: true,
-            microLabel:
-            microItems[index]['label']
-            as String,
-          ),
+      itemBuilder: (context, index) => _NutrientTile(
+        title: microItems[index]['title'] as String,
+        value: microItems[index]['val'] as String,
+        color: microItems[index]['color'] as Color,
+        isMicro: true,
+        microLabel: microItems[index]['label'] as String,
+      ),
     );
   }
 }
@@ -279,35 +239,41 @@ class _NutrientTile extends StatelessWidget {
         children: [
           isMicro
               ? CircleAvatar(
-            backgroundColor: color.withOpacity(0.15),
-            radius: 18,
-            child: Text(
-              microLabel!,
-              style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12),
-            ),
-          )
+                  backgroundColor: color.withOpacity(0.15),
+                  radius: 18,
+                  child: Text(
+                    microLabel!,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                )
               : Icon(icon, color: color, size: 24),
           const SizedBox(width: 8),
-          Expanded( // Added Expanded to handle long text within the tile
+          Expanded(
+            // Added Expanded to handle long text within the tile
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   value,
                   style: const TextStyle(
-                      color: Colors.redAccent,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600),
+                    color: Colors.redAccent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),

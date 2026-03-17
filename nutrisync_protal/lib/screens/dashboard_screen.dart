@@ -21,11 +21,17 @@ class DashboardScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  const Text("Calories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Calories",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   _CaloriesLineChart(),
                   const SizedBox(height: 30),
-                  const Text("Nutritions", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Nutritions",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   _NutritionsBarChart(),
                   const SizedBox(height: 30),
@@ -47,31 +53,55 @@ class _CaloriesLineChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ["1d", "1w", "1m", "1y", "All"].map((t) => _TimeTab(t, t == "1d")).toList(),
+            children: [
+              "1d",
+              "1w",
+              "1m",
+              "1y",
+              "All",
+            ].map((t) => _TimeTab(t, t == "1d")).toList(),
           ),
           const SizedBox(height: 20),
           SizedBox(
             height: 180,
             child: LineChart(
               LineChartData(
-                gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: 500),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: 500,
+                ),
                 titlesData: FlTitlesData(
                   show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       interval: 500,
-                      getTitlesWidget: (val, _) => Text(val.toInt().toString(), style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                      getTitlesWidget: (val, _) => Text(
+                        val.toInt().toString(),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -79,8 +109,15 @@ class _CaloriesLineChart extends StatelessWidget {
                 lineBarsData: [
                   LineChartBarData(
                     spots: const [
-                      FlSpot(0, 1400), FlSpot(1, 1450), FlSpot(2, 1000), FlSpot(3, 1500),
-                      FlSpot(4, 1867), FlSpot(5, 1300), FlSpot(6, 400), FlSpot(7, 800), FlSpot(8, 1600),
+                      FlSpot(0, 1400),
+                      FlSpot(1, 1450),
+                      FlSpot(2, 1000),
+                      FlSpot(3, 1500),
+                      FlSpot(4, 1867),
+                      FlSpot(5, 1300),
+                      FlSpot(6, 400),
+                      FlSpot(7, 800),
+                      FlSpot(8, 1600),
                     ],
                     isCurved: true,
                     color: AppColors.primary,
@@ -92,7 +129,10 @@ class _CaloriesLineChart extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [AppColors.primary.withOpacity(0.3), AppColors.primary.withOpacity(0)],
+                        colors: [
+                          AppColors.primary.withOpacity(0.3),
+                          AppColors.primary.withOpacity(0),
+                        ],
                       ),
                     ),
                   ),
@@ -101,7 +141,10 @@ class _CaloriesLineChart extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text("1867 kcal", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+          const Text(
+            "1867 kcal",
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -116,7 +159,9 @@ class _NutritionsBarChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+        ],
       ),
       child: Column(
         children: [
@@ -158,7 +203,11 @@ class _NutritionsBarChart extends StatelessWidget {
           color: color,
           width: 45,
           borderRadius: BorderRadius.circular(12),
-          backDrawRodData: BackgroundBarChartRodData(show: true, toY: 100, color: const Color(0xFFF5F5F5)),
+          backDrawRodData: BackgroundBarChartRodData(
+            show: true,
+            toY: 100,
+            color: const Color(0xFFF5F5F5),
+          ),
         ),
       ],
     );
@@ -169,7 +218,14 @@ class _NutritionsBarChart extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Container(height: 12, width: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3))),
+          Container(
+            height: 12,
+            width: 12,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
           const SizedBox(width: 8),
           Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
           const Spacer(),
@@ -193,7 +249,14 @@ class _TimeTab extends StatelessWidget {
         color: isSelected ? AppColors.primary : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(text, style: TextStyle(color: isSelected ? Colors.white : Colors.grey, fontWeight: FontWeight.bold, fontSize: 12)),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.grey,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }

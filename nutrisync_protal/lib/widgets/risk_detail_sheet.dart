@@ -5,19 +5,14 @@ import '../models/risk_model.dart';
 class RiskDetailSheet extends StatelessWidget {
   final RiskModel risk;
 
-  const RiskDetailSheet({
-    super.key,
-    required this.risk,
-  });
+  const RiskDetailSheet({super.key, required this.risk});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
         top: false,
@@ -46,10 +41,7 @@ class RiskDetailSheet extends StatelessWidget {
                       onTap: () => Navigator.pop(context),
                       child: const Padding(
                         padding: EdgeInsets.only(left: 12),
-                        child: Icon(
-                          Icons.close,
-                          color: AppColors.textMain,
-                        ),
+                        child: Icon(Icons.close, color: AppColors.textMain),
                       ),
                     ),
                   ],
@@ -70,16 +62,14 @@ class RiskDetailSheet extends StatelessWidget {
                 const SizedBox(height: 6),
 
                 Text(
-                  risk.name,
-                  style: AppTextStyles.header.copyWith(
-                    fontSize: 24,
-                  ),
+                  risk.predictedRisk,
+                  style: AppTextStyles.header.copyWith(fontSize: 24),
                 ),
 
                 const SizedBox(height: 8),
 
                 Text(
-                  risk.subtitle,
+                  risk.reasonTitle,
                   style: AppTextStyles.subHeader.copyWith(
                     color: AppColors.textSub,
                   ),
@@ -109,7 +99,7 @@ class RiskDetailSheet extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          risk.warningText,
+                          risk.warning,
                           style: AppTextStyles.subHeader.copyWith(
                             color: AppColors.textMain,
                             height: 1.45,
@@ -135,7 +125,7 @@ class RiskDetailSheet extends StatelessWidget {
 
                 /// meals list
                 Column(
-                  children: risk.contributingMeals.map((meal) {
+                  children: risk.contibutedMealList.map((meal) {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(12),
@@ -145,13 +135,16 @@ class RiskDetailSheet extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: Image.asset(
-                              meal.imagePath,
-                              width: 56,
-                              height: 56,
-                              fit: BoxFit.cover,
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: const Icon(
+                              Icons.fastfood,
+                              color: Colors.grey,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -160,7 +153,7 @@ class RiskDetailSheet extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  meal.mealName,
+                                  meal.foodName,
                                   style: AppTextStyles.subHeader.copyWith(
                                     color: AppColors.textMain,
                                     fontWeight: FontWeight.bold,
@@ -168,7 +161,9 @@ class RiskDetailSheet extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  meal.nutrientText,
+                                  meal.contribution,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: AppTextStyles.subHeader.copyWith(
                                     color: AppColors.textSub,
                                     fontSize: 14,

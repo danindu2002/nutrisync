@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/login_dto.dart';
 import '../models/onboarding_dto.dart';
+import '../models/risk_model.dart';
 
 class ApiService {
   static String get baseUrl {
@@ -59,6 +60,70 @@ class ApiService {
     } catch (e) {
       debugPrint("Login exception: $e");
       return false;
+    }
+  }
+
+  static Future<List<RiskModel>> predictRisk(int userId, int years) async {
+    final url = Uri.parse(
+      '$baseUrl/risk-predictor/predict-risk/$userId?years=$years',
+    );
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+
+        // The API wraps the risks in an object, but based on the example
+        // it seems to return an array at a specific key OR it's a list.
+        // Looking at the top of the User's sample:
+        // {
+        //   "data": { ... list of items in some property or directly it's "data": [ ... ] }
+        //   "message": "Risk Predicted Successfully",
+        //   "status": 200
+        // }
+
+        if (decoded['status'] == 200) {
+          var data = decoded['data'];
+          // The top level data object seems to have a list of risks as an array or inside a field?
+          // The sample was:
+          // [
+          //   { "predictedRisk": ... }
+          // ], mealSwapList:[]
+          // Let's assume `data` is a map with a `riskPredictList` or it just sends back an array directly in data if it's not a map
+
+          List<dynamic> listToParse = [];
+          if (data is List) {
+            listToParse = data;
+          } else if (data is Map && data.containsKey('risks')) {
+            listToParse = data['risks'];
+          } else {
+            // Fallback if data contains the array somewhere (since sample was partially cut off but shows an array bracket)
+            // The sample showed `],mealSwapList:[]` meaning data is an object like `{ "risks": [...], "mealSwapList": [] }`
+            // Wait, the user JSON snippet showed `[ { ... }, { ... } ], mealSwapList: [] }` which is structurally invalid JSON string if literal,
+            // it usually means `{"predictedRisks": [...], "mealSwapList": [] }` or similar. Let's try to extract any List item.
+            var possibleList = data.values.firstWhere(
+              (v) => v is List,
+              orElse: () => null,
+            );
+            if (possibleList != null) {
+              listToParse = possibleList as List;
+            }
+          }
+
+          return listToParse.map((json) => RiskModel.fromJson(json)).toList();
+        }
+        return [];
+      } else {
+        debugPrint("Predict risk error: \${response.body}");
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Predict risk exception: \$e");
+      return [];
     }
   }
 }

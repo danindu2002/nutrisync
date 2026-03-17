@@ -40,8 +40,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt,
-                    color: AppColors.primary),
+                leading: const Icon(Icons.camera_alt, color: AppColors.primary),
                 title: const Text('Capture with Camera'),
                 onTap: () {
                   Navigator.pop(context);
@@ -49,8 +48,10 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library,
-                    color: AppColors.primary),
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: AppColors.primary,
+                ),
                 title: const Text('Select from Gallery'),
                 onTap: () {
                   Navigator.pop(context);
@@ -68,8 +69,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
   /// Pick image from selected source
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? image =
-      await _picker.pickImage(source: source);
+      final XFile? image = await _picker.pickImage(source: source);
 
       if (image == null) {
         // If user cancels, go back
@@ -113,9 +113,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => const BriefScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const BriefScreen()),
         );
       }
     } catch (e) {
@@ -132,33 +130,26 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
       body: Stack(
         children: [
           // Background
-          Positioned.fill(
-            child: Container(color: Colors.black),
-          ),
+          Positioned.fill(child: Container(color: Colors.black)),
 
           // Center UI
           Center(
             child: _isProcessing
                 ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-                SizedBox(height: 15),
-                Text(
-                  "Uploading...",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            )
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircularProgressIndicator(color: Colors.white),
+                      SizedBox(height: 15),
+                      Text(
+                        "Uploading...",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ],
+                  )
                 : const Text(
-              "Preparing...",
-              style: TextStyle(color: Colors.white),
-            ),
+                    "Preparing...",
+                    style: TextStyle(color: Colors.white),
+                  ),
           ),
         ],
       ),

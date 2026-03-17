@@ -21,12 +21,20 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Challenges",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
         centerTitle: false,
         actions: [
@@ -49,7 +57,10 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
-                if (isShowingActive) ..._buildActiveChallenges() else ..._buildAvailableChallenges(),
+                if (isShowingActive)
+                  ..._buildActiveChallenges()
+                else
+                  ..._buildAvailableChallenges(),
                 const SizedBox(height: 20),
               ],
             ),
@@ -69,7 +80,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
           ],
         ),
         child: const Row(
@@ -78,7 +89,10 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
             SizedBox(width: 4),
             Text(
               "1240",
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -103,7 +117,9 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               child: Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isShowingActive ? AppColors.primary : Colors.transparent,
+                  color: isShowingActive
+                      ? AppColors.primary
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -122,7 +138,9 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               child: Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: !isShowingActive ? AppColors.primary : Colors.transparent,
+                  color: !isShowingActive
+                      ? AppColors.primary
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -233,7 +251,11 @@ class ChallengeCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -241,10 +263,11 @@ class ChallengeCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                height: 45, width: 45,
+                height: 45,
+                width: 45,
                 decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12)
+                  color: iconColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: iconColor),
               ),
@@ -253,8 +276,17 @@ class ChallengeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(subtitle, style: TextStyle(color: AppColors.textSub, fontSize: 12)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(color: AppColors.textSub, fontSize: 12),
+                    ),
                   ],
                 ),
               ),
@@ -264,7 +296,11 @@ class ChallengeCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _info(Icons.access_time_filled, "$daysLeft days left", AppColors.primary),
+              _info(
+                Icons.access_time_filled,
+                "$daysLeft days left",
+                AppColors.primary,
+              ),
               _info(Icons.card_giftcard, "$points points", Colors.orange),
             ],
           ),
@@ -276,7 +312,9 @@ class ChallengeCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress ?? 0.0,
                 backgroundColor: AppColors.cardBg,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.primary,
+                ),
                 minHeight: 8,
               ),
             ),
@@ -284,8 +322,22 @@ class ChallengeCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Day $dayCount", style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
-                Text("${((progress ?? 0.0) * 100).toInt()}%", style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                Text(
+                  "Day $dayCount",
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "${((progress ?? 0.0) * 100).toInt()}%",
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ],
@@ -293,9 +345,9 @@ class ChallengeCard extends StatelessWidget {
           const SizedBox(height: 15),
 
           PrimaryButton(
-              onTap: () {},
-              text: isAvailableView ? "Join Challenge" : "Log Progress",
-              isRed: true
+            onTap: () {},
+            text: isAvailableView ? "Join Challenge" : "Log Progress",
+            isRed: true,
           ),
         ],
       ),
@@ -307,7 +359,10 @@ class ChallengeCard extends StatelessWidget {
       children: [
         Icon(icon, size: 14, color: color),
         const SizedBox(width: 5),
-        Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        ),
       ],
     );
   }

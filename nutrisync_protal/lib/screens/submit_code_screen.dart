@@ -6,26 +6,23 @@ import 'reset_password_screen.dart';
 class SubmitCodeScreen extends StatefulWidget {
   final String email;
 
-  const SubmitCodeScreen({
-    super.key,
-    required this.email,
-  });
+  const SubmitCodeScreen({super.key, required this.email});
 
   @override
   State<SubmitCodeScreen> createState() => _SubmitCodeScreenState();
 }
 
 class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
-  final List<TextEditingController> _controllers =
-  List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
 
-  final List<FocusNode> _focusNodes =
-  List.generate(6, (_) => FocusNode());
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   bool _isLoading = false;
 
-  String get _enteredCode =>
-      _controllers.map((c) => c.text).join();
+  String get _enteredCode => _controllers.map((c) => c.text).join();
 
   String _maskEmail(String email) {
     final parts = email.split("@");
@@ -35,11 +32,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
 
   Future<void> _verifyCode() async {
     if (_enteredCode.length != 6) {
-      showModernToast(
-        context,
-        "Enter complete 6-digit code",
-        type: 'error',
-      );
+      showModernToast(context, "Enter complete 6-digit code", type: 'error');
       return;
     }
 
@@ -52,16 +45,10 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
     if (_enteredCode == "123456") {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const ResetPasswordScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
       );
     } else {
-      showModernToast(
-        context,
-        "Invalid verification code",
-        type: 'error',
-      );
+      showModernToast(context, "Invalid verification code", type: 'error');
     }
   }
 
@@ -75,8 +62,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
           if (event is RawKeyDownEvent &&
               event.logicalKey == LogicalKeyboardKey.backspace) {
             if (_controllers[index].text.isEmpty && index > 0) {
-              FocusScope.of(context)
-                  .requestFocus(_focusNodes[index - 1]);
+              FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
               _controllers[index - 1].clear();
             }
           }
@@ -87,13 +73,8 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
           maxLength: 1,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-          ],
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
             counterText: "",
             filled: true,
@@ -110,8 +91,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
           onChanged: (value) {
             if (value.isNotEmpty) {
               if (index < 5) {
-                FocusScope.of(context)
-                    .requestFocus(_focusNodes[index + 1]);
+                FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
               } else {
                 FocusScope.of(context).unfocus();
               }
@@ -147,7 +127,6 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 Container(
                   height: 70,
                   width: 70,
@@ -166,10 +145,7 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
 
                 const Text(
                   "Enter Verification Code",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 10),
@@ -183,10 +159,8 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
                 const SizedBox(height: 25),
 
                 Row(
-                  mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
-                  children: List.generate(
-                      6, (index) => _buildOtpBox(index)),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(6, (index) => _buildOtpBox(index)),
                 ),
 
                 const SizedBox(height: 30),
@@ -201,15 +175,14 @@ class _SubmitCodeScreenState extends State<SubmitCodeScreen> {
                     ),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(
-                      color: Colors.white)
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                    "Verify Code",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                          "Verify Code",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ],
             ),

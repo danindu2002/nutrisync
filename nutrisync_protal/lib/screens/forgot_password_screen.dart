@@ -19,11 +19,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     FocusScope.of(context).unfocus();
 
     if (_emailController.text.trim().isEmpty) {
-      showModernToast(
-        context,
-        "Please enter your email",
-        type: 'error',
-      );
+      showModernToast(context, "Please enter your email", type: 'error');
       return;
     }
 
@@ -44,18 +40,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     Navigator.pop(context);
     setState(() => _isLoading = false);
 
-    showModernToast(
-      context,
-      "Reset link sent successfully!",
-      type: 'success',
-    );
+    showModernToast(context, "Reset link sent successfully!", type: 'success');
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ConfirmEmailScreen(
-          email: _emailController.text.trim(),
-        ),
+        builder: (_) => ConfirmEmailScreen(email: _emailController.text.trim()),
       ),
     );
   }
@@ -81,7 +71,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     const Text(
                       "Forgot\nPassword",
                       style: TextStyle(

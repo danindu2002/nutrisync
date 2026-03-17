@@ -60,16 +60,17 @@ class _MealLogScreenState extends State<MealLogScreen> {
                       const Text(
                         "My Meals",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Row(
                         children: [
-                          const Text("Sort ",
-                              style: TextStyle(color: Colors.grey)),
-                          Icon(Icons.tune,
-                              size: 18,
-                              color: AppColors.primary),
+                          const Text(
+                            "Sort ",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          Icon(Icons.tune, size: 18, color: AppColors.primary),
                         ],
                       ),
                     ],
@@ -113,13 +114,13 @@ class _MealLogScreenState extends State<MealLogScreen> {
   /// ================= HEADER =================
   Widget _buildHeader(BuildContext context) {
     final daysInMonth = DateUtils.getDaysInMonth(
-        selectedDate.year, selectedDate.month);
+      selectedDate.year,
+      selectedDate.month,
+    );
 
     return Container(
       padding: const EdgeInsets.only(top: 60, bottom: 30),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E2026),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFF1E2026)),
       child: Column(
         children: [
           /// Top Bar
@@ -129,16 +130,20 @@ class _MealLogScreenState extends State<MealLogScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: Colors.white, size: 20),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                   onPressed: () {},
                 ),
                 const Text(
                   "Meal Log",
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Container(
                   decoration: BoxDecoration(
@@ -177,8 +182,7 @@ class _MealLogScreenState extends State<MealLogScreen> {
               }
             },
             child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.white54),
@@ -191,9 +195,10 @@ class _MealLogScreenState extends State<MealLogScreen> {
                   Text(
                     "${_monthName(selectedDate.month)} ${selectedDate.year}",
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600),
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   const Icon(Icons.arrow_drop_down, color: Colors.white),
@@ -242,19 +247,23 @@ class _MealLogScreenState extends State<MealLogScreen> {
                       children: [
                         Text(
                           _weekDayName(
-                              selectedDate.year,
-                              selectedDate.month,
-                              day),
+                            selectedDate.year,
+                            selectedDate.month,
+                            day,
+                          ),
                           style: const TextStyle(
-                              color: Colors.white70, fontSize: 12),
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           "$day",
                           style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -288,17 +297,16 @@ class _MealLogScreenState extends State<MealLogScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color:
-                  isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected ? AppColors.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Text(
                     type,
                     style: TextStyle(
-                        color:
-                        isSelected ? Colors.white : Colors.grey,
-                        fontWeight: FontWeight.bold),
+                      color: isSelected ? Colors.white : Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -312,15 +320,25 @@ class _MealLogScreenState extends State<MealLogScreen> {
   /// ================= HELPERS =================
   String _monthName(int month) {
     const months = [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
     return months[month - 1];
   }
 
   String _weekDayName(int year, int month, int day) {
     final date = DateTime(year, month, day);
-    const weekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     return weekDays[date.weekday - 1];
   }
 }
@@ -330,8 +348,12 @@ class MealCard extends StatelessWidget {
 
   const MealCard({
     super.key,
-    required this.title, required this.calories, required this.protein,
-    required this.carbs, required this.fats, required this.imagePath,
+    required this.title,
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fats,
+    required this.imagePath,
   });
 
   @override
@@ -356,23 +378,47 @@ class MealCard extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 15, left: 20,
+            top: 15,
+            left: 20,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 Row(
                   children: [
-                    const Icon(Icons.local_fire_department, color: AppColors.primary, size: 14),
-                    Text(calories, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                    const Icon(
+                      Icons.local_fire_department,
+                      color: AppColors.primary,
+                      size: 14,
+                    ),
+                    Text(
+                      calories,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          const Positioned(top: 15, right: 10, child: Icon(Icons.more_vert, color: Colors.white)),
+          const Positioned(
+            top: 15,
+            right: 10,
+            child: Icon(Icons.more_vert, color: Colors.white),
+          ),
           Positioned(
-            bottom: 15, left: 20, right: 20,
+            bottom: 15,
+            left: 20,
+            right: 20,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -393,15 +439,34 @@ class MealCard extends StatelessWidget {
         Stack(
           alignment: Alignment.center,
           children: [
-            SizedBox(width: 24, height: 24, child: CircularProgressIndicator(value: 0.7, strokeWidth: 3, color: color, backgroundColor: Colors.white24)),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                value: 0.7,
+                strokeWidth: 3,
+                color: color,
+                backgroundColor: Colors.white24,
+              ),
+            ),
           ],
         ),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 10),
+            ),
           ],
         ),
       ],

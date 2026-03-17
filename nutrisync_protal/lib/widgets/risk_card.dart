@@ -6,11 +6,7 @@ class RiskCard extends StatelessWidget {
   final RiskModel risk;
   final VoidCallback onTap;
 
-  const RiskCard({
-    super.key,
-    required this.risk,
-    required this.onTap,
-  });
+  const RiskCard({super.key, required this.risk, required this.onTap});
 
   Color getRiskColor(double value) {
     if (value < 0.3) {
@@ -41,10 +37,7 @@ class RiskCard extends StatelessWidget {
                 color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                risk.icon,
-                color: AppColors.secondary,
-              ),
+              child: Icon(risk.icon, color: AppColors.secondary),
             ),
             const SizedBox(width: 12),
 
@@ -53,7 +46,7 @@ class RiskCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    risk.name,
+                    risk.predictedRisk,
                     style: AppTextStyles.subHeader.copyWith(
                       color: AppColors.textMain,
                       fontWeight: FontWeight.bold,
@@ -61,22 +54,38 @@ class RiskCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: risk.riskLevel,
-                      minHeight: 8,
-                      backgroundColor: Colors.grey.shade200,
-                      valueColor: AlwaysStoppedAnimation(
-                        getRiskColor(risk.riskLevel),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: risk.probability,
+                            minHeight: 8,
+                            backgroundColor: Colors.grey.shade200,
+                            valueColor: AlwaysStoppedAnimation(
+                              getRiskColor(risk.probability),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "${(risk.probability * 100).round()}",
+                        style: AppTextStyles.subHeader.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: getRiskColor(risk.probability),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 6),
 
                   Text(
-                    risk.description,
+                    risk.reasonTitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.subHeader.copyWith(
                       color: AppColors.textSub,
                       fontSize: 13,
