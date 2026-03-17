@@ -3,8 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/constants.dart';
 
+import 'package:flutter/foundation.dart';
+import 'package:device_preview/device_preview.dart';
+
 void main() {
-  runApp(const NutriSyncApp());
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const NutriSyncApp(),
+    ),
+  );
 }
 
 class NutriSyncApp extends StatelessWidget {
@@ -13,6 +21,8 @@ class NutriSyncApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       title: 'NutriSync',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
