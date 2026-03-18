@@ -60,6 +60,7 @@ public class SecurityConfig {
             "/api/v1/challenges/**",
             "/api/v1/rewards/**",
             "/api/v1/risk-predictor/**",
+            "/api/v1/impact-simulator/**",
     };
 
     @Bean

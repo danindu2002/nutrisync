@@ -135,6 +135,55 @@ def generate_meal_plan():
         print(f"LLM Error: {e}")
         return {"error": "Failed to generate meal plan"}, 500
 
+@app.route('/simulate-impact', methods=['POST'])
+def simulate_impact():
+    user_data = request.json
+
+    prompt = f"""
+    You are an expert AI health and fitness predictive engine. 
+    The user is starting a new diet and workout plan. Calculate a realistic health projection for {user_data.get('months', 6)} months in the future.
+
+    Current User Profile:
+    - Age: {user_data.get('age')}
+    - Gender: {user_data.get('gender')}
+    - Current Weight: {user_data.get('weightKg')} kg
+    - Height: {user_data.get('heightCm')} cm
+    - Current BMI: {user_data.get('bmi')}
+    - Target Daily Calories: {user_data.get('dailyCalorieGoal')} kcal
+    - Current Body Fat: {user_data.get('bodyFatPercent', 27)}%
+
+    STRICT RULES:
+    1. Calculate realistic weight loss based on standard safe medical guidelines (e.g., losing 0.5 to 1 kg per week).
+    2. Recalculate the future BMI based on the projected future weight and their current height.
+    3. Calculate the difference (change) between current and projected metrics.
+    4. Provide realistic body fat and waist-to-hip ratio improvements.
+
+    You MUST return ONLY a valid JSON object matching this exact schema:
+    {{
+      "projectedBmi": 0.0,
+      "projectedWeightKg": 0.0,
+      "projectedBodyFatPercent": 0,
+      "waistToHipRatio": 0.0,
+      "expectedConsistencyLevel": "String (e.g., High, Medium)",
+      "bmiChange": 0.0,
+      "weightChangeKg": 0.0,
+      "bodyFatChangePercent": 0
+    }}
+    """
+
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            )
+        )
+        return response.text, 200, {'Content-Type': 'application/json'}
+    except Exception as e:
+        print(f"LLM Error: {e}")
+        return {"error": "Failed to simulate health impact"}, 500
+        
 @app.route('/risk-prediction', methods=['POST'])
 def risk_prediction():
     user_data = request.json
@@ -434,6 +483,6 @@ def format_meal_logs(meal_logs):
     {meal.get("notes","")}
     """
     return formatted
-
+        
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
