@@ -57,6 +57,9 @@ public class SecurityConfig {
             "/api/v1/reference/**",
             "/api/v1/meal/**",
             "/api/v1/diet-plan/**",
+            "/api/v1/challenges/**",
+            "/api/v1/rewards/**",
+            "/api/v1/risk-predictor/**",
             "/api/v1/impact-simulator/**",
     };
 
