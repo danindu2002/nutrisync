@@ -128,7 +128,12 @@ public class DashboardServiceImpl implements DashboardService {
                 .toList();
 
         List<Double> values = new ArrayList<>(dailyCaloriesMap.values());
-        double totalCalories = dailyCaloriesMap.getOrDefault(today, 0.0);
+        double totalCalories = dailyCaloriesMap.values()
+                .stream()
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+
 
         return CaloriesChartDTO.builder()
                 .labels(labels)
