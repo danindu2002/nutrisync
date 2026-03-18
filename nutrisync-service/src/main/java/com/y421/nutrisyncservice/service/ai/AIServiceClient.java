@@ -93,42 +93,64 @@ public class AIServiceClient {
         }
     }
 
-public ImpactSimulationResponseDTO simulateHealthImpact(NutrisyncUser user, int months) {
-    String url = baseUrl + "/simulate-impact";
+    public ImpactSimulationResponseDTO simulateHealthImpact(NutrisyncUser user, int months) {
+        String url = baseUrl + "/simulate-impact";
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-    // Create a request DTO that includes current stats + duration
-    ImpactSimulationRequestDTO requestPayload = ImpactSimulationRequestDTO.builder()
-            .age(user.getAge())
-            .gender(user.getGender())
-            .weightKg(user.getWeightKg())
-            .heightCm(user.getHeightCm())
-            .bmi(user.getBmi())
-            .dailyCalorieGoal(user.getDailyCalorieGoal())
-            .months(months)
-            .build();
+        // Create a request DTO that includes current stats + duration
+        ImpactSimulationRequestDTO requestPayload = ImpactSimulationRequestDTO.builder()
+                .age(user.getAge())
+                .gender(user.getGender())
+                .weightKg(user.getWeightKg())
+                .heightCm(user.getHeightCm())
+                .bmi(user.getBmi())
+                .dailyCalorieGoal(user.getDailyCalorieGoal())
+                .months(months)
+                .build();
 
-    HttpEntity<ImpactSimulationRequestDTO> requestEntity = new HttpEntity<>(requestPayload, headers);
+        HttpEntity<ImpactSimulationRequestDTO> requestEntity = new HttpEntity<>(requestPayload, headers);
 
-    try {
-        ResponseEntity<ImpactSimulationResponseDTO> response = restTemplate.postForEntity(
-                url,
-                requestEntity,
-                ImpactSimulationResponseDTO.class
-        );
+        try {
+            ResponseEntity<ImpactSimulationResponseDTO> response = restTemplate.postForEntity(
+                    url,
+                    requestEntity,
+                    ImpactSimulationResponseDTO.class
+            );
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new RuntimeException("AI Service failed to simulate impact");
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("AI Service failed to simulate impact");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-        return null;
     }
-}
-  
+
+    public AIRiskPredictorResDTO predictRisk(MealLogRiskRequestDTO requestPayload) {
+        try {
+            // 1. Prepare the headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // 2. Prepare header and payload
+            HttpEntity<MealLogRiskRequestDTO> requestEntity = new HttpEntity<>(requestPayload, headers);
+
+            // 3. Call the Python API
+            ResponseEntity<AIRiskPredictorResDTO> response = restTemplate.postForEntity(baseUrl + "/risk-prediction", requestEntity, AIRiskPredictorResDTO.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("AI Service Error: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
   
 }
