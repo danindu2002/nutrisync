@@ -1,46 +1,111 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
+import '../services/DietPlanService.dart';
+import '../services/FirebaseImageService.dart';
 import '../widgets/common_widgets.dart';
 import 'meal_plan_preview_screen.dart';
 
 class MealPlanScreen extends StatefulWidget {
-  const MealPlanScreen({super.key});
+  final int? userId;
+  const MealPlanScreen({super.key, required this.userId});
 
   @override
   State<MealPlanScreen> createState() => _MealPlanScreenState();
 }
 
 class _MealPlanScreenState extends State<MealPlanScreen> {
-  final List<MealPlanItem> _mealPlans = [
-    MealPlanItem(
-      imagePath: 'assets/images/MealPlan.png',
-      name: 'Diabetes Management Plan',
-      description:
-      'A personalized meal plan focused on balancing blood sugar levels through nutritious, portion-controlled meals.',
-    ),
-    MealPlanItem(
-      imagePath: 'assets/images/MealPlan.png',
-      name: 'Weight Loss Plan',
-      description:
-      'A calorie-conscious meal plan designed to support healthy weight reduction with balanced nutrition.',
-    ),
-  ];
+  bool _isLoading = true;
+  List<dynamic> _mealPlans = [];
 
-  void _goToMealPlanPreview({MealPlanItem? plan}) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const MealPlanPreviewScreen(),
+  @override
+  void initState() {
+    super.initState();
+    _fetchPlans();
+  }
+
+  Future<void> _fetchPlans() async {
+    setState(() => _isLoading = true);
+    final response = await DietPlanService.getDietPlans(widget.userId);
+
+    if (mounted) {
+      if (response.success) {
+        setState(() {
+          _mealPlans = response.data ?? [];
+        });
+      } else if (response.status == 404) {
+        // 404 means no active plans found, which is fine, just show empty state
+        setState(() {
+          _mealPlans = [];
+        });
+      } else {
+        Logger.error(response.message);
+        showModernToast(context, 'Failed to load meal plans', type: 'error');
+      }
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showDeleteConfirmation(int planId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Delete Plan?', style: AppTextStyles.header.copyWith(fontSize: 20)),
+        content: Text(
+          'Are you sure you want to delete this meal plan? This action cannot be undone.',
+          style: AppTextStyles.subHeader,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSub)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              LoadingIndicator.show(context);
+
+              final res = await DietPlanService.deleteDietPlan(planId);
+
+              LoadingIndicator.hide(context);
+
+              if (res.success) {
+                showModernToast(context, 'Plan deleted', type: 'success');
+                _fetchPlans(); // Refresh the list
+              } else {
+                showModernToast(context, 'Failed to delete plan', type: 'error');
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
 
-  void _showEditMealPlanPopup(int index) {
-    final selectedPlan = _mealPlans[index];
+  void _goToMealPlanPreview({int? planId}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MealPlanPreviewScreen(
+          userId: widget.userId,
+          planId: planId, // If null, it generates a new one. If provided, it views the existing one.
+          isReadOnly: planId != null,
+        ),
+      ),
+    ).then((_) => _fetchPlans()); // Refresh list when returning
+  }
+
+  void _showEditMealPlanPopup(Map<String, dynamic> plan) {
     final TextEditingController nameController =
-    TextEditingController(text: selectedPlan.name);
+    TextEditingController(text: plan['dietPlanName'] ?? '');
     final TextEditingController descriptionController =
-    TextEditingController(text: selectedPlan.description);
+    TextEditingController(text: plan['dietPlanDescription'] ?? '');
+
+    // Manage local state inside the dialog
+    String currentImageUrl = plan['dietPlanImage'] ?? '';
+    bool isUploadingImage = false;
 
     showDialog(
       context: context,
@@ -71,28 +136,50 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 8),
 
+                      // --- DYNAMIC IMAGE DISPLAY ---
                       ClipRRect(
                         borderRadius: BorderRadius.circular(22),
-                        child: Image.asset(
-                          selectedPlan.imagePath,
+                        child: isUploadingImage
+                            ? const SizedBox(
+                          height: 140,
+                          width: 140,
+                          child: Center(
+                            child: CircularProgressIndicator(color: AppColors.primary),
+                          ),
+                        )
+                            : currentImageUrl.startsWith('http')
+                            ? Image.network(
+                          currentImageUrl,
                           height: 140,
                           width: 140,
                           fit: BoxFit.cover,
-                        ),
+                          errorBuilder: (_, __, ___) => _buildFallbackImage(),
+                        )
+                            : _buildFallbackImage(),
                       ),
 
                       const SizedBox(height: 12),
 
+                      // --- UPLOAD BUTTON TRIGGER ---
                       GestureDetector(
-                        onTap: () {
-                          showModernToast(
-                            context,
-                            'Image change will be connected later',
-                            type: 'info',
-                          );
+                        onTap: () async {
+                          setPopupState(() => isUploadingImage = true);
+
+                          // Call your new Firebase service
+                          String? newUrl = await FirebaseImageService.pickAndUploadImage();
+
+                          if (newUrl != null) {
+                            // Update the image immediately in the popup
+                            setPopupState(() {
+                              currentImageUrl = newUrl;
+                              isUploadingImage = false;
+                            });
+                          } else {
+                            // Cancelled or Failed
+                            setPopupState(() => isUploadingImage = false);
+                          }
                         },
                         child: Text(
                           'Change Photo',
@@ -115,7 +202,6 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 8),
 
                       TextField(
@@ -149,7 +235,6 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 8),
 
                       TextField(
@@ -185,27 +270,27 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _mealPlans[index] = MealPlanItem(
-                                imagePath: selectedPlan.imagePath,
-                                name: nameController.text.trim().isEmpty
-                                    ? selectedPlan.name
-                                    : nameController.text.trim(),
-                                description:
-                                descriptionController.text.trim().isEmpty
-                                    ? selectedPlan.description
-                                    : descriptionController.text.trim(),
-                              );
-                            });
+                          onPressed: () async {
+                            Navigator.pop(context); // Close dialog
+                            LoadingIndicator.show(context); // Show full-screen loader
 
-                            Navigator.pop(context);
+                            // Send the updated URL to Spring Boot
+                            final payload = {
+                              "dietPlanName": nameController.text.trim(),
+                              "dietPlanDescription": descriptionController.text.trim(),
+                              "dietPlanImage": currentImageUrl, // Uses the newly uploaded Firebase URL!
+                            };
 
-                            showModernToast(
-                              context,
-                              'Meal plan updated successfully',
-                              type: 'success',
-                            );
+                            final res = await DietPlanService.updatePlanMetadata(plan['planId'], payload);
+
+                            LoadingIndicator.hide(context);
+
+                            if (res.success) {
+                              showModernToast(context, 'Meal plan updated successfully', type: 'success');
+                              _fetchPlans(); // Refresh the list screen to show new data
+                            } else {
+                              showModernToast(context, 'Failed to update plan', type: 'error');
+                            }
                           },
                           child: Text(
                             'Save Changes',
@@ -224,13 +309,22 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     );
   }
 
+  Widget _buildFallbackImage() {
+    return Image.asset(
+      'assets/images/meal_plan/MealPlan.png',
+      height: 140,
+      width: 140,
+      fit: BoxFit.cover,
+    );
+  }
+
   Widget _buildEmptyState() {
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/images/MealPlan.png',
+            'assets/images/meal_plan/MealPlan.png',
             height: 220,
             fit: BoxFit.contain,
           ),
@@ -281,114 +375,133 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     );
   }
 
-  Widget _buildMealPlanCard(MealPlanItem plan, int index) {
+  Widget _buildMealPlanCard(Map<String, dynamic> plan) {
+    String imageUrl = plan['dietPlanImage'] ?? '';
+    String name = plan['dietPlanName'] ?? 'Custom Meal Plan';
+    String description = plan['dietPlanDescription'] ?? 'Your personalized nutrition guide.';
+    int planId = plan['planId'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: Colors.grey.shade100, // Explicitly adding the requested slight grey shade
         borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(24),
-              ),
-              onTap: () => _goToMealPlanPreview(plan: plan),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        plan.imagePath,
-                        width: 72,
-                        height: 72,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            plan.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.subHeader.copyWith(
-                              color: AppColors.textMain,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            plan.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.subHeader.copyWith(
-                              fontSize: 13,
-                              color: AppColors.textSub,
-                              height: 1.35,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          GestureDetector(
-            onTap: () => _showEditMealPlanPopup(index),
-            child: Container(
-              width: 88,
-              height: 100,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.edit_outlined,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Edit',
-                    style: AppTextStyles.buttonText.copyWith(
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04), // Soft shadow to make the grey card pop
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
         ],
       ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Left: Content Area (Clickable to Preview)
+            Expanded(
+              child: InkWell(
+                borderRadius: const BorderRadius.horizontal(left: Radius.circular(24)),
+                onTap: () => _goToMealPlanPreview(planId: planId),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: imageUrl.startsWith('http')
+                            ? Image.network(
+                          imageUrl,
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _buildCardFallbackImage(),
+                        )
+                            : _buildCardFallbackImage(),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.subHeader.copyWith(
+                                color: AppColors.textMain,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.subHeader.copyWith(
+                                fontSize: 13,
+                                color: AppColors.textSub,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Middle: Edit Button
+            GestureDetector(
+              onTap: () => _showEditMealPlanPopup(plan),
+              child: Container(
+                width: 48,
+                color: AppColors.primary,
+                child: const Icon(Icons.edit_outlined, color: Colors.white, size: 20),
+              ),
+            ),
+
+            // Right: Delete Button
+            GestureDetector(
+              onTap: () => _showDeleteConfirmation(planId),
+              child: Container(
+                width: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFE5E5),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                  ),
+                ),
+                child: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardFallbackImage() {
+    return Image.asset(
+      'assets/images/meal_plan/MealPlan.png',
+      width: 72,
+      height: 72,
+      fit: BoxFit.cover,
     );
   }
 
   Widget _buildMealPlanListState() {
     return Expanded(
-      child: ListView(
+      child: ListView.builder(
         padding: EdgeInsets.zero,
-        children: [
-          ...List.generate(
-            _mealPlans.length,
-                (index) => _buildMealPlanCard(_mealPlans[index], index),
-          ),
-        ],
+        itemCount: _mealPlans.length,
+        itemBuilder: (context, index) {
+          return _buildMealPlanCard(_mealPlans[index]);
+        },
       ),
     );
   }
@@ -434,7 +547,12 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
               const SizedBox(height: 24),
 
-              hasMealPlans ? _buildMealPlanListState() : _buildEmptyState(),
+              if (_isLoading)
+                const Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.primary)))
+              else if (hasMealPlans)
+                _buildMealPlanListState()
+              else
+                _buildEmptyState(),
 
               const SizedBox(height: 20),
 
@@ -449,16 +567,4 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
       ),
     );
   }
-}
-
-class MealPlanItem {
-  final String imagePath;
-  final String name;
-  final String description;
-
-  MealPlanItem({
-    required this.imagePath,
-    required this.name,
-    required this.description,
-  });
 }

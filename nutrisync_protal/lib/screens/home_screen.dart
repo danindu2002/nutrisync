@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.status == 200) {
         final data = response.data;
 
-        final premiumExpireDate = data["premiumExpiryDate"];
+        final premiumExpireDate = data["premiumExpireDate"];
         await prefs.setString('premiumExpireDate', premiumExpireDate ?? "");
 
         if (mounted) {
@@ -84,6 +84,15 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
     setState(() => isPremium = false);
+  }
+
+  void _navigateToMealPlan() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("userId");
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => MealPlanScreen(userId: userId)),
+    );
   }
 
   void _navigateToPremium() async {
@@ -152,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (!isPremium) {
                           _navigateToPremium();
                         } else {
-                          // TODO: Navigate to Meal Plan Screen
+                          _navigateToMealPlan();
                         }
                       },
                     ),
