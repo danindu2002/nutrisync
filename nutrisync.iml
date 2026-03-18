@@ -8,6 +8,9 @@
       <excludeFolder url="file://$MODULE_DIR$/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/nutrisync_protal/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/nutrisync_protal/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/nutrisync_protal/build" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
