@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../core/constants.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../services/dashboard_service.dart';
 import '../widgets/common_widgets.dart';
 import 'dart:convert';
 import '../models/dashboard_calories_chart_dto.dart';
@@ -25,11 +26,11 @@ class DashboardScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  const Text("Calories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text("Calories", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   _CaloriesLineChart(),
                   const SizedBox(height: 30),
-                  const Text("Nutritions", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text("Nutritions", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   _NutritionsBarChart(),
                   const SizedBox(height: 30),
@@ -65,35 +66,36 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
   }
 
   Future<void> fetchCaloriesChart(String range) async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
 
-    try {
-      final endpoint = "/dashboard/calories?userId=$userId&range=$range";
-      final response = await ApiClient.get(endpoint);
+      try {
+        final response = await DashboardService.getCaloriesChart(
+          userId: userId,
+          range: range,
+        );
 
-      final Map<String, dynamic> body = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && body["data"] != null) {
+        if (response.status == 200 && response.data != null) {
+          setState(() {
+            chartData = DashboardCaloriesChartDto.fromJson(response.data);
+            selectedRange = range;
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            errorMessage = response.message ?? "Failed to load chart data";
+            isLoading = false;
+          });
+        }
+      } catch (e) {
         setState(() {
-          chartData = DashboardCaloriesChartDto.fromJson(body["data"]);
-          selectedRange = range;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          errorMessage = body["message"] ?? "Failed to load chart data";
+          errorMessage = "Error loading chart data";
           isLoading = false;
         });
       }
-    } catch (e) {
-      setState(() {
-        errorMessage = "Error loading chart data";
-        isLoading = false;
-      });
-    }
+
   }
 
   List<FlSpot> buildSpots() {
@@ -116,20 +118,24 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
 
     final maxValue = values.reduce((a, b) => a > b ? a : b);
 
+    if (maxValue <= 100) return 100;
     if (maxValue <= 500) return 500;
     if (maxValue <= 1000) return 1000;
-    if (maxValue <= 1500) return 1500;
     if (maxValue <= 2000) return 2000;
-    return maxValue + 200;
+    if (maxValue <= 3000) return 3000;
+    if (maxValue <= 5000) return 5000;
+    return (maxValue / 1000).ceil() * 1000;
   }
 
   double calculateInterval() {
     final maxY = calculateMaxY();
 
+    if (maxY <= 100) return 20;
     if (maxY <= 500) return 100;
     if (maxY <= 1000) return 200;
     if (maxY <= 2000) return 500;
-    return 1000;
+    if (maxY <= 5000) return 1000;
+    return 2000;
   }
 
   @override
@@ -172,7 +178,7 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
           ),
           const SizedBox(height: 20),
           SizedBox(
-            height: 220,
+            height: 300,
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : errorMessage != null
@@ -228,6 +234,7 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
+                      reservedSize: 40,
                       interval: calculateInterval(),
                       getTitlesWidget: (val, meta) => Text(
                         val.toInt().toString(),
