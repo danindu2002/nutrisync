@@ -14,5 +14,19 @@ public interface MealLogRepository extends JpaRepository<MealLog,Long> {
     @Query("SELECT m FROM MealLog m WHERE m.user.userId = :userId AND CAST(m.createdOn AS date) = :date AND m.isDeleted = false")
     List<MealLog> findByUserIdAndDate(@Param("userId") Long userId, @Param("date") LocalDate date);
 
+    @Query("SELECT m FROM MealLog m " +
+            "WHERE m.user.userId = :userId " +
+            "AND CAST(m.createdOn AS date) BETWEEN :startDate AND :endDate " +
+            "AND m.isDeleted = false " +
+            "ORDER BY m.createdOn ASC")
+    List<MealLog> findByUserIdAndDateRange(@Param("userId") Long userId,
+                                           @Param("startDate") LocalDate startDate,
+                                           @Param("endDate") LocalDate endDate);
+    @Query("SELECT m FROM MealLog m " +
+            "WHERE m.user.userId = :userId " +
+            "AND m.isDeleted = false " +
+            "ORDER BY m.createdOn ASC")
+    List<MealLog> findAllByUserId(@Param("userId") Long userId);
+    
     List<MealLog> findByUserAndIsDeletedFalse(NutrisyncUser user);
 }
