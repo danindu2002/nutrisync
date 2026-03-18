@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -1332,20 +1333,48 @@ class InputFieldState extends State<InputField> {
 }
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key});
+  final String userName;
+  final int score;
+  final dynamic profileImageData; // Accepts String (Base64) or List<int> (Byte Array)
 
-  // Future to fetch user data
-  Future<Map<String, String?>> _getUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    return {
-      'name': prefs.getString('name')?.split(" ")[0], // Get first name
-      'profileImage': prefs.getString('profileImage'),
-    };
+  const HomeHeader({
+    super.key,
+    required this.userName,
+    required this.score,
+    this.profileImageData,
+  });
+
+  // Helper method to handle both Base64 Strings and Byte Arrays safely
+  ImageProvider? _getProfileImage() {
+    if (profileImageData == null) return null;
+
+    try {
+      if (profileImageData is String && (profileImageData as String).isNotEmpty) {
+        final String base64String = profileImageData as String;
+        // Strip out data URI prefixes if present
+        final cleanBase64 = base64String.contains(',')
+            ? base64String.split(',').last
+            : base64String;
+        final decodedBytes = base64Decode(cleanBase64.replaceAll(RegExp(r'\s+'), ''));
+        return MemoryImage(decodedBytes);
+      }
+      else if (profileImageData is List<int>) {
+        // Convert raw byte array to Uint8List for MemoryImage
+        return MemoryImage(Uint8List.fromList(profileImageData as List<int>));
+      }
+    } catch (e) {
+      debugPrint("Error parsing profile image: $e");
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('MMM dd, yyyy').format(DateTime.now());
+    final ImageProvider? avatarImage = _getProfileImage();
+
+    // Extract first name if a full name is passed
+    final String firstName = userName.isNotEmpty ? userName.split(" ")[0] : "User";
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -1353,100 +1382,88 @@ class HomeHeader extends StatelessWidget {
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),
-      child: FutureBuilder<Map<String, String?>>(
-        future: _getUserData(),
-        builder: (context, snapshot) {
-          // Default values while loading or if data is null
-          String firstName = snapshot.data?['name'] ?? "";
-          String? imagePath = snapshot.data?['profileImage'];
+      child: Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(28),
+            bottomRight: Radius.circular(28),
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.black, Color(0xFF2B2B2B)],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
+            child: Row(
+              children: [
+                /// User Avatar Logic
+                CircleAvatar(
+                  radius: 26,
+                  backgroundColor: Colors.grey[800],
+                  backgroundImage: avatarImage,
+                  child: avatarImage == null
+                      ? const Icon(Icons.person, color: Colors.white, size: 30)
+                      : null,
+                ),
+                const SizedBox(width: 12),
 
-          return Container(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.black, Color(0xFF2B2B2B)],
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
-                child: Row(
-                  children: [
-                    /// User Avatar Logic
-                    CircleAvatar(
-                      radius: 26,
-                      backgroundColor: Colors.grey[800],
-                      // If imagePath exists, show FileImage; else show default icon
-                      backgroundImage: imagePath != null
-                          ? FileImage(File(imagePath))
-                          : null,
-                      child: imagePath == null
-                          ? const Icon(Icons.person, color: Colors.white, size: 30)
-                          : null,
-                    ),
-                    const SizedBox(width: 12),
-
-                    /// User Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                /// User Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Hello $firstName!", // Dynamic First Name
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
                         children: [
-                          Text(
-                            "Hello $firstName!", // Dynamic First Name
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          const Icon(
+                            Icons.favorite,
+                            color: AppColors.primary,
+                            size: 14,
                           ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.favorite,
-                                color: AppColors.primary,
-                                size: 14,
-                              ),
-                              const SizedBox(width: 4),
-                              const Text(
-                                "88% healthy",
-                                style: TextStyle(color: Colors.white70, fontSize: 12),
-                              ),
-                              const SizedBox(width: 12),
-                              const Icon(
-                                Icons.calendar_today,
-                                size: 14,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                formattedDate,
-                                style: const TextStyle(color: Colors.white70, fontSize: 12),
-                              ),
-                            ],
+                          const SizedBox(width: 4),
+                          Text(
+                            "$score% healthy",
+                            style: TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formattedDate,
+                            style: const TextStyle(color: Colors.white70, fontSize: 12),
                           ),
                         ],
                       ),
-                    ),
-
-                    /// Notification Icon
-                    const Icon(
-                      Icons.notifications_none,
-                      size: 28,
-                      color: Colors.white,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+
+                /// Notification Icon
+                const Icon(
+                  Icons.notifications_none,
+                  size: 28,
+                  color: Colors.white,
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
