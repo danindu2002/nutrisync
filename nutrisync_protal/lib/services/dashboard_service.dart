@@ -24,4 +24,26 @@ class DashboardService {
       );
     }
   }
+
+  static Future<ApiResponse> getNutritionChart({
+    required int userId,
+    required String range,
+  }) async {
+    try {
+      final response = await ApiClient.get(
+        "/dashboard/nutrition?userId=$userId&range=$range",
+      );
+
+      final body = jsonDecode(response.body);
+      Logger.info("Nutrition Chart Response: $body");
+      return ApiResponse.fromJson(body);
+    } catch (e) {
+      Logger.error("An error occurred while fetching nutrition chart: $e");
+      return ApiResponse(
+        status: 500,
+        message: "Unexpected error occurred",
+        data: null,
+      );
+    }
+  }
 }
