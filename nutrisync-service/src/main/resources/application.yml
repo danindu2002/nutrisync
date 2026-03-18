@@ -7,7 +7,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8088/realms/nutrisync-service
+          issuer-uri: http://keycloak:8088/realms/nutrisync-service
           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
       client:
         registration:
@@ -29,9 +29,9 @@ spring:
     name: NUTRISYNC-SERVICE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/nutrisync?createDatabaseIfNotExist=true
+    url: jdbc:mysql://172.17.0.1:3306/nutrisync?createDatabaseIfNotExist=true
     username: adminusr
-    password: Aegis@1212
+    password: Admin@1212
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       minimum-idle: 10
@@ -86,7 +86,7 @@ rest:
     client_id: client-user
     jwk_set_uri: ${rest.service.url}realms/${rest.nutrisync-service.realm}/${rest.service.jwk_path}
   service:
-    url: http://localhost:8080/
+    url: http://keycloak:8080/
     username: admin
     password: Admin@1212
     jwk_path: protocol/openid-connect/certs
