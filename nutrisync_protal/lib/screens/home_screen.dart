@@ -217,7 +217,7 @@ class _MetricsRow extends StatelessWidget {
         const SizedBox(width: 12),
         _MetricCard(title: "Calorie Goal", value: "$calories", color: Colors.blue),
         const SizedBox(width: 12),
-        _MetricCard(title: "Challenges", value: "$challenges", color: Colors.grey),
+        _MetricCard(title: "Challenges", value: "$challenges", color: Colors.black54),
       ],
     );
   }
@@ -240,7 +240,7 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            Text(title, style: const TextStyle(color: Colors.white70, fontSize: 13.5)),
             const Spacer(),
             Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
           ],

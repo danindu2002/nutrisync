@@ -149,16 +149,18 @@ class ApiClient {
     return response;
   }
 
-  /// POST MULTIPART (For File Uploads)
-  static Future<http.Response> postMultipart(
+  /// MULTIPART (For File Uploads)
+  static Future<http.Response> multipartUpload(
       String endpoint,
       File file,
       String fileField, {
-        Map<String, String>? fields, // ADD THIS PARAMETER
+        Map<String, String>? fields,
         bool requiresAuth = true,
+        String method = "POST",
       }) async {
     final url = Uri.parse("${ApiConstants.baseUrl}$endpoint");
-    final request = http.MultipartRequest('POST', url);
+
+    final request = http.MultipartRequest(method, url);
 
     final headers = await getHeaders(requiresAuth: requiresAuth);
     headers.remove("Content-Type");
@@ -167,19 +169,15 @@ class ApiClient {
     request.files.add(
       await http.MultipartFile.fromPath(fileField, file.path),
     );
-
-    // ADD THIS BLOCK to attach JSON data
     if (fields != null) {
       request.fields.addAll(fields);
     }
-
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode == 405) {
       await _handleTokenExpired();
     }
-
     return response;
   }
 }

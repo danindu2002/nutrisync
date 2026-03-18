@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import '../core/constants.dart';
 import '../models/login_dto.dart';
 import '../models/onboarding_dto.dart';
@@ -51,7 +52,6 @@ class AuthService {
       final response = await ApiClient.get("/user/getProfile/$userId");
 
       final body = jsonDecode(response.body);
-      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
       Logger.error("An error occurred: $e");
@@ -120,7 +120,6 @@ class AuthService {
       final response = await ApiClient.get("/user/userDetails/$userId");
 
       final body = jsonDecode(response.body);
-      Logger.info("Response: $body");
       return ApiResponse.fromJson(body);
     } catch (e) {
       Logger.error("An error occurred: $e");
@@ -146,6 +145,35 @@ class AuthService {
     } catch (e) {
       Logger.error("Error subscribing: $e");
       return ApiResponse(status: 500, message: "Unexpected error occurred");
+    }
+  }
+
+  static Future<ApiResponse> updateProfile(
+      int userId,
+      File imageFile,
+      Map<String, dynamic> data,
+      ) async {
+    try {
+      final response = await ApiClient.multipartUpload(
+        "/user/updateProfile/$userId",
+        imageFile,
+        "profileImage",
+        method: "PUT",
+        fields: {
+          "firstName": data["firstName"] ?? "",
+          "lastName": data["lastName"] ?? "",
+          "email": data["email"] ?? "",
+        },
+      );
+      final body = jsonDecode(response.body);
+      return ApiResponse.fromJson(body);
+    } catch (e) {
+      Logger.error("An error occurred: $e");
+      return ApiResponse(
+        status: 500,
+        message: "Unexpected error occurred",
+        data: null,
+      );
     }
   }
 }
