@@ -41,6 +41,9 @@ public class MealLog extends AuditModel implements Serializable {
     @Column(name = "TOTAL_CALORIES")
     private Float totalCalories; // Total calories content based on consumed quantity (kcal)
 
+    @Column(name = "TOTAL_FATS")
+    private Float totalFats; // Total fat content based on consumed quantity (g)
+
     @Column(name = "CONSUMED_QUANTITY")
     private Float consumedQuantity; // Quantity consumed by the user (g)
 

@@ -2,7 +2,11 @@ package com.y421.nutrisyncservice.service.ai;
 
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
 import com.y421.nutrisyncservice.request.dietPlan.MealPlanRequestDTO;
+import com.y421.nutrisyncservice.request.impactSimulation.ImpactSimulationRequestDTO;
 import com.y421.nutrisyncservice.response.dietPlan.MealPlanResponseDTO;
+import com.y421.nutrisyncservice.request.meal.MealLogRiskRequestDTO;
+import com.y421.nutrisyncservice.response.riskPredictor.AIRiskPredictorResDTO;
+import com.y421.nutrisyncservice.response.impactSimulation.ImpactSimulationResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -88,4 +92,65 @@ public class AIServiceClient {
             return null;
         }
     }
+
+    public ImpactSimulationResponseDTO simulateHealthImpact(NutrisyncUser user, int months) {
+        String url = baseUrl + "/simulate-impact";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Create a request DTO that includes current stats + duration
+        ImpactSimulationRequestDTO requestPayload = ImpactSimulationRequestDTO.builder()
+                .age(user.getAge())
+                .gender(user.getGender())
+                .weightKg(user.getWeightKg())
+                .heightCm(user.getHeightCm())
+                .bmi(user.getBmi())
+                .dailyCalorieGoal(user.getDailyCalorieGoal())
+                .months(months)
+                .build();
+
+        HttpEntity<ImpactSimulationRequestDTO> requestEntity = new HttpEntity<>(requestPayload, headers);
+
+        try {
+            ResponseEntity<ImpactSimulationResponseDTO> response = restTemplate.postForEntity(
+                    url,
+                    requestEntity,
+                    ImpactSimulationResponseDTO.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("AI Service failed to simulate impact");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public AIRiskPredictorResDTO predictRisk(MealLogRiskRequestDTO requestPayload) {
+        try {
+            // 1. Prepare the headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // 2. Prepare header and payload
+            HttpEntity<MealLogRiskRequestDTO> requestEntity = new HttpEntity<>(requestPayload, headers);
+
+            // 3. Call the Python API
+            ResponseEntity<AIRiskPredictorResDTO> response = restTemplate.postForEntity(baseUrl + "/risk-prediction", requestEntity, AIRiskPredictorResDTO.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("AI Service Error: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+  
 }

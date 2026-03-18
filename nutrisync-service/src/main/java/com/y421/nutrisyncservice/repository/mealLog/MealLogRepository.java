@@ -27,4 +27,6 @@ public interface MealLogRepository extends JpaRepository<MealLog,Long> {
             "AND m.isDeleted = false " +
             "ORDER BY m.createdOn ASC")
     List<MealLog> findAllByUserId(@Param("userId") Long userId);
+    
+    List<MealLog> findByUserAndIsDeletedFalse(NutrisyncUser user);
 }

@@ -11,6 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginDto {
-    private String email;
+    private String userName;
     private String password;
 }

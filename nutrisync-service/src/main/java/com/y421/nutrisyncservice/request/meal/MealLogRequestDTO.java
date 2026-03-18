@@ -20,4 +20,5 @@ public class MealLogRequestDTO {
     private Float totalProtein;
     private Float totalCarbs;
     private Float totalCalories;
+    private Float totalFats;
 }
