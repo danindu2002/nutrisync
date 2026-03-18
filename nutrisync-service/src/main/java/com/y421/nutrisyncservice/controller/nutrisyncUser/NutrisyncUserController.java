@@ -34,4 +34,10 @@ public interface NutrisyncUserController {
 
     @GetMapping("/userDetails/{userId}")
     ResponseEntity<Object> getUserDetails(@PathVariable Long userId);
+
+    @PutMapping(value = "/updateProfile/{userId}", consumes = {"multipart/form-data"})
+    ResponseEntity<Object> updateProfile(
+            @PathVariable Long userId,
+            @ModelAttribute UpdateProfileRequestDto dto
+    );
 }

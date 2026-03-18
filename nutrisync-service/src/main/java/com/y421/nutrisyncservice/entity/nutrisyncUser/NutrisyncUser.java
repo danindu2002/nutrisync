@@ -28,6 +28,10 @@ public class NutrisyncUser extends AuditModel implements Serializable {
     @Column(name = "USER_ID", nullable = false)
     private Long userId;
 
+    @Lob
+    @Column(name = "PROFILE_IMAGE", length = 20971520) // 20MB
+    private byte[] profileImage;
+
     @Column(name = "FIRST_NAME", nullable = false)
     private String firstName;
 
