@@ -28,4 +28,19 @@ public class DashboardControllerImpl implements DashboardController {
             return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
         }
     }
+
+    @Override
+    public ResponseEntity<Object> getNutritionChart(Long userId, String range) {
+        try {
+            ResponseEntity<Object> response = dashboardService.getNutritionChart(userId, range);
+
+            if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+                return generateResponse("Nutrition chart fetched successfully", HttpStatus.OK, response.getBody());
+            } else {
+                return generateResponse((String) response.getBody(), (HttpStatus) response.getStatusCode(), null);
+            }
+        } catch (Exception e) {
+            return generateResponse("Error Occurred", HttpStatus.BAD_REQUEST, null);
+        }
+    }
 }

@@ -13,4 +13,9 @@ public interface DashboardController {
             @RequestParam("userId") Long userId,
             @RequestParam("range") String range
     );
+    @GetMapping("/nutrition")
+    ResponseEntity<Object> getNutritionChart(
+            @RequestParam("userId") Long userId,
+            @RequestParam("range") String range
+    );
 }

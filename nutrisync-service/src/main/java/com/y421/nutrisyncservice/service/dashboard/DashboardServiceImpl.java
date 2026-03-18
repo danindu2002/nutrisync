@@ -6,6 +6,7 @@ import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
 import com.y421.nutrisyncservice.repository.mealLog.MealLogRepository;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
 import com.y421.nutrisyncservice.response.dashboard.CaloriesChartDTO;
+import com.y421.nutrisyncservice.response.dashboard.NutritionChartDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -215,48 +216,91 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private CaloriesChartDTO buildAllChart(Long userId) {
-        Optional<NutrisyncUser> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            return CaloriesChartDTO.builder()
-                    .labels(Collections.emptyList())
-                    .values(Collections.emptyList())
-                    .totalCalories(0.0)
-                    .range("all")
-                    .build();
-        }
-
-        LocalDate startDate = userOptional.get().getRegDate().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-        LocalDate endDate = LocalDate.now();
-
-        List<MealLog> logs = mealLogRepository.findByUserIdAndDateRange(userId, startDate, endDate);
-
-        Map<String, Double> monthYearMap = new LinkedHashMap<>();
-
-        for (MealLog log : logs) {
-            LocalDate logDate = log.getCreatedOn().toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
-
-            String label = logDate.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH)
-                    + " " + logDate.getYear();
-
-            monthYearMap.putIfAbsent(label, 0.0);
-
-            double calories = log.getTotalCalories() != null ? log.getTotalCalories() : 0.0;
-            monthYearMap.put(label, monthYearMap.get(label) + calories);
-        }
+        List<MealLog> logs = mealLogRepository.findAllByUserId(userId);
 
         double totalCalories = logs.stream()
                 .mapToDouble(log -> log.getTotalCalories() != null ? log.getTotalCalories() : 0.0)
                 .sum();
 
         return CaloriesChartDTO.builder()
-                .labels(new ArrayList<>(monthYearMap.keySet()))
-                .values(new ArrayList<>(monthYearMap.values()))
+                .labels(List.of("Start", "Now"))
+                .values(List.of(totalCalories, totalCalories))
                 .totalCalories(totalCalories)
                 .range("all")
                 .build();
+    }
+
+    @Override
+    public ResponseEntity<Object> getNutritionChart(Long userId, String range) {
+        try {
+            Optional<NutrisyncUser> userOptional = userRepository.findById(userId);
+            if (userOptional.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            String normalizedRange = range.toLowerCase();
+            LocalDate today = LocalDate.now();
+
+            List<MealLog> logs;
+
+            switch (normalizedRange) {
+                case "day":
+                case "1d":
+                    logs = mealLogRepository.findByUserIdAndDate(userId, today);
+                    break;
+
+                case "week":
+                case "1w":
+                    LocalDate startOfWeek = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+                    LocalDate endOfWeek = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+                    logs = mealLogRepository.findByUserIdAndDateRange(userId, startOfWeek, endOfWeek);
+                    break;
+
+                case "month":
+                case "1m":
+                    LocalDate startOfMonth = today.withDayOfMonth(1);
+                    LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+                    logs = mealLogRepository.findByUserIdAndDateRange(userId, startOfMonth, endOfMonth);
+                    break;
+
+                case "year":
+                case "1y":
+                    LocalDate startOfYear = today.withDayOfYear(1);
+                    LocalDate endOfYear = today.withDayOfYear(today.lengthOfYear());
+                    logs = mealLogRepository.findByUserIdAndDateRange(userId, startOfYear, endOfYear);
+                    break;
+
+                case "all":
+                    logs = mealLogRepository.findAllByUserId(userId);
+                    break;
+
+                default:
+                    return new ResponseEntity<>("Invalid range value", HttpStatus.BAD_REQUEST);
+            }
+
+            double totalFat = logs.stream()
+                    .mapToDouble(log -> log.getTotalFats() != null ? log.getTotalFats() : 0.0)
+                    .sum();
+
+            double totalProtein = logs.stream()
+                    .mapToDouble(log -> log.getTotalProtein() != null ? log.getTotalProtein() : 0.0)
+                    .sum();
+
+            double totalCarbs = logs.stream()
+                    .mapToDouble(log -> log.getTotalCarbs() != null ? log.getTotalCarbs() : 0.0)
+                    .sum();
+
+            NutritionChartDTO dto = NutritionChartDTO.builder()
+                    .labels(List.of("Fat", "Protein", "Carbs"))
+                    .values(List.of(totalFat, totalProtein, totalCarbs))
+                    .range(normalizedRange)
+                    .build();
+
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error Occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

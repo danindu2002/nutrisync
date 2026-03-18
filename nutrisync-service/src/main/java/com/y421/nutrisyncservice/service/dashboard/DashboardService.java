@@ -4,4 +4,5 @@ import org.springframework.http.ResponseEntity;
 
 public interface DashboardService {
     ResponseEntity<Object> getCaloriesChart(Long userId, String range);
+    ResponseEntity<Object> getNutritionChart(Long userId, String range);
 }
