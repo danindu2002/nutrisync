@@ -1490,7 +1490,6 @@ class LoadingIndicator {
 
   static void show(BuildContext context) {
     if (_isShowing) return;
-
     _isShowing = true;
 
     showDialog(
@@ -1509,7 +1508,6 @@ class LoadingIndicator {
 
   static void hide(BuildContext context) {
     if (!_isShowing) return;
-
     _isShowing = false;
 
     Navigator.of(context, rootNavigator: true).pop();
