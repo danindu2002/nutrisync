@@ -1,4 +1,7 @@
+import 'package:NutriSync/services/risk_service.dart';
+import 'package:NutriSync/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import '../models/risk_model.dart';
 import '../models/contributing_meal_model.dart';
@@ -14,95 +17,113 @@ class RiskPredictorScreen extends StatefulWidget {
 class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
   String? selectedPeriod = '1 year';
   int currentSwapIndex = 0;
+  bool isLoading = true;
 
-  final List<String> periods = [
-    '1 year',
-    '2 years',
-    '5 years',
-    '10 years'
-  ];
+  final List<String> periods = ['1 year', '2 years', '5 years', '10 years'];
 
-  /// MOCK DATA
-  /// Replace this later with API response
-  final List<RiskModel> mockRisks = [
-    RiskModel(
-      name: "High Cholesterol",
-      description: "High saturated fat diet",
-      riskLevel: 0.1,
-      icon: Icons.monitor_heart,
-      subtitle: "Based on recent activity & meals",
-      warningText: "Based on your current patterns, your cholesterol risk score is relatively low. However, it's important to maintain a balanced diet and regular exercise to keep it that way",
-      contributingMeals: [
-        ContributingMealModel(
-          mealName: "Bacon Double Cheeseburger",
-          nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk_predictor/burger.png",
-        ),
-      ],
-    ),
-    RiskModel(
-      name: "Obesity",
-      description: "Sedentary lifestyle & excess calories.",
-      riskLevel: 0.5,
-      icon: Icons.balance,
-      subtitle: "Based on recent activity & meals",
-      warningText: "Based on your current patterns, your obesity risk score is moderate. This suggests that there are some areas in your lifestyle that could be improved to reduce this risk",
-      contributingMeals: [
-        ContributingMealModel(
-          mealName: "Bacon Double Cheeseburger",
-          nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk_predictor/pasta.png",
-        ),
-      ],
-    ),
-    RiskModel(
-      name: "Type 2 Diabetes",
-      description: "Genetics & high sugar intake",
-      riskLevel: 0.9,
-      icon: Icons.water_drop,
-      subtitle: "Based on recent activity & meals",
-      warningText: "Based on your current patterns, your type 2 diabetes risk score is high. This indicates that there are significant factors in your lifestyle that may be contributing to an increased risk of developing diabetes.",
-      contributingMeals: [
-        ContributingMealModel(
-          mealName: "Bacon Double Cheeseburger",
-          nutrientText: "90g Saturated Fat",
-          imagePath: "assets/images/risk_predictor/chicken.png",
-        ),
-      ],
-    ),
-  ];
+  List<RiskModel> risks = [];
+  List<MealSwapModel> mealSwaps = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadRiskPrediction();
+  }
 
-  final List<MealSwapModel> mockMealSwaps = [
-    MealSwapModel(
-      currentMealName: "Fried Rice",
-      currentMealImagePath: "assets/images/risk_predictor/fried_rice.png",
-      currentMealMetric: "50g Saturated Fat",
-      suggestedMealName: "Quinoa Bowl",
-      suggestedMealImagePath: "assets/images/risk_predictor/quinoa_bowl.png",
-      suggestedMealMetric: "25g Saturated Fat",
-    ),
-    MealSwapModel(
-      currentMealName: "Cheese Burger",
-      currentMealImagePath: "assets/images/risk_predictor/burgerSwap.png",
-      currentMealMetric: "90g Saturated Fat",
-      suggestedMealName: "Grilled Chicken Wrap",
-      suggestedMealImagePath: "assets/images/risk_predictor/GrilledChickenWrapSwap.png",
-      suggestedMealMetric: "35g Saturated Fat",
-    ),
-    MealSwapModel(
-      currentMealName: "Creamy Pasta",
-      currentMealImagePath: "assets/images/risk_predictor/PastaSwap.png",
-      currentMealMetric: "65g Saturated Fat",
-      suggestedMealName: "Veggie Rice Bowl",
-      suggestedMealImagePath: "assets/images/risk_predictor/VeggieRiceBowlSwap.png",
-      suggestedMealMetric: "20g Saturated Fat",
-    ),
-  ];
+  Future<void> _loadRiskPrediction() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      int? userId = prefs.getInt("userId");
+
+      if (userId == null) {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+        return;
+      }
+
+      int years = int.tryParse(selectedPeriod?.split(' ').first ?? '1') ?? 1;
+
+      final ApiResponse response = await RiskService.getRiskPrediction(
+        userId,
+        years,
+      );
+
+      if (response.status == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        final List<dynamic> riskList = data['riskPredictionList'] ?? [];
+        final List<dynamic> swapList = data['mealSwapList'] ?? [];
+
+        if (mounted) {
+          setState(() {
+            risks = riskList.map((r) {
+              String probStr =
+                  r['probability']?.toString().replaceAll('%', '') ?? '0';
+              double riskLvl = (double.tryParse(probStr) ?? 0.0) / 100.0;
+
+              List<dynamic> contribList = r['contibutedMealList'] ?? [];
+              List<ContributingMealModel> cMeals = contribList.map((c) {
+                return ContributingMealModel(
+                  mealName: c['foodName'] ?? 'Unknown Meal',
+                  nutrientText: c['contribution'] ?? '',
+                  imagePath:
+                      c['image'] ?? 'assets/images/risk_predictor/burger.png',
+                );
+              }).toList();
+
+              return RiskModel(
+                name: r['predictedRisk'] ?? 'Unknown Risk',
+                description: r['reasonTitle'] ?? '',
+                riskLevel: riskLvl,
+                icon: Icons.health_and_safety,
+                subtitle: 'Based on recent activity & meals',
+                warningText: r['warning'] ?? '',
+                contributingMeals: cMeals,
+              );
+            }).toList();
+
+            mealSwaps = swapList.map((s) {
+              return MealSwapModel(
+                currentMealName: s['riskyMealName'] ?? 'Unknown Meal',
+                currentMealImagePath:
+                    'assets/images/risk_predictor/burgerSwap.png',
+                currentMealMetric: s['riskyMealFact'] ?? '',
+                suggestedMealName: s['healthyMealName'] ?? 'Unknown Meal',
+                suggestedMealImagePath:
+                    'assets/images/risk_predictor/quinoa_bowl.png',
+                suggestedMealMetric: s['healthyMealFact'] ?? '',
+              );
+            }).toList();
+
+            currentSwapIndex = 0;
+          });
+        }
+      } else {
+        if (mounted) {
+          showModernToast(context, response.message, type: 'error');
+        }
+      }
+    } catch (e) {
+      Logger.error("Error loading risk prediction: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   void _nextSwap() {
+    if (mealSwaps.isEmpty) return;
     setState(() {
-      currentSwapIndex = (currentSwapIndex + 1) % mockMealSwaps.length;
+      currentSwapIndex = (currentSwapIndex + 1) % mealSwaps.length;
     });
   }
 
@@ -137,10 +158,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                   const SizedBox(width: 8),
 
                   /// Title
-                  Text(
-                    "Risk Predictor",
-                    style: AppTextStyles.header,
-                  ),
+                  Text("Risk Predictor", style: AppTextStyles.header),
                 ],
               ),
 
@@ -160,7 +178,10 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(
-                            left: 20, top: 12, bottom: 12),
+                          left: 20,
+                          top: 12,
+                          bottom: 12,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -181,7 +202,8 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                               height: 28,
                               width: 133,
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12),
+                                horizontal: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
@@ -204,27 +226,31 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                   isExpanded: true,
                                   menuMaxHeight: 200,
                                   isDense: true,
+
                                   /// Call backend AI prediction API here
                                   /// using the selected time period and update risks list
                                   onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedPeriod = newValue;
-                                    });
+                                    if (newValue != null) {
+                                      setState(() {
+                                        selectedPeriod = newValue;
+                                      });
+                                      _loadRiskPrediction();
+                                    }
                                   },
-                                  items: periods
-                                      .map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                  items: periods.map<DropdownMenuItem<String>>((
+                                    String value,
+                                  ) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ),
                             ),
@@ -236,7 +262,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                     /// Right Side: Predict Risks Button (Black Box)
                     GestureDetector(
                       onTap: () {
-                        // Prediction logic goes here
+                        _loadRiskPrediction();
                       },
                       child: Container(
                         width: 120,
@@ -268,51 +294,69 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
 
               const SizedBox(height: 24),
 
-              Text(
-                "Top Predicted Risks",
-                style: AppTextStyles.subHeader.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textMain,
-                ),
-              ),
+              if (isLoading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 40.0),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                )
+              else if (risks.isEmpty && mealSwaps.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 40.0),
+                  child: Center(
+                    child: Text(
+                      "No risks to display for this period.",
+                      style: TextStyle(color: AppColors.textSub),
+                    ),
+                  ),
+                )
+              else ...[
+                if (risks.isNotEmpty) ...[
+                  Text(
+                    "Top Predicted Risks",
+                    style: AppTextStyles.subHeader.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textMain,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBg,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      children: risks.map((risk) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: RiskCard(
+                            risk: risk,
+                            onTap: () => _showRiskDetails(risk),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
 
-              const SizedBox(height: 16),
-
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  children: mockRisks.map((risk) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: RiskCard(
-                        risk: risk,
-                        onTap: () => _showRiskDetails(risk),
-                      )
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              Text(
-                "Suggested Meal Swaps",
-                style: AppTextStyles.subHeader.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textMain,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              MealSwapCard(
-                swap: mockMealSwaps[currentSwapIndex],
-                onNext: _nextSwap,
-              ),
+                if (mealSwaps.isNotEmpty) ...[
+                  Text(
+                    "Suggested Meal Swaps",
+                    style: AppTextStyles.subHeader.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textMain,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  MealSwapCard(
+                    swap: mealSwaps[currentSwapIndex],
+                    onNext: _nextSwap,
+                  ),
+                ],
+              ],
             ],
           ),
         ),
@@ -325,11 +369,7 @@ class MealSwapCard extends StatelessWidget {
   final MealSwapModel swap;
   final VoidCallback onNext;
 
-  const MealSwapCard({
-    super.key,
-    required this.swap,
-    required this.onNext,
-  });
+  const MealSwapCard({super.key, required this.swap, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +388,6 @@ class MealSwapCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-
           /// CURRENT MEAL
           Expanded(
             child: Column(
@@ -377,10 +416,7 @@ class MealSwapCard extends StatelessWidget {
 
                 Text(
                   swap.currentMealMetric,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.red,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
                 ),
               ],
             ),
@@ -389,18 +425,17 @@ class MealSwapCard extends StatelessWidget {
           /// SWAP AREA
           Column(
             children: [
-              const Icon(
-                Icons.arrow_forward,
-                size: 28,
-                color: Colors.teal,
-              ),
+              const Icon(Icons.arrow_forward, size: 28, color: Colors.teal),
 
               const SizedBox(height: 10),
 
               GestureDetector(
                 onTap: onNext,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(10),
@@ -448,20 +483,14 @@ class MealSwapCard extends StatelessWidget {
 
                 Text(
                   swap.suggestedMealMetric,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.green,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.green),
                 ),
               ],
             ),
           ),
 
           /// NEXT ARROW
-          IconButton(
-            onPressed: onNext,
-            icon: const Icon(Icons.chevron_right),
-          ),
+          IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right)),
         ],
       ),
     );
@@ -472,11 +501,7 @@ class RiskCard extends StatelessWidget {
   final RiskModel risk;
   final VoidCallback onTap;
 
-  const RiskCard({
-    super.key,
-    required this.risk,
-    required this.onTap,
-  });
+  const RiskCard({super.key, required this.risk, required this.onTap});
 
   Color getRiskColor(double value) {
     if (value < 0.3) {
@@ -507,10 +532,7 @@ class RiskCard extends StatelessWidget {
                 color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                risk.icon,
-                color: AppColors.secondary,
-              ),
+              child: Icon(risk.icon, color: AppColors.secondary),
             ),
             const SizedBox(width: 12),
 
@@ -561,19 +583,14 @@ class RiskCard extends StatelessWidget {
 class RiskDetailSheet extends StatelessWidget {
   final RiskModel risk;
 
-  const RiskDetailSheet({
-    super.key,
-    required this.risk,
-  });
+  const RiskDetailSheet({super.key, required this.risk});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
         top: false,
@@ -602,10 +619,7 @@ class RiskDetailSheet extends StatelessWidget {
                       onTap: () => Navigator.pop(context),
                       child: const Padding(
                         padding: EdgeInsets.only(left: 12),
-                        child: Icon(
-                          Icons.close,
-                          color: AppColors.textMain,
-                        ),
+                        child: Icon(Icons.close, color: AppColors.textMain),
                       ),
                     ),
                   ],
@@ -627,9 +641,7 @@ class RiskDetailSheet extends StatelessWidget {
 
                 Text(
                   risk.name,
-                  style: AppTextStyles.header.copyWith(
-                    fontSize: 24,
-                  ),
+                  style: AppTextStyles.header.copyWith(fontSize: 24),
                 ),
 
                 const SizedBox(height: 8),
