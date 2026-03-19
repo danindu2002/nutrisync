@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../services/auth_service.dart';
 import '../services/dashboard_service.dart';
 import '../widgets/common_widgets.dart';
 import '../models/dashboard_calories_chart_dto.dart';
@@ -16,6 +18,41 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   String selectedRange = "1d";
 
+  String _firstName = "User";
+  String? _profileImage;
+  int _score = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      int? userId = prefs.getInt("userId");
+
+      if (userId == null) return;
+
+      final ApiResponse response = await AuthService.getUserData(userId);
+
+      if (response.status == 200) {
+        final data = response.data;
+
+        if (mounted) {
+          setState(() {
+            _firstName = data["firstName"] ?? "User";
+            _score = data["score"] ?? 0;
+            _profileImage = data["profileImage"];
+          });
+        }
+      }
+    } catch (e) {
+      Logger.error("Error loading data: $e");
+    }
+  }
+
   void onRangeChanged(String range) {
     setState(() {
       selectedRange = range;
@@ -30,10 +67,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const HomeHeader(
-              userName: "User",
-              profileImageData: null,
-              score: 85,
+            HomeHeader(
+              userName: _firstName,
+              profileImageData: _profileImage,
+              score: _score,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
