@@ -6,6 +6,7 @@ import '../core/constants.dart';
 import '../models/risk_model.dart';
 import '../models/contributing_meal_model.dart';
 import '../models/meal_swap_model.dart';
+import '../services/PexelsImageService.dart';
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -60,47 +61,88 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
         final List<dynamic> riskList = data['riskPredictionList'] ?? [];
         final List<dynamic> swapList = data['mealSwapList'] ?? [];
 
+        PexelsImageService.resetAvailability();
+
+        List<RiskModel> fetchedRisks = [];
+        for (var r in riskList) {
+          String probStr =
+              r['probability']?.toString().replaceAll('%', '') ?? '0';
+          double riskLvl = (double.tryParse(probStr) ?? 0.0) / 100.0;
+
+          List<dynamic> contribList = r['contibutedMealList'] ?? [];
+          List<ContributingMealModel> cMeals = [];
+
+          for (var c in contribList) {
+            String mealName = c['foodName'] ?? 'Unknown Meal';
+            String imageUrl = c['image'] ?? '';
+
+            if (imageUrl.isEmpty || imageUrl == 'null') {
+              if (!PexelsImageService.isUnavailable) {
+                String? pexelsUrl = await PexelsImageService.fetchImage(
+                  mealName,
+                );
+                if (pexelsUrl != null) imageUrl = pexelsUrl;
+              }
+              if (imageUrl.isEmpty || imageUrl == 'null') {
+                imageUrl = 'assets/images/risk_predictor/burger.png';
+              }
+            }
+
+            cMeals.add(
+              ContributingMealModel(
+                mealName: mealName,
+                nutrientText: c['contribution'] ?? '',
+                imagePath: imageUrl,
+              ),
+            );
+          }
+
+          fetchedRisks.add(
+            RiskModel(
+              name: r['predictedRisk'] ?? 'Unknown Risk',
+              description: r['reasonTitle'] ?? '',
+              riskLevel: riskLvl,
+              icon: Icons.health_and_safety,
+              subtitle: 'Based on recent activity & meals',
+              warningText: r['warning'] ?? '',
+              contributingMeals: cMeals,
+            ),
+          );
+        }
+
+        List<MealSwapModel> fetchedSwaps = [];
+        for (var s in swapList) {
+          String currentName = s['riskyMealName'] ?? 'Unknown Meal';
+          String suggestedName = s['healthyMealName'] ?? 'Unknown Meal';
+
+          String currentImg = 'assets/images/risk_predictor/burgerSwap.png';
+          if (!PexelsImageService.isUnavailable) {
+            String? url = await PexelsImageService.fetchImage(currentName);
+            if (url != null) currentImg = url;
+          }
+
+          String suggestedImg = 'assets/images/risk_predictor/quinoa_bowl.png';
+          if (!PexelsImageService.isUnavailable) {
+            String? url = await PexelsImageService.fetchImage(suggestedName);
+            if (url != null) suggestedImg = url;
+          }
+
+          fetchedSwaps.add(
+            MealSwapModel(
+              currentMealName: currentName,
+              currentMealImagePath: currentImg,
+              currentMealMetric: s['riskyMealFact'] ?? '',
+              suggestedMealName: suggestedName,
+              suggestedMealImagePath: suggestedImg,
+              suggestedMealMetric: s['healthyMealFact'] ?? '',
+            ),
+          );
+        }
+
         if (mounted) {
           setState(() {
-            risks = riskList.map((r) {
-              String probStr =
-                  r['probability']?.toString().replaceAll('%', '') ?? '0';
-              double riskLvl = (double.tryParse(probStr) ?? 0.0) / 100.0;
-
-              List<dynamic> contribList = r['contibutedMealList'] ?? [];
-              List<ContributingMealModel> cMeals = contribList.map((c) {
-                return ContributingMealModel(
-                  mealName: c['foodName'] ?? 'Unknown Meal',
-                  nutrientText: c['contribution'] ?? '',
-                  imagePath:
-                      c['image'] ?? 'assets/images/risk_predictor/burger.png',
-                );
-              }).toList();
-
-              return RiskModel(
-                name: r['predictedRisk'] ?? 'Unknown Risk',
-                description: r['reasonTitle'] ?? '',
-                riskLevel: riskLvl,
-                icon: Icons.health_and_safety,
-                subtitle: 'Based on recent activity & meals',
-                warningText: r['warning'] ?? '',
-                contributingMeals: cMeals,
-              );
-            }).toList();
-
-            mealSwaps = swapList.map((s) {
-              return MealSwapModel(
-                currentMealName: s['riskyMealName'] ?? 'Unknown Meal',
-                currentMealImagePath:
-                    'assets/images/risk_predictor/burgerSwap.png',
-                currentMealMetric: s['riskyMealFact'] ?? '',
-                suggestedMealName: s['healthyMealName'] ?? 'Unknown Meal',
-                suggestedMealImagePath:
-                    'assets/images/risk_predictor/quinoa_bowl.png',
-                suggestedMealMetric: s['healthyMealFact'] ?? '',
-              );
-            }).toList();
-
+            risks = fetchedRisks;
+            mealSwaps = fetchedSwaps;
             currentSwapIndex = 0;
           });
         }
@@ -422,12 +464,27 @@ class _MealSwapCardState extends State<MealSwapCard> {
                   Column(
                     children: [
                       ClipOval(
-                        child: Image.asset(
-                          widget.swap.currentMealImagePath,
-                          height: 70,
-                          width: 70,
-                          fit: BoxFit.cover,
-                        ),
+                        child:
+                            widget.swap.currentMealImagePath.startsWith('http')
+                            ? Image.network(
+                                widget.swap.currentMealImagePath,
+                                height: 70,
+                                width: 70,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Image.asset(
+                                      'assets/images/risk_predictor/burgerSwap.png',
+                                      height: 70,
+                                      width: 70,
+                                      fit: BoxFit.cover,
+                                    ),
+                              )
+                            : Image.asset(
+                                widget.swap.currentMealImagePath,
+                                height: 70,
+                                width: 70,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ],
                   ),
@@ -455,7 +512,7 @@ class _MealSwapCardState extends State<MealSwapCard> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Text(
-                              "Swap Meal",
+                              "Next Meal",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
@@ -471,12 +528,29 @@ class _MealSwapCardState extends State<MealSwapCard> {
                   Column(
                     children: [
                       ClipOval(
-                        child: Image.asset(
-                          widget.swap.suggestedMealImagePath,
-                          height: 70,
-                          width: 70,
-                          fit: BoxFit.cover,
-                        ),
+                        child:
+                            widget.swap.suggestedMealImagePath.startsWith(
+                              'http',
+                            )
+                            ? Image.network(
+                                widget.swap.suggestedMealImagePath,
+                                height: 70,
+                                width: 70,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Image.asset(
+                                      'assets/images/risk_predictor/quinoa_bowl.png',
+                                      height: 70,
+                                      width: 70,
+                                      fit: BoxFit.cover,
+                                    ),
+                              )
+                            : Image.asset(
+                                widget.swap.suggestedMealImagePath,
+                                height: 70,
+                                width: 70,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ],
                   ),
@@ -802,12 +876,30 @@ class RiskDetailSheet extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: Image.asset(
-                              meal.imagePath,
-                              width: 56,
-                              height: 56,
-                              fit: BoxFit.cover,
-                            ),
+                            child: meal.imagePath.startsWith('http')
+                                ? Image.network(
+                                    meal.imagePath,
+                                    width: 56,
+                                    height: 56,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (
+                                          context,
+                                          error,
+                                          stackTrace,
+                                        ) => Image.asset(
+                                          'assets/images/risk_predictor/burger.png',
+                                          width: 56,
+                                          height: 56,
+                                          fit: BoxFit.cover,
+                                        ),
+                                  )
+                                : Image.asset(
+                                    meal.imagePath,
+                                    width: 56,
+                                    height: 56,
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
