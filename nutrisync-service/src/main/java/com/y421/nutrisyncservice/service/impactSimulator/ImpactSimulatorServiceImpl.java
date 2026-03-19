@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -50,6 +51,9 @@ public class ImpactSimulatorServiceImpl implements ImpactSimulatorService {
                 return new ResponseEntity<>("Error Simulating Impact", HttpStatus.CONFLICT);
             }
             return new ResponseEntity<>(res, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            // This catches the 429 Too Many Requests from the Rate Limiter
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error Occurred", HttpStatus.INTERNAL_SERVER_ERROR);
