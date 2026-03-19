@@ -446,7 +446,7 @@ class _NutritionRow extends StatelessWidget {
         const SizedBox(width: 12),
         _NutritionCard(
           title: "Health Impact Simulator", subtitle: "Personal Health Insights",
-          imagePath: "assets/images/dashboard/salad_eggs.png",
+          imagePath: "assets/images/dashboard/impact_simulator.png",
           isPremiumLocked: isPremiumLocked,
           onTap: () {
             if (isPremiumLocked) {
