@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
@@ -35,7 +36,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _firstNameController.text = prefs.getString('firstName') ?? "";
       _lastNameController.text = prefs.getString('lastName') ?? "";
       _emailController.text = prefs.getString('email') ?? "";
-      _dobController.text = prefs.getString('dob') ?? "";
+
+      // Load and format the existing DOB for the UI (d/M/yyyy)
+      String storedDob = prefs.getString('dob') ?? "";
+      if (storedDob.isNotEmpty) {
+        DateTime parsed = DateTime.parse(storedDob);
+        _dobController.text = DateFormat('d/M/yyyy').format(parsed);
+      }
 
       // Load the existing Base64 string from memory
       _existingprofileImage = prefs.getString('profileImage');
@@ -73,13 +80,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return null; // Show default icon if both are null
   }
 
+  // Safely converts the UI date (d/M/yyyy) back to API format (yyyy-MM-dd)
+  String convertDateFormat(String dob) {
+    if (dob.isEmpty) return "";
+
+    try {
+      dob = dob.trim();
+      DateTime date = DateFormat('d/M/yyyy').parse(dob);
+      return DateFormat('yyyy-MM-dd').format(date);
+    } catch (e) {
+      try {
+        // fallback ISO parsing
+        DateTime date = DateTime.parse(dob.trim());
+        return DateFormat('yyyy-MM-dd').format(date);
+      } catch (_) {
+        print("Date parse failed for: $dob");
+        return dob;
+      }
+    }
+  }
+
   Future<void> _saveProfile() async {
     if (_firstNameController.text.isEmpty ||
         _lastNameController.text.isEmpty ||
-        _emailController.text.isEmpty) {
+        _emailController.text.isEmpty ||
+        _dobController.text.isEmpty) {
       showModernToast(context, "Please fill in all required fields", type: 'error');
       return;
     }
+
     File? uploadFile;
     if (_newImagePath != null && _newImagePath!.isNotEmpty) {
       uploadFile = File(_newImagePath!);
@@ -90,6 +119,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } else if (_existingprofileImage == null || _existingprofileImage!.isEmpty) {
       showModernToast(context, "Please select a profile picture", type: 'error');
       return;
+    } else if (_existingprofileImage != null && _existingprofileImage!.isNotEmpty) {
+      try {
+        final cleanBase64 = _existingprofileImage!.contains(',')
+            ? _existingprofileImage!.split(',').last
+            : _existingprofileImage!;
+        final decodedBytes = base64Decode(
+          cleanBase64.replaceAll(RegExp(r'\s+'), ''),
+        );
+        final tempDir = Directory.systemTemp;
+        final tempFile = File('${tempDir.path}/temp_profile_image.png');
+        await tempFile.writeAsBytes(decodedBytes);
+        uploadFile = tempFile;
+      } catch (e) {
+        debugPrint("Error preparing existing image for upload: $e");
+        showModernToast(context, "Failed to prepare existing profile image. Please reselect.", type: 'error');
+        return;
+      }
     }
 
     final prefs = await SharedPreferences.getInstance();
@@ -97,6 +143,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     try {
       LoadingIndicator.show(context);
+
+      final apiDob = convertDateFormat(_dobController.text);
+
       final response = await AuthService.updateProfile(
         userId!,
         uploadFile!,
@@ -104,6 +153,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           "firstName": _firstNameController.text,
           "lastName": _lastNameController.text,
           "email": _emailController.text,
+          "dob": _dobController.text,
         },
       );
       if (mounted) LoadingIndicator.hide(context);
@@ -113,6 +163,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await prefs.setString('lastName', _lastNameController.text);
         await prefs.setString('email', _emailController.text);
         await prefs.setString('dob', _dobController.text);
+
         if (_newImagePath != null) {
           await prefs.setString('profileImage', _newImagePath!);
         }
@@ -122,6 +173,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Navigator.pop(context, true);
         }
       } else {
+        Logger.error("Failed to update profile: ${response.message}");
         showModernToast(context, response.message.isNotEmpty ? response.message : "Failed to update profile", type: 'error');
       }
     } catch (e) {
@@ -206,10 +258,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   backgroundImage: _getProfileImageProvider(),
                                   child: _getProfileImageProvider() == null
                                       ? const Icon(
-                                          Icons.person,
-                                          size: 50,
-                                          color: Colors.white,
-                                        )
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.white,
+                                  )
                                       : null,
                                 ),
                               ),
@@ -292,11 +344,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildInputField(
-    String label,
-    TextEditingController controller, {
-    TextInputType? keyboardType,
-    bool isDate = false,
-  }) {
+      String label,
+      TextEditingController controller, {
+        TextInputType? keyboardType,
+        bool isDate = false,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -317,19 +369,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             readOnly: isDate,
             onTap: isDate
                 ? () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2000),
-                      firstDate: DateTime(1950),
-                      lastDate: DateTime.now(),
-                    );
-                    if (pickedDate != null) {
-                      setState(
-                        () => controller.text =
-                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
-                      );
-                    }
-                  }
+              // 1. Determine the currently selected date to show in the picker
+              DateTime initialDate = DateTime.now().subtract(const Duration(days: 365 * 25));
+
+              if (controller.text.isNotEmpty) {
+                try {
+                  // Parse existing UI text (d/M/yyyy) back into a DateTime
+                  initialDate = DateFormat('d/M/yyyy').parseStrict(controller.text);
+                } catch (e) {
+                  // If it fails, fallback to the default initialDate
+                }
+              }
+
+              // 2. Open the Date Picker
+              DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: initialDate,
+                firstDate: DateTime(1950),
+                lastDate: DateTime.now(),
+              );
+
+              // 3. Set the new date back to the controller
+              if (pickedDate != null) {
+                setState(() {
+                  controller.text = DateFormat('d/M/yyyy').format(pickedDate);
+                });
+              }
+            }
                 : null,
             decoration: InputDecoration(
               filled: true,

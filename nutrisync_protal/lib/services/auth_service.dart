@@ -163,6 +163,7 @@ class AuthService {
           "firstName": data["firstName"] ?? "",
           "lastName": data["lastName"] ?? "",
           "email": data["email"] ?? "",
+          "dob": data["dob"] ?? "",
         },
       );
       final body = jsonDecode(response.body);
