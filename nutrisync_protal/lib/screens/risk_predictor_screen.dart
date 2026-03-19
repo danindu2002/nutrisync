@@ -365,14 +365,33 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
   }
 }
 
-class MealSwapCard extends StatelessWidget {
+class MealSwapCard extends StatefulWidget {
   final MealSwapModel swap;
   final VoidCallback onNext;
 
   const MealSwapCard({super.key, required this.swap, required this.onNext});
 
   @override
+  State<MealSwapCard> createState() => _MealSwapCardState();
+}
+
+class _MealSwapCardState extends State<MealSwapCard> {
+  bool _isExpanded = false;
+
+  @override
+  void didUpdateWidget(MealSwapCard oldWidget) {
+    if (oldWidget.swap != widget.swap) {
+      _isExpanded = false;
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final nameMaxLines = _isExpanded ? null : 3;
+    final metricMaxLines = _isExpanded ? null : 4;
+    final overflow = _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -386,111 +405,179 @@ class MealSwapCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          /// CURRENT MEAL
-          Expanded(
-            child: Column(
-              children: [
-                ClipOval(
-                  child: Image.asset(
-                    swap.currentMealImagePath,
-                    height: 70,
-                    width: 70,
-                    fit: BoxFit.cover,
+          Table(
+            columnWidths: const {
+              0: FlexColumnWidth(1),
+              1: IntrinsicColumnWidth(),
+              2: FlexColumnWidth(1),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.top,
+            children: [
+              /// IMAGES & SWAP AREA
+              TableRow(
+                children: [
+                  Column(
+                    children: [
+                      ClipOval(
+                        child: Image.asset(
+                          widget.swap.currentMealImagePath,
+                          height: 70,
+                          width: 70,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 4),
+                        const Icon(
+                          Icons.arrow_forward,
+                          size: 28,
+                          color: Colors.teal,
+                        ),
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: widget.onNext,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              "Swap Meal",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      ClipOval(
+                        child: Image.asset(
+                          widget.swap.suggestedMealImagePath,
+                          height: 70,
+                          width: 70,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
 
-                const SizedBox(height: 8),
+              /// GAP
+              const TableRow(
+                children: [
+                  SizedBox(height: 8),
+                  SizedBox(height: 8),
+                  SizedBox(height: 8),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
 
-                Text(
-                  swap.currentMealName,
+          /// NAMES
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.swap.currentMealName,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
                   textAlign: TextAlign.center,
+                  maxLines: nameMaxLines,
+                  overflow: overflow,
                 ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  swap.currentMealMetric,
-                  style: const TextStyle(fontSize: 12, color: Colors.red),
-                ),
-              ],
-            ),
-          ),
-
-          /// SWAP AREA
-          Column(
-            children: [
-              const Icon(Icons.arrow_forward, size: 28, color: Colors.teal),
-
-              const SizedBox(height: 10),
-
-              GestureDetector(
-                onTap: onNext,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  widget.swap.suggestedMealName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Text(
-                    "Swap Meal",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: nameMaxLines,
+                  overflow: overflow,
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 12),
 
-          const SizedBox(width: 12),
-
-          /// SUGGESTED MEAL
-          Expanded(
-            child: Column(
-              children: [
-                ClipOval(
-                  child: Image.asset(
-                    swap.suggestedMealImagePath,
-                    height: 70,
-                    width: 70,
-                    fit: BoxFit.cover,
-                  ),
+          /// METRICS
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.swap.currentMealMetric,
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
+                  textAlign: TextAlign.justify,
+                  maxLines: metricMaxLines,
+                  overflow: overflow,
                 ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  swap.suggestedMealName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  swap.suggestedMealMetric,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  widget.swap.suggestedMealMetric,
                   style: const TextStyle(fontSize: 12, color: Colors.green),
+                  textAlign: TextAlign.justify,
+                  maxLines: metricMaxLines,
+                  overflow: overflow,
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8.0,
+                horizontal: 16.0,
+              ),
+              child: Center(
+                child: Text(
+                  _isExpanded ? "Hide Details" : "Read More",
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
             ),
           ),
-
-          /// NEXT ARROW
-          IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right)),
         ],
       ),
     );
