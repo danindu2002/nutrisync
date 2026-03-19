@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../core/constants.dart';
 import '../widgets/common_widgets.dart';
+import 'PexelsImageService.dart'; // Import the new service!
 
 class DietPlanService {
-  static const String pexelsApiKey = "tMcRzsieU3qRFOycTM3hUDQQ2S2sNYixEKB9W6aqh9wj6FKeGmAXkL7q";
 
   static Future<ApiResponse> getDietPlans(int? userId) async {
     try {
@@ -15,7 +14,7 @@ class DietPlanService {
     }
   }
 
-  // 2. Generate Preview & Fetch Pexels Images (NOW RUNS IN PARALLEL)
+  // Generate Preview & Fetch Pexels Images (BULLETPROOF VERSION)
   static Future<ApiResponse> generatePlanPreview(int userId) async {
     try {
       final response = await ApiClient.post('/diet-plan/preview?userId=$userId', {});
@@ -24,25 +23,27 @@ class DietPlanService {
       if (apiRes.success && apiRes.data != null) {
         var weeklyPlan = apiRes.data['weeklyPlan'] as List<dynamic>? ?? [];
 
-        // List to hold all our async image fetch operations
-        List<Future<void>> pexelsTasks = [];
+        // Reset the short-circuit flag via the new service before starting
+        PexelsImageService.resetAvailability();
 
         for (var day in weeklyPlan) {
           var meals = day['meals'] as List<dynamic>? ?? [];
           for (var meal in meals) {
 
-            // Add the fetch task to the list INSTEAD of waiting for it sequentially
-            pexelsTasks.add((() async {
-              String searchTerm = meal['imageSearchTerm'] ?? meal['recipeName'] ?? 'healthy food';
-              String? pexelsUrl = await _fetchPexelsImage(searchTerm);
-              meal['mealImageUrl'] = pexelsUrl ?? "https://via.placeholder.com/150";
-            })());
+            // Check if Pexels is down using the new service
+            if (PexelsImageService.isUnavailable) {
+              meal['mealImageUrl'] = "https://via.placeholder.com/150";
+              continue;
+            }
 
+            String searchTerm = meal['imageSearchTerm'] ?? meal['recipeName'] ?? 'healthy food';
+
+            // Fetch the image via the standalone service
+            String? pexelsUrl = await PexelsImageService.fetchImage(searchTerm);
+
+            meal['mealImageUrl'] = pexelsUrl ?? "https://via.placeholder.com/150";
           }
         }
-
-        // Wait for ALL image requests to finish concurrently (takes ~1 second total instead of 15 seconds)
-        await Future.wait(pexelsTasks);
       }
       return apiRes;
     } catch (e) {
@@ -86,26 +87,5 @@ class DietPlanService {
       Logger.error("Error deleting diet plan: $e");
       return ApiResponse(status: 500, message: "Failed to delete plan");
     }
-  }
-
-  // --- Private Helper for Pexels ---
-  static Future<String?> _fetchPexelsImage(String query) async {
-    try {
-      // Added a strict timeout to ensure the UI NEVER hangs endlessly on a bad connection
-      final response = await http.get(
-        Uri.parse('https://api.pexels.com/v1/search?query=$query&per_page=1'),
-        headers: {'Authorization': pexelsApiKey},
-      ).timeout(const Duration(seconds: 4));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['photos'] != null && data['photos'].isNotEmpty) {
-          return data['photos'][0]['src']['medium'];
-        }
-      }
-    } catch (e) {
-      Logger.error("Pexels fetch error: $e");
-    }
-    return null;
   }
 }

@@ -9,7 +9,7 @@ class MealService {
   static Future<ApiResponse> identifyMeal(File imageFile) async {
     try {
       // Note: "file" is the key the backend expects for the image file
-      final response = await ApiClient.postMultipart(
+      final response = await ApiClient.multipartUpload(
         "/meal/identify",
         imageFile,
         "image",
@@ -30,7 +30,7 @@ class MealService {
   // This method logs the meal with the image and additional data
   static Future<ApiResponse> logMeal(File imageFile, Map<String, dynamic> dataJson) async {
     try {
-      final response = await ApiClient.postMultipart(
+      final response = await ApiClient.multipartUpload(
           "/meal/log",
           imageFile,
           "image",

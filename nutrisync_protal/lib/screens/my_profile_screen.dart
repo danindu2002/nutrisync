@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,12 +17,12 @@ class MyProfileScreen extends StatefulWidget {
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
   Map<String, dynamic>? user;
-  String? imagePath;
+
+  String? profileImage;
 
   @override
   void initState() {
     super.initState();
-    // Wait for the first frame to build before loading the profile
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProfile();
     });
@@ -40,13 +40,39 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       final ApiResponse response = await AuthService.getUserProfile(userId);
 
       if (response.status == 200) {
-        setState(() => user = response.data);
+        setState(() {
+          user = response.data;
+          profileImage = user?["profileImage"];
+        });
+
+        await prefs.setString('firstName', user?["firstName"] ?? "");
+        await prefs.setString('lastName', user?["lastName"] ?? "");
+        await prefs.setString('email', user?["email"] ?? "");
+        await prefs.setString('dob', (user?["dateOfBirth"] ?? "").split('T')[0]);
+        await prefs.setString('profileImage', profileImage ?? "");
       } else {
         showModernToast(context, response.message, type: 'error');
       }
     } catch (e) {
       Logger.error("Error loading profile: $e");
     }
+  }
+
+  ImageProvider? _getProfileImage() {
+    if (profileImage == null || profileImage!.isEmpty) return null;
+
+    try {
+      final cleanBase64 = profileImage!.contains(',')
+          ? profileImage!.split(',').last
+          : profileImage!;
+      final decodedBytes = base64Decode(
+        cleanBase64.replaceAll(RegExp(r'\s+'), ''),
+      );
+      return MemoryImage(decodedBytes);
+    } catch (e) {
+      debugPrint("Error parsing profile image: $e");
+    }
+    return null;
   }
 
   void _showLogoutDialog() {
@@ -82,6 +108,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setBool("isLoggedIn", false);
                 await prefs.setBool("rememberMe", false);
+                await prefs.remove("userId");
+                await prefs.remove("token");
+                await prefs.remove('firstName');
+                await prefs.remove('lastName');
+                await prefs.remove('email');
+                await prefs.remove('dob');
+                await prefs.remove('profileImage');
 
                 if (!mounted) return;
 
@@ -142,8 +175,15 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           child: CircleAvatar(
                             radius: 45,
                             backgroundColor: Colors.grey.shade800,
-                            backgroundImage: imagePath != null
-                                ? FileImage(File(imagePath!))
+                            // 4. Hooked up the helper method here!
+                            backgroundImage: _getProfileImage(),
+                            // Show a default icon if there is no image
+                            child: _getProfileImage() == null
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 45,
+                                    color: Colors.white,
+                                  )
                                 : null,
                           ),
                         ),
@@ -195,6 +235,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               const SizedBox(height: 25),
 
               /// Profile Details
+              _buildProfileTile("Username", user?["userName"] ?? ""),
               _buildProfileTile("First Name", user?["firstName"] ?? ""),
               _buildProfileTile("Last Name", user?["lastName"] ?? ""),
               _buildProfileTile("Email", user?["email"] ?? ""),
@@ -211,7 +252,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 child: ElevatedButton(
                   onPressed: _showLogoutDialog,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.red,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),

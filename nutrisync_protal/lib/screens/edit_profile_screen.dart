@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Required for SystemUiOverlayStyle
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/auth_service.dart';
+import '../widgets/common_widgets.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -16,7 +19,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
-  String? _imagePath;
+
+  String? _existingprofileImage;
+  String? _newImagePath;
 
   @override
   void initState() {
@@ -27,11 +32,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _loadCurrentData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _firstNameController.text = prefs.getString('firstName') ?? "John";
-      _lastNameController.text = prefs.getString('lastName') ?? "Smith";
-      _emailController.text = prefs.getString('email') ?? "johnsmith@gmail.com";
-      _dobController.text = prefs.getString('dob') ?? "12/05/2000";
-      _imagePath = prefs.getString('profileImage');
+      _firstNameController.text = prefs.getString('firstName') ?? "";
+      _lastNameController.text = prefs.getString('lastName') ?? "";
+      _emailController.text = prefs.getString('email') ?? "";
+      _dobController.text = prefs.getString('dob') ?? "";
+
+      // Load the existing Base64 string from memory
+      _existingprofileImage = prefs.getString('profileImage');
     });
   }
 
@@ -39,20 +46,86 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() => _imagePath = image.path);
+      setState(() => _newImagePath = image.path);
     }
   }
 
-  Future<void> _saveProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('firstName', _firstNameController.text);
-    await prefs.setString('lastName', _lastNameController.text);
-    await prefs.setString('email', _emailController.text);
-    await prefs.setString('dob', _dobController.text);
-    if (_imagePath != null) await prefs.setString('profileImage', _imagePath!);
+  // Helper method to decide which image to show in the UI
+  ImageProvider? _getProfileImageProvider() {
+    if (_newImagePath != null && _newImagePath!.isNotEmpty) {
+      return FileImage(File(_newImagePath!));
+    }
 
-    if (mounted) {
-      Navigator.pop(context, true); // Return true to trigger refresh in MyProfileScreen
+    if (_existingprofileImage != null && _existingprofileImage!.isNotEmpty) {
+      try {
+        final cleanBase64 = _existingprofileImage!.contains(',')
+            ? _existingprofileImage!.split(',').last
+            : _existingprofileImage!;
+        final decodedBytes = base64Decode(
+          cleanBase64.replaceAll(RegExp(r'\s+'), ''),
+        );
+        return MemoryImage(decodedBytes);
+      } catch (e) {
+        debugPrint("Error decoding base64: $e");
+      }
+    }
+
+    return null; // Show default icon if both are null
+  }
+
+  Future<void> _saveProfile() async {
+    if (_firstNameController.text.isEmpty ||
+        _lastNameController.text.isEmpty ||
+        _emailController.text.isEmpty) {
+      showModernToast(context, "Please fill in all required fields", type: 'error');
+      return;
+    }
+    File? uploadFile;
+    if (_newImagePath != null && _newImagePath!.isNotEmpty) {
+      uploadFile = File(_newImagePath!);
+      if (!uploadFile.existsSync()) {
+        showModernToast(context, "Invalid image file. Please reselect.", type: 'error');
+        return;
+      }
+    } else if (_existingprofileImage == null || _existingprofileImage!.isEmpty) {
+      showModernToast(context, "Please select a profile picture", type: 'error');
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("userId");
+
+    try {
+      LoadingIndicator.show(context);
+      final response = await AuthService.updateProfile(
+        userId!,
+        uploadFile!,
+        {
+          "firstName": _firstNameController.text,
+          "lastName": _lastNameController.text,
+          "email": _emailController.text,
+        },
+      );
+      if (mounted) LoadingIndicator.hide(context);
+
+      if (response.status == 200) {
+        await prefs.setString('firstName', _firstNameController.text);
+        await prefs.setString('lastName', _lastNameController.text);
+        await prefs.setString('email', _emailController.text);
+        await prefs.setString('dob', _dobController.text);
+        if (_newImagePath != null) {
+          await prefs.setString('profileImage', _newImagePath!);
+        }
+
+        if (mounted) {
+          showModernToast(context, "Profile updated successfully!", type: 'success');
+          Navigator.pop(context, true);
+        }
+      } else {
+        showModernToast(context, response.message.isNotEmpty ? response.message : "Failed to update profile", type: 'error');
+      }
+    } catch (e) {
+      Logger.error("Error updating profile: $e");
     }
   }
 
@@ -93,14 +166,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                               onPressed: () => Navigator.pop(context),
                             ),
                             const Text(
                               "Edit Profile",
-                              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            const SizedBox(width: 40), // Spacer for balance
+                            const SizedBox(width: 40),
                           ],
                         ),
                         const SizedBox(height: 10),
@@ -114,14 +195,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white24, width: 2),
+                                  border: Border.all(
+                                    color: Colors.white24,
+                                    width: 2,
+                                  ),
                                 ),
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundColor: Colors.grey.shade800,
-                                  backgroundImage: _imagePath != null
-                                      ? FileImage(File(_imagePath!))
-                                      : const AssetImage("assets/images/profile.jpg") as ImageProvider,
+                                  backgroundImage: _getProfileImageProvider(),
+                                  child: _getProfileImageProvider() == null
+                                      ? const Icon(
+                                          Icons.person,
+                                          size: 50,
+                                          color: Colors.white,
+                                        )
+                                      : null,
                                 ),
                               ),
                               Positioned(
@@ -129,8 +218,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 right: 0,
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
-                                  child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.redAccent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
                                 ),
                               ),
                             ],
@@ -151,8 +247,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   children: [
                     _buildInputField("First Name", _firstNameController),
                     _buildInputField("Last Name", _lastNameController),
-                    _buildInputField("Email", _emailController, keyboardType: TextInputType.emailAddress),
-                    _buildInputField("Date of Birth", _dobController, isDate: true),
+                    _buildInputField(
+                      "Email",
+                      _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    _buildInputField(
+                      "Date of Birth",
+                      _dobController,
+                      isDate: true,
+                    ),
 
                     const SizedBox(height: 10),
 
@@ -161,13 +265,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       onPressed: _saveProfile,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         minimumSize: const Size(double.infinity, 55),
                         elevation: 0,
                       ),
                       child: const Text(
                         "Save Changes",
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -181,38 +291,58 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller, {TextInputType? keyboardType, bool isDate = false}) {
+  Widget _buildInputField(
+    String label,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+    bool isDate = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: controller,
             keyboardType: keyboardType,
             readOnly: isDate,
-            onTap: isDate ? () async {
-              DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime(2000),
-                firstDate: DateTime(1950),
-                lastDate: DateTime.now(),
-              );
-              if (pickedDate != null) {
-                setState(() => controller.text = "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}");
-              }
-            } : null,
+            onTap: isDate
+                ? () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime(2000),
+                      firstDate: DateTime(1950),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      setState(
+                        () => controller.text =
+                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
+                      );
+                    }
+                  }
+                : null,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
               hintText: "Enter $label",
               contentPadding: const EdgeInsets.all(18),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
               focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: const BorderSide(color: Colors.redAccent, width: 1)
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Colors.redAccent, width: 1),
               ),
             ),
           ),
