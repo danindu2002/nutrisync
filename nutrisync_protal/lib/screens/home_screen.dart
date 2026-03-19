@@ -262,7 +262,7 @@ class _MealLogCard extends StatelessWidget {
         height: 160,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          image: const DecorationImage(image: AssetImage("assets/images/dashboard/workout.png"), fit: BoxFit.cover),
+          image: const DecorationImage(image: AssetImage("assets/images/dashboard/meal_log.png"), fit: BoxFit.cover),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: Stack(
