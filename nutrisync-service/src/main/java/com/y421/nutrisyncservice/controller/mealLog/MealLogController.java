@@ -17,7 +17,7 @@ public interface MealLogController {
     ResponseEntity<Object> identifyMeal(@RequestParam("image") MultipartFile image);
 
     @PostMapping(value = "/log", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> logMeal(
+    ResponseEntity<Object> logMeal(
             @RequestPart("data") String dataString,
             @RequestPart(value = "image", required = false) MultipartFile image) throws IOException;
 

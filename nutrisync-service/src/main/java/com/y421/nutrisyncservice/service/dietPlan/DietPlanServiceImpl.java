@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -32,18 +33,26 @@ public class DietPlanServiceImpl implements DietPlanService {
 
     @Override
     public ResponseEntity<Object> generateMealPlanPreview(Long userId) {
-        Optional<NutrisyncUser> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
-        }
+        try {
+            Optional<NutrisyncUser> user = userRepository.findById(userId);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+            }
 
-        // ONLY calls AI, does NOT save to DB
-        MealPlanResponseDTO generatedPlan = aiServiceClient.generateMealPlanForUser(user.get());
-        if (generatedPlan == null) {
+            // ONLY calls AI, does NOT save to DB
+            MealPlanResponseDTO generatedPlan = aiServiceClient.generateMealPlanForUser(user.get());
+            if (generatedPlan == null) {
+                return new ResponseEntity<>("Error Generating Meal Plan Preview", HttpStatus.CONFLICT);
+            }
+
+            return new ResponseEntity<>(generatedPlan, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            // This catches the 429 Too Many Requests from the Rate Limiter
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>("Error Generating Meal Plan Preview", HttpStatus.CONFLICT);
         }
-
-        return new ResponseEntity<>(generatedPlan, HttpStatus.OK);
     }
 
     @Override

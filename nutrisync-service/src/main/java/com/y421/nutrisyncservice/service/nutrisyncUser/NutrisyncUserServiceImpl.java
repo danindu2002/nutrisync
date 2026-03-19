@@ -225,6 +225,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
             if (dto.getLastName() != null) {
                 user.setLastName(dto.getLastName());
             }
+            user.setDateOfBirth(dto.getDob() != null ? dto.getDob() : null);
 
             // Update Email (with validation)
             if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
@@ -242,8 +243,9 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
                         .get(user.getKeycloakUserId());
 
                 UserRepresentation kcUser = userResource.toRepresentation();
-                kcUser.setEmail(dto.getEmail());
-                kcUser.setUsername(dto.getEmail()); // optional (depends on your design)
+                kcUser.setEmail(user.getEmail());
+                kcUser.setFirstName(user.getFirstName());
+                kcUser.setLastName(user.getLastName());
                 userResource.update(kcUser);
             }
 

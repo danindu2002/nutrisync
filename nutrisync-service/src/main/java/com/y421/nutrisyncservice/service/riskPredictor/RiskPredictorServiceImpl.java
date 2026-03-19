@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,9 @@ public class RiskPredictorServiceImpl implements RiskPredictorService {
                 prediction.setMealRiskContributionList(null);
             });
             return new ResponseEntity<>(riskPrediction, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            // This catches the 429 Too Many Requests from the Rate Limiter
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error Occurred", HttpStatus.INTERNAL_SERVER_ERROR);

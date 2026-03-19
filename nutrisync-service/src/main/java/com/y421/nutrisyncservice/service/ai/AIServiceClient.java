@@ -7,7 +7,8 @@ import com.y421.nutrisyncservice.response.dietPlan.MealPlanResponseDTO;
 import com.y421.nutrisyncservice.request.meal.MealLogRiskRequestDTO;
 import com.y421.nutrisyncservice.response.riskPredictor.AIRiskPredictorResDTO;
 import com.y421.nutrisyncservice.response.impactSimulation.ImpactSimulationResponseDTO;
-import lombok.RequiredArgsConstructor;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -15,15 +16,49 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Duration;
 
 @Service
-@RequiredArgsConstructor
 public class AIServiceClient {
 
     private final RestTemplate restTemplate;
+    private final Bucket rateLimitBucket;
 
     @Value("${python-service-url}")
     private String baseUrl;
+
+    public AIServiceClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+        int rpm = 4; // 5 Requests per minute
+        int rpd = 19; // 20 Requests per day
+
+        // Gemini 2.5 Flash Free Tier Strict Limits
+        Bandwidth minuteLimit = Bandwidth.builder()
+                .capacity(rpm)
+                .refillGreedy(rpm, Duration.ofMinutes(1))
+                .build();
+
+        Bandwidth dailyLimit = Bandwidth.builder()
+                .capacity(rpd)
+                .refillGreedy(rpd, Duration.ofDays(1))
+                .build();
+
+        // Build the bucket with BOTH limits applied simultaneously
+        this.rateLimitBucket = Bucket.builder()
+                .addLimit(minuteLimit)
+                .addLimit(dailyLimit)
+                .build();
+    }
+
+    private void enforceRateLimit() {
+        if (!rateLimitBucket.tryConsume(1)) {
+            throw new ResponseStatusException(
+                    HttpStatus.TOO_MANY_REQUESTS, "AI Service rate limit exceeded, Please try again later"
+            );
+        }
+    }
 
     public String predictFood(MultipartFile image) {
         try {
@@ -53,9 +88,9 @@ public class AIServiceClient {
     }
 
     public MealPlanResponseDTO generateMealPlanForUser(NutrisyncUser user) {
-        String url = baseUrl + "/generate-meal-plan";
+        enforceRateLimit(); // Check limit before processing
 
-        // 1. Prepare headers for JSON
+        String url = baseUrl + "/generate-meal-plan";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -71,11 +106,9 @@ public class AIServiceClient {
                 .dietaryPreferences(user.getDietaryPreferences())
                 .build();
 
-        // 2. Send the clean DTO instead of the raw user entity
         HttpEntity<MealPlanRequestDTO> requestEntity = new HttpEntity<>(requestPayload, headers);
 
         try {
-            // 3. Call the Python API and map the response automatically to the DTO
             ResponseEntity<MealPlanResponseDTO> response = restTemplate.postForEntity(
                     url,
                     requestEntity,
@@ -94,8 +127,9 @@ public class AIServiceClient {
     }
 
     public ImpactSimulationResponseDTO simulateHealthImpact(NutrisyncUser user, int months) {
-        String url = baseUrl + "/simulate-impact";
+        enforceRateLimit(); // Check limit before processing
 
+        String url = baseUrl + "/simulate-impact";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -131,6 +165,8 @@ public class AIServiceClient {
     }
 
     public AIRiskPredictorResDTO predictRisk(MealLogRiskRequestDTO requestPayload) {
+        enforceRateLimit(); // Check limit before processing
+
         try {
             // 1. Prepare the headers
             HttpHeaders headers = new HttpHeaders();
