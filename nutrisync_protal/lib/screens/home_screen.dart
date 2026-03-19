@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.status == 200) {
         final data = response.data;
 
-        final premiumExpireDate = data["premiumExpiryDate"];
+        final premiumExpireDate = data["premiumExpireDate"];
         await prefs.setString('premiumExpireDate', premiumExpireDate ?? "");
 
         if (mounted) {
