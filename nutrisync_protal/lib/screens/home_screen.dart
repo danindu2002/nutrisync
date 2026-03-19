@@ -412,7 +412,7 @@ class _ChallengesRow extends StatelessWidget {
         const SizedBox(width: 12),
         _NutritionCard(
           title: "Earn Rewards", subtitle: "Prizes Await You",
-          imagePath: "assets/images/dashboard/salad_eggs.png",
+          imagePath: "assets/images/dashboard/earn_rewards.png",
           isPremiumLocked: false,
           onTap: onRewardsTap,
         ),
