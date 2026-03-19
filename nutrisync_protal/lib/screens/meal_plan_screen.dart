@@ -31,17 +31,21 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
       if (response.success) {
         setState(() {
           _mealPlans = response.data ?? [];
+          _isLoading = false; // Add this!
         });
       } else if (response.status == 404) {
         // 404 means no active plans found, which is fine, just show empty state
         setState(() {
           _mealPlans = [];
+          _isLoading = false; // Add this!
         });
       } else {
         Logger.error(response.message);
         showModernToast(context, 'Failed to load meal plans', type: 'error');
+        setState(() {
+          _isLoading = false; // Add this!
+        });
       }
-      setState(() => _isLoading = false);
     }
   }
 

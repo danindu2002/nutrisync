@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "504922945351",
+    "project_id": "nutrisync-dev-2026-f3227",
+    "storage_bucket": "nutrisync-dev-2026-f3227.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:504922945351:android:95498d9f04df4a9b89fe62",
+        "android_client_info": {
+          "package_name": "com.example.nutrisync_protal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuquqOrZLWV54TyqnUABSKel9isX4z0Tk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
