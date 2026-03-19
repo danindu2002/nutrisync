@@ -405,7 +405,7 @@ class _ChallengesRow extends StatelessWidget {
       children: [
         _NutritionCard(
           title: "Daily Challenges", subtitle: "Take healthy goals",
-          imagePath: "assets/images/dashboard/salad_eggs.png",
+          imagePath: "assets/images/dashboard/daily_challenges.png",
           isPremiumLocked: false,
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChallengesScreen())),
         ),
