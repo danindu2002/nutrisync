@@ -3,6 +3,7 @@ package com.y421.nutrisyncservice.service.ai;
 import com.y421.nutrisyncservice.entity.nutrisyncUser.NutrisyncUser;
 import com.y421.nutrisyncservice.request.dietPlan.MealPlanRequestDTO;
 import com.y421.nutrisyncservice.request.impactSimulation.ImpactSimulationRequestDTO;
+import com.y421.nutrisyncservice.response.dietPlan.DietPlanDetailedDTO;
 import com.y421.nutrisyncservice.response.dietPlan.MealPlanResponseDTO;
 import com.y421.nutrisyncservice.request.meal.MealLogRiskRequestDTO;
 import com.y421.nutrisyncservice.response.riskPredictor.AIRiskPredictorResDTO;
@@ -126,7 +127,7 @@ public class AIServiceClient {
         }
     }
 
-    public ImpactSimulationResponseDTO simulateHealthImpact(NutrisyncUser user, int months) {
+    public ImpactSimulationResponseDTO simulateHealthImpact(NutrisyncUser user, int months, DietPlanDetailedDTO dietPlan) {
         enforceRateLimit(); // Check limit before processing
 
         String url = baseUrl + "/simulate-impact";
@@ -142,6 +143,7 @@ public class AIServiceClient {
                 .bmi(user.getBmi())
                 .dailyCalorieGoal(user.getDailyCalorieGoal())
                 .months(months)
+                .dietPlan(dietPlan)
                 .build();
 
         HttpEntity<ImpactSimulationRequestDTO> requestEntity = new HttpEntity<>(requestPayload, headers);
