@@ -2,8 +2,11 @@ import 'dart:math' as math;
 import 'package:NutriSync/screens/impact_simulator/impact_simulation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NutriSync/core/theme.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/simulation_service.dart';
 
 class BmiResultsScreen extends StatefulWidget {
   const BmiResultsScreen({super.key});
@@ -15,13 +18,62 @@ class BmiResultsScreen extends StatefulWidget {
 class _BmiResultsScreenState extends State<BmiResultsScreen>
     with SingleTickerProviderStateMixin {
   int _selectedTab = 0;
-  static const double _bmiValue = 32.1;
+
+  // Changed from static const to a mutable state variable
+  double _bmiValue = 0.0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchBMI();
+    });
+  }
+
+  Future<void> _fetchBMI() async {
+    setState(() => _isLoading = true);
+    LoadingIndicator.show(context);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final int? userId = prefs.getInt("userId");
+
+      if (userId == null) {
+        if (mounted) LoadingIndicator.hide(context);
+        return;
+      }
+
+      final ApiResponse response = await SimulationService.getUserBMI(userId);
+
+      if (mounted) {
+        if (response.success && response.data != null) {
+          setState(() {
+            _bmiValue = (response.data as num).toDouble();
+          });
+        } else {
+          showModernToast(context, response.message.isNotEmpty ? response.message : "Failed to load BMI", type: 'error');
+        }
+      }
+    } catch (e) {
+      debugPrint("API Error fetching BMI: $e");
+      if (mounted) showModernToast(context, "An error occurred", type: 'error');
+    } finally {
+      if (mounted) {
+        LoadingIndicator.hide(context);
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: SafeArea(
+      // Only show the body if we are done loading so we don't flash default data
+      body: _isLoading
+          ? const SizedBox()
+          : SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Column(
@@ -51,7 +103,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const ImpactSimulationScreen(),
+                                builder: (_) => ImpactSimulationScreen(bmiValue: _bmiValue),
                               ),
                             );
                           },
@@ -96,7 +148,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       badgeColor = const Color(0xFFB71C1C); // Dark Red
     }
 
-    // Create a soft background color using 15% opacity of the main color
     Color badgeBgColor = badgeColor.withValues(alpha: 0.15);
 
     return Padding(
@@ -108,7 +159,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 22,
-              color: AppTheme.textPrimary, // Assuming you have this in your theme
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(width: 14),
@@ -122,34 +173,30 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               ),
             ),
           ),
-
-          // 2. Dynamic Badge Container
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: badgeBgColor, // Dynamic Background
+              color: badgeBgColor,
               borderRadius: BorderRadius.circular(50),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Glowing Dot
                 Container(
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: badgeColor, // Dynamic Dot Color
+                    color: badgeColor,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
-                // Badge Text
                 Text(
-                  badgeText, // Dynamic Text
+                  badgeText,
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: badgeColor, // Dynamic Text Color
+                    color: badgeColor,
                   ),
                 ),
               ],
@@ -189,10 +236,9 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
         ],
       ),
       padding: const EdgeInsets.all(24),
-      // Maintain aspect ratio around 1.2 height for 1.0 width
-      child: const AspectRatio(
+      child: AspectRatio(
         aspectRatio: 1 / 0.85,
-        child: BmiGauge(value: _bmiValue),
+        child: BmiGauge(value: _bmiValue), // Uses dynamic value
       ),
     );
   }
@@ -227,7 +273,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     );
   }
 
-  // ─── Category Card ───────────────────────────────────
+   // ─── Category Card ───────────────────────────────────
   Widget _buildCategoryCard() {
     String category;
     String message;
@@ -267,7 +313,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       emoji = '😫';
     }
 
-    // 2. Build the UI using the dynamic properties
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -277,7 +322,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       ),
       child: Row(
         children: [
-          // Left side: text content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +336,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  category, // Dynamic Category
+                  category,
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -303,17 +347,17 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 Row(
                   children: [
                     Icon(
-                      icon, // Dynamic Icon
+                      icon,
                       size: 18,
-                      color: themeColor, // Dynamic Color
+                      color: themeColor,
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      message, // Dynamic Message
+                      message,
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: themeColor, // Dynamic Color
+                        color: themeColor,
                       ),
                     ),
                   ],
@@ -321,17 +365,15 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               ],
             ),
           ),
-          // Right side: dynamic face emoji in tinted rounded square
           Container(
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              // Use a light 15% opacity of the theme color for the background
               color: themeColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 28)), // Dynamic Emoji
+              child: Text(emoji, style: const TextStyle(fontSize: 28)),
             ),
           ),
         ],
@@ -349,14 +391,12 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            // Background image
             Positioned.fill(
               child: Image.asset(
                 'assets/images/impact_simulator/overview image.png',
                 fit: BoxFit.cover,
               ),
             ),
-            // Dark gradient overlay
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -371,14 +411,12 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 ),
               ),
             ),
-            // Text content
             Padding(
               padding: const EdgeInsets.all(22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Heading
                   Text(
                     'Change your diet,\nChange your \nlife!',
                     style: GoogleFonts.poppins(
@@ -389,11 +427,9 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Bottom row: subtitle + Dive In button
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      // Subtitle
                       Expanded(
                         child: Text(
                           'You can Reshape your life\nwith NutriSync Diet plan',
@@ -405,7 +441,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                           ),
                         ),
                       ),
-                      // Dive In button
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -476,6 +511,8 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     );
   }
 }
+
+// ... [Keep BmiGauge and _BmiGaugePainter exactly as they are] ...
 
 /// Semi-circular BMI gauge using CustomPaint.
 ///
