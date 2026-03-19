@@ -433,7 +433,7 @@ class _NutritionRow extends StatelessWidget {
       children: [
         _NutritionCard(
           title: "Health Risk Predictor", subtitle: "Check Your Risk Factors",
-          imagePath: "assets/images/dashboard/salad_eggs.png",
+          imagePath: "assets/images/dashboard/risk_predictor.png",
           isPremiumLocked: isPremiumLocked,
           onTap: () {
             if (isPremiumLocked) {
