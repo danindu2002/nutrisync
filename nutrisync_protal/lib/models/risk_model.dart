@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
 import 'contributing_meal_model.dart';
 
 class RiskModel {
   final String name;
   final String description;
   final double riskLevel;
-  final IconData icon;
+  final String icon;
 
   // New fields for popup
   final String subtitle;

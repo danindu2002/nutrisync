@@ -1,8 +1,13 @@
 import 'dart:math' as math;
+import 'package:NutriSync/screens/impact_simulator/impact_simulation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NutriSync/core/theme.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/simulation_service.dart';
+import '../meal_plan_screen.dart';
 
 class BmiResultsScreen extends StatefulWidget {
   const BmiResultsScreen({super.key});
@@ -14,13 +19,71 @@ class BmiResultsScreen extends StatefulWidget {
 class _BmiResultsScreenState extends State<BmiResultsScreen>
     with SingleTickerProviderStateMixin {
   int _selectedTab = 0;
-  static const double _bmiValue = 32.1;
+
+  // Changed from static const to a mutable state variable
+  double _bmiValue = 0.0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchBMI();
+    });
+  }
+
+  Future<void> _fetchBMI() async {
+    setState(() => _isLoading = true);
+    LoadingIndicator.show(context);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final int? userId = prefs.getInt("userId");
+
+      if (userId == null) {
+        if (mounted) LoadingIndicator.hide(context);
+        return;
+      }
+
+      final ApiResponse response = await SimulationService.getUserBMI(userId);
+
+      if (mounted) {
+        if (response.success && response.data != null) {
+          setState(() {
+            _bmiValue = (response.data as num).toDouble();
+          });
+        } else {
+          showModernToast(context, response.message.isNotEmpty ? response.message : "Failed to load BMI", type: 'error');
+        }
+      }
+    } catch (e) {
+      debugPrint("API Error fetching BMI: $e");
+      if (mounted) showModernToast(context, "An error occurred", type: 'error');
+    } finally {
+      if (mounted) {
+        LoadingIndicator.hide(context);
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _navigateToMealPlan() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("userId");
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => MealPlanScreen(userId: userId)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: SafeArea(
+      // Only show the body if we are done loading so we don't flash default data
+      body: _isLoading
+          ? const SizedBox()
+          : SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Column(
@@ -41,8 +104,25 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                       const SizedBox(height: 24),
                       _buildCategoryCard(),
                       const SizedBox(height: 24),
-                      _buildBannerCard(),
+                      _buildBannerCard(context),
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                        child: PrimaryButton(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ImpactSimulationScreen(bmiValue: _bmiValue),
+                              ),
+                            );
+                          },
+                          text: "Impact Simulation",
+                          isRed: true,
+                        ),
+                      ),
                     ] else ...[
+                      const SizedBox(height: 24),
                       _buildHistogramPlaceholder(),
                     ],
                     const SizedBox(height: 32),
@@ -58,6 +138,28 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
 
   // ─── App Bar ─────────────────────────────────────────
   Widget _buildAppBar() {
+    String badgeText;
+    Color badgeColor;
+
+    if (_bmiValue < 18.5) {
+      badgeText = 'Low';
+      badgeColor = const Color(0xFF00B0FF); // Light Blue
+    } else if (_bmiValue >= 18.5 && _bmiValue <= 24.9) {
+      badgeText = 'Healthy';
+      badgeColor = const Color(0xFF4CAF50); // Green
+    } else if (_bmiValue >= 25.0 && _bmiValue <= 29.9) {
+      badgeText = 'Warning';
+      badgeColor = const Color(0xFFFF9800); // Orange
+    } else if (_bmiValue >= 30.0 && _bmiValue <= 34.9) {
+      badgeText = 'High Risk';
+      badgeColor = const Color(0xFFF44336); // Red
+    } else {
+      badgeText = 'Critical!';
+      badgeColor = const Color(0xFFB71C1C); // Dark Red
+    }
+
+    Color badgeBgColor = badgeColor.withValues(alpha: 0.15);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
@@ -84,7 +186,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: AppTheme.statusCriticalBg,
+              color: badgeBgColor,
               borderRadius: BorderRadius.circular(50),
             ),
             child: Row(
@@ -93,18 +195,18 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primary,
+                  decoration: BoxDecoration(
+                    color: badgeColor,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Critical!',
+                  badgeText,
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.statusCriticalText,
+                    color: badgeColor,
                   ),
                 ),
               ],
@@ -144,10 +246,9 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
         ],
       ),
       padding: const EdgeInsets.all(24),
-      // Maintain aspect ratio around 1.2 height for 1.0 width
-      child: const AspectRatio(
+      child: AspectRatio(
         aspectRatio: 1 / 0.85,
-        child: BmiGauge(value: _bmiValue),
+        child: BmiGauge(value: _bmiValue), // Uses dynamic value
       ),
     );
   }
@@ -182,8 +283,46 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     );
   }
 
-  // ─── Category Card ───────────────────────────────────
+   // ─── Category Card ───────────────────────────────────
   Widget _buildCategoryCard() {
+    String category;
+    String message;
+    IconData icon;
+    Color themeColor;
+    String emoji;
+
+    if (_bmiValue < 18.5) {
+      category = 'Underweight';
+      message = 'Needs Attention!';
+      icon = Icons.info_outline_rounded;
+      themeColor = const Color(0xFF00B0FF); // Light Blue
+      emoji = '😕';
+    } else if (_bmiValue >= 18.5 && _bmiValue <= 24.9) {
+      category = 'Normal Weight';
+      message = 'Great Job!';
+      icon = Icons.check_circle_outline_rounded;
+      themeColor = const Color(0xFF4CAF50); // Green
+      emoji = '😊';
+    } else if (_bmiValue >= 25.0 && _bmiValue <= 29.9) {
+      category = 'Overweight';
+      message = 'Take Care!';
+      icon = Icons.warning_amber_rounded;
+      themeColor = const Color(0xFFFF9800); // Orange
+      emoji = '😐';
+    } else if (_bmiValue >= 30.0 && _bmiValue <= 34.9) {
+      category = 'Obese';
+      message = 'Attention Required!';
+      icon = Icons.warning_amber_rounded;
+      themeColor = const Color(0xFFF44336); // Red
+      emoji = '😞';
+    } else {
+      category = 'Extremely Obese';
+      message = 'Critical Action Needed!';
+      icon = Icons.error_outline_rounded;
+      themeColor = const Color(0xFFB71C1C); // Dark Red
+      emoji = '😫';
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -193,7 +332,6 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       ),
       child: Row(
         children: [
-          // Left side: text content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +346,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Obese Class I',
+                  category,
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -218,18 +356,18 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(
-                      Icons.warning_amber_rounded,
+                    Icon(
+                      icon,
                       size: 18,
-                      color: AppTheme.primary,
+                      color: themeColor,
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Attention Required!',
+                      message,
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.primary,
+                        color: themeColor,
                       ),
                     ),
                   ],
@@ -237,16 +375,15 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               ],
             ),
           ),
-          // Right side: sad face emoji in pale red rounded square
           Container(
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: AppTheme.statusCriticalBg,
+              color: themeColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Center(
-              child: Text('😞', style: TextStyle(fontSize: 28)),
+            child: Center(
+              child: Text(emoji, style: const TextStyle(fontSize: 28)),
             ),
           ),
         ],
@@ -255,7 +392,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 
   // ─── Banner Card with Image ──────────────────────────
-  Widget _buildBannerCard() {
+  Widget _buildBannerCard(BuildContext context) {
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(minHeight: 180),
@@ -264,14 +401,12 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            // Background image
             Positioned.fill(
               child: Image.asset(
-                'assets/images/overview image.png',
+                'assets/images/impact_simulator/overview image.png',
                 fit: BoxFit.cover,
               ),
             ),
-            // Dark gradient overlay
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -286,16 +421,14 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                 ),
               ),
             ),
-            // Text content
             Padding(
               padding: const EdgeInsets.all(22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Heading
                   Text(
-                    'Shed the weight,\nTake Less\nBreaks!',
+                    'Change your diet,\nChange your \nlife!',
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -304,11 +437,9 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Bottom row: subtitle + Dive In button
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      // Subtitle
                       Expanded(
                         child: Text(
                           'You can Reshape your life\nwith NutriSync Diet plan',
@@ -320,35 +451,38 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                           ),
                         ),
                       ),
-                      // Dive In button
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Dive In',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+
+                      GestureDetector(
+                        onTap: _navigateToMealPlan,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Dive In',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 16,
                                 color: Colors.white,
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -392,7 +526,9 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   }
 }
 
-/// A beautiful, accurate semi-circular BMI gauge using CustomPaint.
+// ... [Keep BmiGauge and _BmiGaugePainter exactly as they are] ...
+
+/// Semi-circular BMI gauge using CustomPaint.
 ///
 /// Two concentric arc-bands display category names (outer) and BMI ranges
 /// (inner), each label rotated so it follows the arc direction exactly.

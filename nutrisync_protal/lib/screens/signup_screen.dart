@@ -32,7 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(now.year),
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1950),
       lastDate: now,
     );

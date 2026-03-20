@@ -1,16 +1,76 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NutriSync/core/theme.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 
+import '../../services/simulation_service.dart';
+
 class ImpactSimulationScreen extends StatefulWidget {
-  const ImpactSimulationScreen({super.key});
+  final double bmiValue;
+
+  const ImpactSimulationScreen({
+    super.key,
+    this.bmiValue = 0,
+  });
 
   @override
   State<ImpactSimulationScreen> createState() => _ImpactSimulationScreenState();
 }
 
 class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
+  bool _isLoading = true;
+  Map<String, dynamic>? _simulationData;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchSimulationData();
+    });
+  }
+
+  Future<void> _fetchSimulationData() async {
+    setState(() => _isLoading = true);
+    // Removed the blocking LoadingIndicator.show(context)
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final int? userId = prefs.getInt("userId");
+
+      if (userId == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Fetching simulation for 6 months
+      final response = await SimulationService.simulateImpact(userId, 6);
+
+      if (mounted) {
+        if (response.success && response.data != null) {
+          setState(() {
+            _simulationData = response.data;
+          });
+        } else {
+          showModernToast(
+            context,
+            response.message.isNotEmpty ? response.message : "Failed to load simulation",
+            type: 'error',
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("API Error fetching simulation: $e");
+      if (mounted) showModernToast(context, "An error occurred", type: 'error');
+    } finally {
+      if (mounted) {
+        // Removed the blocking LoadingIndicator.hide(context)
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +80,10 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
           children: [
             _buildAppBar(),
             Expanded(
-              child: SingleChildScrollView(
+              child: _isLoading
+              // Display the engaging AI loader while fetching
+                  ? AILoadingState(bmiValue: widget.bmiValue)
+                  : SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -28,11 +91,9 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                     children: [
                       const SizedBox(height: 32),
                       _buildBodyComparison(),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 20),
                       _buildDetailsPanel(),
-                      const SizedBox(height: 48),
-                      _buildActionButton(),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -71,37 +132,21 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFCC00).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.info_rounded,
-                  color: Color(0xFFFFCC00),
-                  size: 14,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Attention!',
-                  style: GoogleFonts.workSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFFFFCC00),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
 
   Widget _buildBodyComparison() {
+    double afterBmi = (_simulationData?['projectedBmi'] ?? 0).toDouble();
+    double projBf = (_simulationData?['projectedBodyFatPercent'] ?? 0).toDouble();
+    double bfChange = (_simulationData?['bodyFatChangePercent'] ?? 0).toDouble();
+
+    double nowBfPercent = (projBf - bfChange) / 100.0;
+    if (nowBfPercent <= 0) nowBfPercent = projBf / 100.0;
+
+    double afterBfPercent = projBf / 100.0;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -118,10 +163,9 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Image.asset(
-                'assets/images/now image.png',
-                height: 200,
-                fit: BoxFit.contain,
+              DynamicBodySilhouette(
+                bmi: widget.bmiValue,
+                bodyFatPercentage: nowBfPercent,
               ),
               const SizedBox(height: 16),
               Text(
@@ -133,7 +177,7 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                 ),
               ),
               Text(
-                '32.1',
+                widget.bmiValue.toStringAsFixed(1),
                 style: GoogleFonts.workSans(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
@@ -149,7 +193,7 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
           child: Icon(
             Icons.chevron_right_rounded,
             size: 48,
-            color: const Color(0xFFEE3638).withValues(alpha: 0.8),
+            color: const Color(0xFFEE3638).withOpacity(0.8), // Updated to withOpacity
           ),
         ),
         // After Column
@@ -177,10 +221,9 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Image.asset(
-                'assets/images/after image.png',
-                height: 200,
-                fit: BoxFit.contain,
+              DynamicBodySilhouette(
+                bmi: afterBmi,
+                bodyFatPercentage: afterBfPercent,
               ),
               const SizedBox(height: 16),
               Text(
@@ -192,7 +235,7 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
                 ),
               ),
               Text(
-                '24.0',
+                afterBmi.toStringAsFixed(1),
                 style: GoogleFonts.workSans(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
@@ -220,14 +263,14 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
             ),
             child: Column(
               children: [
-                _buildDetailRow('Average body fat', '21%'),
-                _buildDetailRow('Waist-to-hip ratio', '0.8'),
-                _buildDetailRow('Body weight', '65kg'),
-                _buildDetailRow('Expected consistency level', 'High'),
+                _buildTextRow('Average body fat', '${_simulationData?['projectedBodyFatPercent'] ?? '-'}%'),
+                _buildTextRow('Waist-to-hip ratio', '${_simulationData?['waistToHipRatio'] ?? '-'}'),
+                _buildTextRow('Body weight', '${_simulationData?['projectedWeightKg'] ?? '-'}kg'),
+                _buildTextRow('Expected consistency level', '${_simulationData?['expectedConsistencyLevel'] ?? '-'}'),
                 const SizedBox(height: 16),
-                _buildDetailRow('BMI Change', '8.1'),
-                _buildDetailRow('Body weight change', '16kg'),
-                _buildDetailRow('Average body fat change', '6%'),
+                _buildChangeRow('BMI Change', _simulationData?['bmiChange']),
+                _buildChangeRow('Body weight change', _simulationData?['weightChangeKg'], unit: 'kg'),
+                _buildChangeRow('Average body fat change', _simulationData?['bodyFatChangePercent'], unit: '%'),
               ],
             ),
           ),
@@ -236,7 +279,51 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildTextRow(String label, String value) {
+    return _buildBaseRow(
+      label,
+      Text(
+        ': $value',
+        style: GoogleFonts.workSans(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF616161),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChangeRow(String label, dynamic changeValue, {String unit = ''}) {
+    if (changeValue == null) return _buildTextRow(label, '-');
+
+    double val = (changeValue as num).toDouble();
+    bool isNegative = val < 0;
+
+    IconData icon = isNegative ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
+    Color iconColor = isNegative ? const Color(0xFF4CAF50) : const Color(0xFFEE3638);
+
+    return _buildBaseRow(
+      label,
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(': ', style: TextStyle(color: Color(0xFF616161), fontSize: 15, fontWeight: FontWeight.w500)),
+          Icon(icon, size: 16, color: iconColor),
+          const SizedBox(width: 4),
+          Text(
+            '${val.abs().toStringAsFixed(1)}$unit',
+            style: GoogleFonts.workSans(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF616161),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBaseRow(String label, Widget valueWidget) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -254,22 +341,11 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              ': $value',
-              style: GoogleFonts.workSans(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF616161),
-              ),
-            ),
+            child: valueWidget,
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildActionButton() {
-    return PrimaryButton(text: 'Impact Overview', isRed: true, onTap: () {});
   }
 }
 
@@ -279,19 +355,13 @@ class _BubbleClipper extends CustomClipper<Path> {
     var path = Path();
     const arrowWidth = 20.0;
     const arrowHeight = 12.0;
-    final arrowCenter =
-        size.width * 0.75; // Aligned under the target BMI (24.0)
+    final arrowCenter = size.width * 0.75;
 
-    // Start near top-left
     path.moveTo(0, arrowHeight);
-
-    // Triangle pointer shifted to the right
     path.lineTo(arrowCenter - arrowWidth / 2, arrowHeight);
     path.lineTo(arrowCenter, 0);
     path.lineTo(arrowCenter + arrowWidth / 2, arrowHeight);
     path.lineTo(size.width, arrowHeight);
-
-    // Remaining sides of rounded rect
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
     path.close();
@@ -300,4 +370,162 @@ class _BubbleClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+// ---------------------------------------------------------
+// AI Loading Widget
+// ---------------------------------------------------------
+class AILoadingState extends StatefulWidget {
+  final double bmiValue;
+  const AILoadingState({super.key, required this.bmiValue});
+
+  @override
+  State<AILoadingState> createState() => _AILoadingStateState();
+}
+
+class _AILoadingStateState extends State<AILoadingState> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  Timer? _textTimer;
+  int _textIndex = 0;
+
+  final List<String> _loadingPhrases = [
+    "Analyzing your current metrics...",
+    "Evaluating NutriSync diet plan...",
+    "Simulating metabolic changes...",
+    "Projecting 6 months into the future...",
+    "Finalizing health predictions...",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Creates a continuous pulsing effect
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    // Cycles the text every 2.5 seconds
+    _textTimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
+      if (mounted) {
+        setState(() {
+          _textIndex = (_textIndex + 1) % _loadingPhrases.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _textTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Pulsing Silhouette
+          FadeTransition(
+            opacity: Tween<double>(begin: 0.4, end: 1.0).animate(_pulseController),
+            child: DynamicBodySilhouette(
+              bmi: widget.bmiValue,
+              bodyFatPercentage: 0.5, // Generic middle-ground loading state
+              height: 180,
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          // Custom Styled Progress Indicator
+          const SizedBox(
+            height: 24,
+            width: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFEE3638)),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Animated Text Switcher for AI Phrases
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: Text(
+              _loadingPhrases[_textIndex],
+              key: ValueKey<int>(_textIndex),
+              style: GoogleFonts.workSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF616161),
+                letterSpacing: 0.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Dynamic silhouette widget that changes based on BMI and body fat percentage, used for both loading and final display states
+class DynamicBodySilhouette extends StatelessWidget {
+  final double bmi;
+  final double bodyFatPercentage;
+  final double height;
+
+  const DynamicBodySilhouette({
+    super.key,
+    required this.bmi,
+    required this.bodyFatPercentage,
+    this.height = 200,
+  });
+
+  String _getSilhouettePath(double currentBmi) {
+    if (currentBmi < 18.5) {
+      return 'assets/images/impact_simulator/silhouette_uw.png';
+    } else if (currentBmi < 25.0) {
+      return 'assets/images/impact_simulator/silhouette_n.png';
+    } else if (currentBmi < 30.0) {
+      return 'assets/images/impact_simulator/silhouette_ow.png';
+    } else if (currentBmi < 35.0) {
+      return 'assets/images/impact_simulator/silhouette_o.png';
+    } else {
+      return 'assets/images/impact_simulator/silhouette_eo.png';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcATop,
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: const [
+            Color(0xFFFFA726),
+            Color(0xFFEE3638),
+            Color(0xFF333333),
+            Color(0xFF333333),
+          ],
+          stops: [
+            0.0,
+            bodyFatPercentage * 3 + 0.02,
+            bodyFatPercentage,
+            bodyFatPercentage + 0.1
+          ],
+        ).createShader(bounds);
+      },
+      child: Image.asset(
+        _getSilhouettePath(bmi),
+        height: height,
+        fit: BoxFit.contain,
+        color: Colors.white,
+      ),
+    );
+  }
 }
