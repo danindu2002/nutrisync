@@ -1,9 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
-import '../widgets/common_widgets.dart'; // Using your PrimaryButton and AppColors
+import '../widgets/common_widgets.dart';
+import '../services/challenge_service.dart';
 
-class RewardsScreen extends StatelessWidget {
+class RewardsScreen extends StatefulWidget {
   const RewardsScreen({super.key});
+
+  @override
+  State<RewardsScreen> createState() => _RewardsScreenState();
+}
+
+class _RewardsScreenState extends State<RewardsScreen> {
+  bool _isLoading = true;
+  int _userPoints = 0;
+  List<dynamic> _rewards = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt("userId");
+
+    if (userId == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    // Fetch points and rewards at the same time
+    final results = await Future.wait([
+      ChallengeService.getUserPoints(userId),
+      ChallengeService.getAllRewards(),
+    ]);
+
+    if (mounted) {
+      setState(() {
+        _userPoints = results[0].data ?? 0;
+        _rewards = results[1].data ?? [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _claimReward(int rewardId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt("userId");
+
+    if (userId == null) return;
+
+    LoadingIndicator.show(context);
+    final response = await ChallengeService.claimReward(userId, rewardId);
+    if (mounted) LoadingIndicator.hide(context);
+
+    if (response.success) {
+      showModernToast(context, "Reward claimed successfully!", type: 'success');
+      _loadData(); // Refresh the points and the list!
+    } else {
+      showModernToast(context, response.message.isNotEmpty ? response.message : "Failed to claim reward", type: 'error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,35 +86,28 @@ class RewardsScreen extends StatelessWidget {
           _buildPointsBadge(),
         ],
       ),
-      body: ListView(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.redAccent))
+          : _rewards.isEmpty
+          ? const Center(child: Text("No rewards available at the moment.", style: TextStyle(color: Colors.grey)))
+          : ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        children: const [
-          RewardCard(
-            title: "Premium Feature",
-            points: 1000,
-            description: "Unlock advanced meal planning and personalized recommendations for 1 month.",
-            icon: Icons.card_giftcard,
+        itemCount: _rewards.length,
+        itemBuilder: (context, index) {
+          final reward = _rewards[index];
+          final costPoints = reward['costPoints'] as int? ?? 0;
+          final hasEnoughPoints = _userPoints >= costPoints;
+
+          return RewardCard(
+            title: reward['name'] ?? "Reward",
+            points: costPoints,
+            description: reward['description'] ?? "",
+            icon: Icons.card_giftcard, // You can make this dynamic if your API returns icon types later
             iconColor: Colors.teal,
-            hasEnoughPoints: true,
-          ),
-          RewardCard(
-            title: "Premium Feature",
-            points: 200,
-            description: "Unlock advanced AI based health risk prediction feature for 24 hours.",
-            icon: Icons.card_giftcard,
-            iconColor: Colors.teal,
-            hasEnoughPoints: true,
-          ),
-          RewardCard(
-            title: "Detailed Reports",
-            points: 2000,
-            description: "Access comprehensive nutrition analytics and health reports.",
-            icon: Icons.insert_chart,
-            iconColor: Colors.indigo,
-            hasEnoughPoints: false, // Triggers "Not Enough Points" state
-          ),
-          SizedBox(height: 20),
-        ],
+            hasEnoughPoints: hasEnoughPoints,
+            onClaim: () => _claimReward(reward['rewardId']),
+          );
+        },
       ),
     );
   }
@@ -70,13 +124,13 @@ class RewardsScreen extends StatelessWidget {
             BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)
           ],
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.stars_rounded, color: Colors.redAccent, size: 18),
-            SizedBox(width: 4),
+            const Icon(Icons.stars_rounded, color: Colors.redAccent, size: 18),
+            const SizedBox(width: 4),
             Text(
-              "1240",
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              "$_userPoints",
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -92,6 +146,7 @@ class RewardCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final bool hasEnoughPoints;
+  final VoidCallback onClaim; // Added to handle the button tap
 
   const RewardCard({
     super.key,
@@ -101,6 +156,7 @@ class RewardCard extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     required this.hasEnoughPoints,
+    required this.onClaim,
   });
 
   @override
@@ -112,7 +168,7 @@ class RewardCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         // Blue border for unavailable items as seen in Figma
-        border: !hasEnoughPoints ? Border.all(color: const Color(0xFF3B82F6), width: 2) : null,
+        border: !hasEnoughPoints ? Border.all(color: const Color(0xFF3B82F6), width: 1) : null,
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))
         ],
@@ -138,7 +194,7 @@ class RewardCard extends StatelessWidget {
                     Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     Text(
                       "${points.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} points",
-                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13), //
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ],
                 ),
@@ -148,18 +204,17 @@ class RewardCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             description,
-            style: TextStyle(color: AppColors.textSub, fontSize: 12, height: 1.4), //
+            style: const TextStyle(color: AppColors.textSub, fontSize: 12, height: 1.4),
           ),
           const SizedBox(height: 20),
 
-          // Using your PrimaryButton structure but adapting for the "Not Enough Points" state
           SizedBox(
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: hasEnoughPoints ? () {} : null,
+              onPressed: hasEnoughPoints ? onClaim : null, // Uses the callback if they have points
               style: ElevatedButton.styleFrom(
-                backgroundColor: hasEnoughPoints ? AppColors.primary : AppColors.secondary, //
+                backgroundColor: hasEnoughPoints ? AppColors.primary : AppColors.secondary,
                 disabledBackgroundColor: AppColors.secondary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,

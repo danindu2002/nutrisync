@@ -13,12 +13,10 @@ class ScanMealScreen extends StatefulWidget {
 
 class _ScanMealScreenState extends State<ScanMealScreen> {
   final ImagePicker _picker = ImagePicker();
-  bool _isProcessing = false;
 
   @override
   void initState() {
     super.initState();
-
     // Show picker options immediately after screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showPickerOptions();
@@ -40,8 +38,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt,
-                    color: AppColors.primary),
+                leading: const Icon(Icons.camera_alt, color: AppColors.primary),
                 title: const Text('Capture with Camera'),
                 onTap: () {
                   Navigator.pop(context);
@@ -49,8 +46,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library,
-                    color: AppColors.primary),
+                leading: const Icon(Icons.photo_library, color: AppColors.primary),
                 title: const Text('Select from Gallery'),
                 onTap: () {
                   Navigator.pop(context);
@@ -65,63 +61,29 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
     );
   }
 
-  /// Pick image from selected source
+  /// Pick image from selected source and pass to BriefScreen
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? image =
-      await _picker.pickImage(source: source);
+      final XFile? image = await _picker.pickImage(source: source);
 
       if (image == null) {
-        // If user cancels, go back
+        // If user cancels, go back to previous screen
         if (mounted) Navigator.pop(context);
         return;
       }
 
-      await _uploadImage(File(image.path));
-    } catch (e) {
-      debugPrint("Image pick error: $e");
-    }
-  }
-
-  /// Mock multipart upload (always success)
-  Future<void> _uploadImage(File imageFile) async {
-    try {
-      setState(() => _isProcessing = true);
-
-      // --- MOCK MULTIPART API CALL ---
-      // In real scenario:
-      /*
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse("YOUR_API_URL"),
-      );
-
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'image',
-          imageFile.path,
-        ),
-      );
-
-      var response = await request.send();
-      */
-
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Always success → Navigate to Brief
+      // Navigate to BriefScreen and pass the selected image file
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => const BriefScreen(),
+            builder: (_) => BriefScreen(imageFile: File(image.path)),
           ),
         );
       }
     } catch (e) {
-      debugPrint("Upload error: $e");
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
+      debugPrint("Image pick error: $e");
+      if (mounted) Navigator.pop(context);
     }
   }
 
@@ -135,28 +97,10 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
           Positioned.fill(
             child: Container(color: Colors.black),
           ),
-
           // Center UI
-          Center(
-            child: _isProcessing
-                ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-                SizedBox(height: 15),
-                Text(
-                  "Uploading...",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            )
-                : const Text(
-              "Preparing...",
+          const Center(
+            child: Text(
+              "Preparing Camera...",
               style: TextStyle(color: Colors.white),
             ),
           ),

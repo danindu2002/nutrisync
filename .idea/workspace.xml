@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="841a715d-fc7e-4a60-9a85-e152fa3de026" name="Changes" comment="Login done">
+      <change afterPath="$PROJECT_DIR$/nutrisync_protal/assets/images/meal_plan/MealPlan.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/nutrisync_protal/lib/services/DietPlanService.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/nutrisync_protal/lib/services/FirebaseImageService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/main_dart.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync.iml" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/assets/images/MealPlan.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/lib/screens/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/lib/screens/meal_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/lib/screens/meal_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/lib/screens/meal_plan_preview_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/lib/screens/meal_plan_preview_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/lib/screens/meal_plan_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/lib/screens/meal_plan_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/lib/widgets/common_widgets.dart" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/lib/widgets/common_widgets.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/linux/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/linux/flutter/generated_plugin_registrant.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/linux/flutter/generated_plugins.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/windows/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/windows/flutter/generated_plugin_registrant.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nutrisync_protal/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/nutrisync_protal/windows/flutter/generated_plugins.cmake" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="main.dart" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/main.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="origin/frontend/bmi-impact-simulation" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="backup/frontend-development" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;danindu2002&quot;
+  }
+}</component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="backend\/development" />
+      </list>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/danindu2002/nutrisync.git&quot;,
+    &quot;accountId&quot;: &quot;6f7f08df-ab27-4c12-a117-efc9841865bd&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="3B46CrRd1sdaQCPUlE0hlfj2Xb3" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1" />
+    <panes>
+      <pane id="ProjectPane">
+        <option name="show-excluded-files" value="false" />
+      </pane>
+    </panes>
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Flutter.main.dart (1).executor&quot;: &quot;Run&quot;,
+    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;frontend/meal-plan&quot;,
+    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Danindu\LEC\SDGP\Development\FE\nutrisync\nutrisync_protal\assets\images\meal_plan" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter" temporary="true">
+      <option name="filePath" value="$PROJECT_DIR$/nutrisync_protal/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Flutter.main.dart" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="841a715d-fc7e-4a60-9a85-e152fa3de026" name="Changes" comment="modules xml" />
+      <created>1773736666517</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1773736666517</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+    </layout>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="meal plan" />
+    <option name="LAST_COMMIT_MESSAGE" value="meal plan" />
+  </component>
+</project>

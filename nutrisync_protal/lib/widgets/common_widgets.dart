@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import 'dart:async';
 
@@ -1079,29 +1083,26 @@ class _HeightRulerState extends State<HeightRuler> {
 }
 
 void showModernToast(BuildContext context, String message, {String type = 'info'}) {
-  final overlayState = Overlay.of(context);
+  // Usethe root overlay to ensure it shows over everything
+  final overlayState = Overlay.of(context, rootOverlay: true);
   late OverlayEntry overlayEntry;
 
-  // Create the widget that performs the animation
   overlayEntry = OverlayEntry(
     builder: (context) => _TopToastWidget(
       message: message,
-      type: type,
-      onDismiss: () {
-        if (overlayEntry.mounted) {
-          overlayEntry.remove();
-        }
-      },
+      type: type,onDismiss: () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    },
     ),
   );
 
-  // Insert it into the screen
   overlayState.insert(overlayEntry);
 }
 
 class _TopToastWidget extends StatefulWidget {
-  final String message;
-  final String type;
+  final String message;final String type;
   final VoidCallback onDismiss;
 
   const _TopToastWidget({
@@ -1120,128 +1121,82 @@ class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProvi
   Timer? _timer;
 
   @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
+  void initState() {super.initState();
+  _controller = AnimationController(
+    duration: const Duration(milliseconds: 500),
+    vsync: this,
+  );
 
-    // 1. ENTRY: Left (-1.5) -> Center (0.0)
-    _offsetAnimation = Tween<Offset>(
-      begin: const Offset(-1.5, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+  // Start from left (-1.2) to center (0.0)
+  _offsetAnimation = Tween<Offset>(begin: const Offset(-1.2, 0.0),
+    end: Offset.zero,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
 
-    _controller.forward();
+  _controller.forward();
 
-    // 2. AUTO DISMISS
-    _timer = Timer(const Duration(seconds: 2), () {
-      _dismiss();
-    });
+  _timer = Timer(const Duration(seconds: 3), () {
+    _dismiss();
+  });
   }
 
-  void _dismiss() {
+  void _dismiss() async {
     if (!mounted) return;
     _timer?.cancel();
 
-    // 3. EXIT: Center (0.0) -> Right (1.5)
+    // Change animation to slide out to the right
     setState(() {
-      _offsetAnimation = Tween<Offset>(
-        begin: Offset.zero,
-        end: const Offset(1.5, 0.0),
-      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInBack));
+      _offsetAnimation = Tween<Offset>(begin: Offset.zero,
+        end: const Offset(1.2, 0.0),
+      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInQuart));
     });
 
+    // Reverse logic: we reset and play forward to move from0.0 to 1.2
     _controller.reset();
-    _controller.forward().then((_) {
-      widget.onDismiss();
-    });
+    await _controller.forward();
+    widget.onDismiss();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     _timer?.cancel();
+    _controller.dispose();
     super.dispose();
-  }
-
-  @override
+  }@override
   Widget build(BuildContext context) {
-    Color iconColor;
-    IconData icon;
-    Color bgColor = Colors.white;
-
-    switch (widget.type) {
-      case 'success':
-        icon = Icons.check_circle;
-        iconColor = Colors.green;
-        break;
-      case 'error':
-        icon = Icons.error_outline;
-        iconColor = Colors.red;
-        break;
-      case 'warning':
-        icon = Icons.warning_amber_rounded;
-        iconColor = Colors.orange;
-        break;
-      default:
-        icon = Icons.info_outline;
-        iconColor = Colors.blue;
-    }
+    // Define colors based on type
+    Color iconColor = widget.type == 'error' ? Colors.red : (widget.type == 'success' ? Colors.green : Colors.blue);
+    IconData icon = widget.type == 'error' ? Icons.error_outline : (widget.type == 'success' ? Icons.check_circle : Icons.info_outline);
 
     return Positioned(
-      top: 60,
+      top: MediaQuery.of(context).padding.top + 10, // Adjust for status bar
       left: 20,
       right: 20,
       child: SlideTransition(
         position: _offsetAnimation,
-        child: Material(
+        child: Material( // Material is required for text styling and shadows in Overlay
           color: Colors.transparent,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-              border: Border(left: BorderSide(color: iconColor, width: 5)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+              border: Border(left: BorderSide(color: iconColor, width: 6)),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center, // Vertically center icon & text
               children: [
                 Icon(icon, color: iconColor, size: 28),
-                const SizedBox(width: 14),
-
-                // Message Text
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     widget.message,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600, // Slightly bolder for readability
-                      height: 1.3,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
                   ),
                 ),
-
-                // Close Button
-                GestureDetector(
-                  onTap: _dismiss,
-                  behavior: HitTestBehavior.opaque, // Ensures easier tapping area
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Icon(Icons.close, size: 20, color: Colors.grey.shade400),
-                  ),
-                )
+                IconButton(
+                  icon: const Icon(Icons.close, size: 20, color: Colors.grey),
+                  onPressed: _dismiss,
+                ),
               ],
             ),
           ),
@@ -1378,18 +1333,54 @@ class InputFieldState extends State<InputField> {
 }
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key});
+  final String userName;
+  final int score;
+  final dynamic profileImageData; // Accepts String (Base64) or List<int> (Byte Array)
+
+  const HomeHeader({
+    super.key,
+    required this.userName,
+    required this.score,
+    this.profileImageData,
+  });
+
+  // Helper method to handle both Base64 Strings and Byte Arrays safely
+  ImageProvider? _getProfileImage() {
+    if (profileImageData == null) return null;
+
+    try {
+      if (profileImageData is String && (profileImageData as String).isNotEmpty) {
+        final String base64String = profileImageData as String;
+        // Strip out data URI prefixes if present
+        final cleanBase64 = base64String.contains(',')
+            ? base64String.split(',').last
+            : base64String;
+        final decodedBytes = base64Decode(cleanBase64.replaceAll(RegExp(r'\s+'), ''));
+        return MemoryImage(decodedBytes);
+      }
+      else if (profileImageData is List<int>) {
+        // Convert raw byte array to Uint8List for MemoryImage
+        return MemoryImage(Uint8List.fromList(profileImageData as List<int>));
+      }
+    } catch (e) {
+      debugPrint("Error parsing profile image: $e");
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('MMM dd, yyyy').format(DateTime.now());
+    final ImageProvider? avatarImage = _getProfileImage();
 
-    // AnnotatedRegion tells the OS to use light icons (white) for the status bar
+    // Extract first name if a full name is passed
+    final String firstName = userName.isNotEmpty ? userName.split(" ")[0] : "User";
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: Colors.transparent, // Keeps the status bar transparent
-        statusBarIconBrightness: Brightness.light, // For Android (white icons)
-        statusBarBrightness: Brightness.dark, // For iOS (white icons)
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
       child: Container(
         decoration: const BoxDecoration(
@@ -1404,15 +1395,19 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          bottom: false, // Prevents extra padding at the bottom of the header
+          bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
             child: Row(
               children: [
-                /// User Avatar
-                const CircleAvatar(
+                /// User Avatar Logic
+                CircleAvatar(
                   radius: 26,
-                  backgroundImage: AssetImage("assets/images/dashboard/avatar.png"),
+                  backgroundColor: Colors.grey[800],
+                  backgroundImage: avatarImage,
+                  child: avatarImage == null
+                      ? const Icon(Icons.person, color: Colors.white, size: 30)
+                      : null,
                 ),
                 const SizedBox(width: 12),
 
@@ -1421,9 +1416,9 @@ class HomeHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Hello John!",
-                        style: TextStyle(
+                      Text(
+                        "Hello $firstName!", // Dynamic First Name
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -1438,8 +1433,8 @@ class HomeHeader extends StatelessWidget {
                             size: 14,
                           ),
                           const SizedBox(width: 4),
-                          const Text(
-                            "88% healthy",
+                          Text(
+                            "$score% healthy",
                             style: TextStyle(color: Colors.white70, fontSize: 12),
                           ),
                           const SizedBox(width: 12),
@@ -1459,15 +1454,11 @@ class HomeHeader extends StatelessWidget {
                   ),
                 ),
 
-                /// Notification Icon with Badge
-                Stack(
-                  children: [
-                    const Icon(
-                      Icons.notifications_none,
-                      size: 28,
-                      color: Colors.white,
-                    ),
-                  ],
+                /// Notification Icon
+                const Icon(
+                  Icons.notifications_none,
+                  size: 28,
+                  color: Colors.white,
                 ),
               ],
             ),
@@ -1475,5 +1466,50 @@ class HomeHeader extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// Simple Logger for console output with colors
+class Logger {
+  static void error(String message) {
+    print("\x1B[31m$message\x1B[0m");
+  }
+
+  static void success(String message) {
+    print("\x1B[32m$message\x1B[0m");
+  }
+
+  static void info(String message) {
+    print("\x1B[36m$message\x1B[0m");
+  }
+}
+
+// Loading Indicator
+class LoadingIndicator {
+  static bool _isShowing = false;
+
+  static void show(BuildContext context) {
+    if (_isShowing) return;
+    _isShowing = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (_) {
+        return const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+        );
+      },
+    );
+  }
+
+  static void hide(BuildContext context) {
+    if (!_isShowing) return;
+    _isShowing = false;
+
+    Navigator.of(context, rootNavigator: true).pop();
   }
 }
