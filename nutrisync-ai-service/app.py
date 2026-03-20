@@ -203,6 +203,7 @@ def risk_prediction():
             "reasonTitle": "",
             "probability": "",
             "warning": "",
+            "icon": "",
             "contributedMeals": [
               {{
                 "mealLogId": "",
@@ -232,7 +233,8 @@ def risk_prediction():
     7. probability = estimated likelihood of the risk occurring within the next 1–5 years.
     8. probability must be expressed as a percentage (example: "35%").
     9. warning must clearly explain why the user's current habits increase the risk.
-    10. contributedMeals must list meal logs that contributed to the risk.
+    10. icon should be a matching condition for the risk from the list[cardio, diabetes, obesity, hypertension, calorie_imbalance, other]. If no matching condition for the risk, set condition "other".
+    11. contributedMeals must list meal logs that contributed to the risk.
 
     Meal contribution rules:
     - Insert mealLogId from MealLogDTO's logId to identify contributed meal.
