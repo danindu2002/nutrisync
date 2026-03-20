@@ -14,7 +14,7 @@ class DietPlanService {
     }
   }
 
-  // Generate Preview & Fetch Pexels Images (BULLETPROOF VERSION)
+  // Generate Preview & Fetch Pexels Images
   static Future<ApiResponse> generatePlanPreview(int userId) async {
     try {
       final response = await ApiClient.post('/diet-plan/preview?userId=$userId', {});
@@ -23,23 +23,20 @@ class DietPlanService {
       if (apiRes.success && apiRes.data != null) {
         var weeklyPlan = apiRes.data['weeklyPlan'] as List<dynamic>? ?? [];
 
-        // Reset the short-circuit flag via the new service before starting
         PexelsImageService.resetAvailability();
 
         for (var day in weeklyPlan) {
           var meals = day['meals'] as List<dynamic>? ?? [];
           for (var meal in meals) {
 
-            // Check if Pexels is down using the new service
             if (PexelsImageService.isUnavailable) {
               meal['mealImageUrl'] = "https://via.placeholder.com/150";
               continue;
             }
 
-            String searchTerm = meal['imageSearchTerm'] ?? meal['recipeName'] ?? 'healthy food';
-
-            // Fetch the image via the standalone service
-            String? pexelsUrl = await PexelsImageService.fetchImage(searchTerm);
+            String rawTerm = meal['imageSearchTerm'] ?? meal['recipeName'] ?? 'healthy food';
+            String optimizedTerm = _sanitizeForPexels(rawTerm);
+            String? pexelsUrl = await PexelsImageService.fetchImage(optimizedTerm);
 
             meal['mealImageUrl'] = pexelsUrl ?? "https://via.placeholder.com/150";
           }
@@ -50,6 +47,21 @@ class DietPlanService {
       Logger.error("Error generating plan preview: $e");
       return ApiResponse(status: 500, message: "Error generating plan");
     }
+  }
+
+  static String _sanitizeForPexels(String query) {
+    String cleanQuery = query.replaceAll(RegExp(r'[^a-zA-Z\s]'), '').trim();
+    List<String> words = cleanQuery.split(RegExp(r'\s+'));
+    String shortTerm = words.take(3).join(' ').toLowerCase();
+
+    if (shortTerm.contains('chicken') || shortTerm.contains('beef') || shortTerm.contains('pork') || shortTerm.contains('fish')) {
+      shortTerm = "${words[0]} meal";
+    }
+
+    if (shortTerm.isEmpty || shortTerm.length < 3) {
+      return 'healthy meal';
+    }
+    return shortTerm;
   }
 
   static Future<ApiResponse> saveDietPlan(Map<String, dynamic> planData) async {
