@@ -42,6 +42,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   firebase_core: ^4.5.0
   firebase_storage: ^13.1.0
+  flutter_svg: ^2.2.4
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/icons/
     - assets/images/questionnaire/
     - assets/images/dashboard/
     - assets/images/authentication/
