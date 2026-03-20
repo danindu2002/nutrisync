@@ -1,6 +1,5 @@
-package com.y421.nutrisyncservice;
+package com.y421.nutrisyncservice.controller.dietPlan;
 
-import com.y421.nutrisyncservice.controller.dietPlan.DietPlanControllerImpl;
 import com.y421.nutrisyncservice.request.dietPlan.SaveMealPlanRequest;
 import com.y421.nutrisyncservice.request.dietPlan.UpdateMealPlanDetailsRequest;
 import com.y421.nutrisyncservice.service.dietPlan.DietPlanService;

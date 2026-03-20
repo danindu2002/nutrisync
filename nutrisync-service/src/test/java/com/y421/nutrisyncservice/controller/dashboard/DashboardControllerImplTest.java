@@ -1,6 +1,5 @@
-package com.y421.nutrisyncservice;
+package com.y421.nutrisyncservice.controller.dashboard;
 
-import com.y421.nutrisyncservice.controller.dashboard.DashboardControllerImpl;
 import com.y421.nutrisyncservice.service.dashboard.DashboardService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

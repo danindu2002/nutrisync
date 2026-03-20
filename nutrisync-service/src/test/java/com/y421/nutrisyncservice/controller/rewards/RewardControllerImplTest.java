@@ -1,4 +1,4 @@
-package com.y421.nutrisyncservice;
+package com.y421.nutrisyncservice.controller.rewards;
 
 import com.y421.nutrisyncservice.controller.reward.RewardControllerImpl;
 import com.y421.nutrisyncservice.request.challenge.ClaimRewardDTO;

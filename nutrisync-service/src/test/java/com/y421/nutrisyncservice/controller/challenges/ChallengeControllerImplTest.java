@@ -1,4 +1,4 @@
-package com.y421.nutrisyncservice;
+package com.y421.nutrisyncservice.controller.challenges;
 
 import com.y421.nutrisyncservice.controller.challenge.ChallengeControllerImpl;
 import com.y421.nutrisyncservice.request.challenge.JoinChallengeDTO;

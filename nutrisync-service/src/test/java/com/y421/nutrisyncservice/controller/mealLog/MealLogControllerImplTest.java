@@ -1,6 +1,5 @@
-package com.y421.nutrisyncservice;
+package com.y421.nutrisyncservice.controller.mealLog;
 
-import com.y421.nutrisyncservice.controller.mealLog.MealLogControllerImpl;
 import com.y421.nutrisyncservice.request.meal.MealLogRequestDTO;
 import com.y421.nutrisyncservice.service.mealLog.MealLogService;
 import org.junit.jupiter.api.BeforeEach;

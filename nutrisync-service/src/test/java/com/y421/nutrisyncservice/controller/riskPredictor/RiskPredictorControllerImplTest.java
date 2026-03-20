@@ -1,6 +1,5 @@
-package com.y421.nutrisyncservice;
+package com.y421.nutrisyncservice.controller.riskPredictor;
 
-import com.y421.nutrisyncservice.controller.riskPredictor.RiskPredictorControllerImpl;
 import com.y421.nutrisyncservice.service.riskPredictor.RiskPredictorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
