@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:NutriSync/services/risk_service.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
@@ -197,15 +198,12 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
               /// Top Bar
               Row(
                 children: [
-                  /// Back Arrow
                   IconButton(
                     icon: const Icon(Icons.arrow_back_ios, size: 18),
                     color: AppColors.textMain,
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: 8),
-
-                  /// Title
                   Text("Risk Predictor", style: AppTextStyles.header),
                 ],
               ),
@@ -222,7 +220,6 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                 ),
                 child: Row(
                   children: [
-                    /// Left Side: Label and Dropdown
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -242,10 +239,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: 8),
-
-                            /// Time Period Dropdown
                             Container(
                               height: 28,
                               width: 133,
@@ -274,9 +268,6 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                   isExpanded: true,
                                   menuMaxHeight: 200,
                                   isDense: true,
-
-                                  /// Call backend AI prediction API here
-                                  /// using the selected time period and update risks list
                                   onChanged: (String? newValue) {
                                     if (newValue != null) {
                                       setState(() {
@@ -286,8 +277,8 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                                     }
                                   },
                                   items: periods.map<DropdownMenuItem<String>>((
-                                    String value,
-                                  ) {
+                                      String value,
+                                      ) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(
@@ -306,8 +297,6 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                         ),
                       ),
                     ),
-
-                    /// Right Side: Predict Risks Button (Black Box)
                     GestureDetector(
                       onTap: () {
                         _loadRiskPrediction();
@@ -342,13 +331,9 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
 
               const SizedBox(height: 24),
 
+              // UPDATED: Use the new animated AI loader here
               if (isLoading)
-                const Padding(
-                  padding: EdgeInsets.only(top: 40.0),
-                  child: Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  ),
-                )
+                const RiskPredictorAILoadingState()
               else if (risks.isEmpty && mealSwaps.isEmpty)
                 const Padding(
                   padding: EdgeInsets.only(top: 40.0),
@@ -360,53 +345,154 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                   ),
                 )
               else ...[
-                if (risks.isNotEmpty) ...[
-                  Text(
-                    "Top Predicted Risks",
-                    style: AppTextStyles.subHeader.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textMain,
+                  if (risks.isNotEmpty) ...[
+                    Text(
+                      "Top Predicted Risks",
+                      style: AppTextStyles.subHeader.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textMain,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(24),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBg,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Column(
+                        children: risks.map((risk) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: RiskCard(
+                              risk: risk,
+                              onTap: () => _showRiskDetails(risk),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                    child: Column(
-                      children: risks.map((risk) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: RiskCard(
-                            risk: risk,
-                            onTap: () => _showRiskDetails(risk),
-                          ),
-                        );
-                      }).toList(),
+                    const SizedBox(height: 24),
+                  ],
+                  if (mealSwaps.isNotEmpty) ...[
+                    Text(
+                      "Suggested Meal Swaps",
+                      style: AppTextStyles.subHeader.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textMain,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 16),
+                    MealSwapCard(
+                      swap: mealSwaps[currentSwapIndex],
+                      onNext: _nextSwap,
+                    ),
+                  ],
                 ],
-
-                if (mealSwaps.isNotEmpty) ...[
-                  Text(
-                    "Suggested Meal Swaps",
-                    style: AppTextStyles.subHeader.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textMain,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  MealSwapCard(
-                    swap: mealSwaps[currentSwapIndex],
-                    onNext: _nextSwap,
-                  ),
-                ],
-              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------
+// AI Loading Widget for Risk Predictor
+// ---------------------------------------------------------
+class RiskPredictorAILoadingState extends StatefulWidget {
+  const RiskPredictorAILoadingState({super.key});
+
+  @override
+  State<RiskPredictorAILoadingState> createState() => _RiskPredictorAILoadingStateState();
+}
+
+class _RiskPredictorAILoadingStateState extends State<RiskPredictorAILoadingState> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  Timer? _textTimer;
+  int _textIndex = 0;
+
+  final List<String> _loadingPhrases = [
+    "Analyzing recent meal patterns...",
+    "Evaluating nutritional macros...",
+    "Cross-referencing health databases...",
+    "Calculating long-term risk probabilities...",
+    "Generating healthier meal swaps...",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Creates a continuous smooth scaling/pulsing effect
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    // Cycles the text every 2.5 seconds
+    _textTimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
+      if (mounted) {
+        setState(() {
+          _textIndex = (_textIndex + 1) % _loadingPhrases.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _textTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 60.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Pulsing Icon (Health & Safety)
+            ScaleTransition(
+              scale: Tween<double>(begin: 0.85, end: 1.15).animate(
+                CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+              ),
+              child: Icon(
+                Icons.health_and_safety_outlined,
+                size: 90,
+                color: AppColors.primary.withOpacity(0.85),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // Custom Styled Progress Indicator
+            const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Animated Text Switcher for AI Phrases
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Text(
+                _loadingPhrases[_textIndex],
+                key: ValueKey<int>(_textIndex),
+                style: AppTextStyles.subHeader.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSub,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
       ),
     );
