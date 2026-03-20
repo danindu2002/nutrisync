@@ -149,6 +149,7 @@ public class MealLogServiceImpl implements MealLogService {
                             .totalCalories(log.getTotalCalories())
                             .totalProtein(log.getTotalProtein())
                             .totalCarbs(log.getTotalCarbs())
+                            .totalFats(log.getTotalFats())
                             .mealTime(log.getMealTime().name())
                             .image(log.getImage())
                             .build())
