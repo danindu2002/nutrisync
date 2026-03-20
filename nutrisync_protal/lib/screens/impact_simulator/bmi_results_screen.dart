@@ -67,6 +67,15 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
     }
   }
 
+  void _navigateToMealPlan() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("userId");
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => MealPlanScreen(userId: userId)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -445,14 +454,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                       const SizedBox(width: 8),
 
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MealPlanScreen(),
-                            ),
-                          );
-                        },
+                        onTap: _navigateToMealPlan,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 18,

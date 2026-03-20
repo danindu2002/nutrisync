@@ -35,6 +35,8 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   final OnboardingDTO _data = OnboardingDTO();
+  final TextEditingController _allergyController = TextEditingController();
+  final TextEditingController _conditionController = TextEditingController();
 
   int _currentPage = 0;
   final int _totalSteps = 15;
@@ -379,14 +381,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         scrollController: FixedExtentScrollController(
           initialItem: initialIndex,
         ),
-        itemExtent: 160,
-        diameterRatio: 1.8,
-
+        // Reduced from 160 to 110 for better mobile fit
+        itemExtent: 130,
+        diameterRatio: 1.1, // Adjusted for a smoother curve at smaller scale
         onSelectedItemChanged: (idx) {
           _hapticLight();
           setState(() => _data.age = idx + 16);
         },
-        selectionOverlay: Container(),
+        selectionOverlay: Container(), // Keeps your custom overlay look
         children: List.generate(80, (index) {
           final val = index + 16;
           final isSelected = val == currentAge;
@@ -394,45 +396,49 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           return Center(
             child: isSelected
                 ? Container(
-                    width: 300,
-                    height: 380,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(40),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 0),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        "$val",
-                        style: const TextStyle(
-                          fontSize: 130,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.15,
-                        ),
-                      ),
-                    ),
-                  )
-                : Text(
-                    "$val",
-                    style: TextStyle(
-                      fontSize: 65,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade500,
-                    ),
+              // Scaled width/height to fit mobile screens (e.g., iPhone SE)
+              width: 180,
+              height: 100,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
                   ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  "$val",
+                  style: const TextStyle(
+                    // Reduced from 130 to 70
+                    fontSize: 70,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+            )
+                : Text(
+              "$val",
+              style: TextStyle(
+                // Reduced from 65 to 40
+                fontSize: 60,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade400,
+              ),
+            ),
           );
         }),
       ),
     );
   }
 
+  // --- Screen 5: Height ---
   Widget _buildHeightScreen() {
     double currentCm = _data.heightCm ?? 170.0;
     double minCm = 100.0;
@@ -780,9 +786,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // --- Screen 10: Allergies ---
+// --- Screen 10: Allergies ---
   Widget _buildAllergiesScreen() {
-    List<String> commonAllergies = [
+    List<String> presetAllergies = [
       "Milk",
       "Eggs",
       "Peanuts",
@@ -799,112 +805,144 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ];
 
     const maxItems = 10;
+    final TextEditingController _controller = TextEditingController();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          /// Common allergy chips
+          const SizedBox(height: 20),
+          const Text(
+            "Do you have any\nallergic foods?",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Color(0xFF2D3142)),
+          ),
+          const SizedBox(height: 30),
+
+          /// Preset Filter Chips
           Wrap(
             spacing: 10,
             runSpacing: 10,
-            children: commonAllergies.map((allergy) {
+            alignment: WrapAlignment.center,
+            children: presetAllergies.map((allergy) {
               final isSelected = _data.allergies.contains(allergy);
-              return FilterChip(
+              return ChoiceChip(
                 label: Text(allergy),
                 selected: isSelected,
                 onSelected: (val) {
                   setState(() {
+                    // Ensure we are working with a growable list
+                    List<String> mutableList = List<String>.from(_data.allergies);
                     if (val) {
-                      if (!_data.allergies.contains(allergy) &&
-                          _data.allergies.length < maxItems) {
-                        _data.allergies.add(allergy);
+                      if (!mutableList.contains(allergy) && mutableList.length < maxItems) {
+                        mutableList.add(allergy);
                       }
                     } else {
-                      _data.allergies.remove(allergy);
+                      mutableList.remove(allergy);
                     }
+                    _data.allergies = mutableList;
                   });
                 },
-                backgroundColor: Colors.grey.shade100,
-                selectedColor: AppColors.primary,
-                labelStyle: TextStyle(
-                  color: isSelected ? AppColors.primary : Colors.black87,
-                ),
-                shape: StadiumBorder(
-                  side: BorderSide(
-                    color: isSelected
-                        ? AppColors.primary
-                        : Colors.grey.shade300,
-                  ),
-                ),
+                backgroundColor: const Color(0xFFF2F2F2),
+                selectedColor: const Color(0xFFF2544D),
+                labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                side: BorderSide.none,
+                showCheckmark: false,
               );
             }).toList(),
           ),
 
           const SizedBox(height: 40),
 
-          /// Input-like container with selected chips
+          /// Selection Container
+          /// 02. Selection Container (Input Area)
           Container(
-            padding: const EdgeInsets.all(12),
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary, width: 1.5),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                  color: const Color(0xFFF2544D).withOpacity(0.5),
+                  width: 1.5
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (_data.allergies.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      "No allergies selected. Tap chips above to add.",
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  )
-                else
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _data.allergies.map((item) {
-                      return Chip(
-                        label: Text(item),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () {
-                          setState(() {
-                            _data.allergies.remove(item);
-                          });
-                        },
-                        backgroundColor: AppColors.primary.withOpacity(0.15),
-                        labelStyle: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    // Selected Tags
+                    ..._data.allergies.map((item) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2544D).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(item, style: const TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () => setState(() => _data.allergies.remove(item)),
+                              child: const Icon(Icons.close, size: 14, color: Color(0xFFF2544D)),
+                            ),
+                          ],
                         ),
                       );
                     }).toList(),
-                  ),
 
-                const SizedBox(height: 50),
-
-                /// Counter
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.edit_note, size: 16, color: AppColors.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${_data.allergies.length}/$maxItems",
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    // Optimized Input Field
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        // If list is empty, take full width. If typing, give enough space.
+                        minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 120,
                       ),
-                    ],
-                  ),
+                      child: TextField(
+                        controller: _allergyController, // Using the class-level controller
+                        onChanged: (val) {
+                          // Only rebuild to show the "Add" button if we transition from empty to text
+                          if (val.length <= 1) setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          hintText: _data.allergies.isEmpty
+                              ? "No allergies selected. Pick from above or type here to add..."
+                              : "Add food...",
+                          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                          border: InputBorder.none,
+                          isDense: true,
+                          suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                          suffixIcon: _allergyController.text.isNotEmpty
+                              ? TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {
+                              if (_allergyController.text.trim().isNotEmpty) {
+                                setState(() {
+                                  _data.allergies.add(_allergyController.text.trim());
+                                  _allergyController.clear();
+                                });
+                              }
+                            },
+                            child: const Text("Add", style: TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
+                          )
+                              : null,
+                        ),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 40),
+                // ... (Counter code)
               ],
             ),
           ),
@@ -1115,7 +1153,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   // --- Screen 12: Medical Conditions ---
   Widget _buildMedicalConditionScreen() {
-    final List<String> conditions = [
+    final List<String> presetConditions = [
       "Diabetes",
       "Hypertension",
       "High Cholesterol",
@@ -1134,113 +1172,183 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Common allergy chips
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: conditions.map((allergy) {
-              final isSelected = _data.medicalConditions.contains(allergy);
-              return FilterChip(
-                label: Text(allergy),
-                selected: isSelected,
-                onSelected: (val) {
-                  setState(() {
-                    if (val) {
-                      if (!_data.medicalConditions.contains(allergy) &&
-                          _data.medicalConditions.length < maxItems) {
-                        _data.medicalConditions.add(allergy);
-                      }
-                    } else {
-                      _data.medicalConditions.remove(allergy);
-                    }
-                  });
-                },
-                backgroundColor: Colors.grey.shade100,
-                selectedColor: AppColors.primary,
-                labelStyle: TextStyle(
-                  color: isSelected ? AppColors.primary : Colors.black87,
-                ),
-                shape: StadiumBorder(
-                  side: BorderSide(
-                    color: isSelected
-                        ? AppColors.primary
-                        : Colors.grey.shade300,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 40),
-
-          /// Input-like container with selected chips
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary, width: 1.5),
+      child: SingleChildScrollView( // Added scroll for smaller screens
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              "Do you have any\nmedical conditions?",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF2D3142),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_data.medicalConditions.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      "No medical conditions selected. Tap chips above to add.",
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  )
-                else
+            const SizedBox(height: 30),
+
+            /// Preset Filter Chips
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.center,
+              children: presetConditions.map((condition) {
+                final isSelected = _data.medicalConditions.contains(condition);
+                return ChoiceChip(
+                  label: Text(condition),
+                  selected: isSelected,
+                  onSelected: (val) {
+                    setState(() {
+                      // Create a mutable copy if necessary
+                      List<String> mutableList = List<String>.from(_data.medicalConditions);
+                      if (val) {
+                        if (!mutableList.contains(condition) && mutableList.length < maxItems) {
+                          mutableList.add(condition);
+                        }
+                      } else {
+                        mutableList.remove(condition);
+                      }
+                      _data.medicalConditions = mutableList;
+                    });
+                  },
+                  backgroundColor: const Color(0xFFF2F2F2),
+                  selectedColor: const Color(0xFFF2544D), // Matching your allergy screen color
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  side: BorderSide.none,
+                  showCheckmark: false,
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 40),
+
+            /// Selection Container (Input Area)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: const Color(0xFFF2544D).withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _data.medicalConditions.map((item) {
-                      return Chip(
-                        label: Text(item),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () {
-                          setState(() {
-                            _data.medicalConditions.remove(item);
-                          });
-                        },
-                        backgroundColor: AppColors.primary.withOpacity(0.15),
-                        labelStyle: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-
-                const SizedBox(height: 50),
-
-                /// Counter
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Icon(Icons.edit_note, size: 16, color: AppColors.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${_data.medicalConditions.length}/$maxItems",
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      // Selected Condition Tags
+                      ..._data.medicalConditions.map((item) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2544D).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                item,
+                                style: const TextStyle(
+                                  color: Color(0xFFF2544D),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () => setState(() => _data.medicalConditions.remove(item)),
+                                child: const Icon(Icons.close, size: 14, color: Color(0xFFF2544D)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+
+                      // Dynamic Input Field
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: _data.medicalConditions.isEmpty
+                              ? MediaQuery.of(context).size.width - 80
+                              : 120,
+                        ),
+                        child: TextField(
+                          controller: _conditionController,
+                          onChanged: (val) {
+                            if (val.length <= 1) setState(() {});
+                          },
+                          decoration: InputDecoration(
+                            hintText: _data.medicalConditions.isEmpty
+                                ? "No conditions selected. Pick above or type..."
+                                : "Add condition...",
+                            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                            border: InputBorder.none,
+                            isDense: true,
+                            suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                            suffixIcon: _conditionController.text.isNotEmpty
+                                ? TextButton(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {
+                                if (_conditionController.text.trim().isNotEmpty &&
+                                    _data.medicalConditions.length < maxItems) {
+                                  setState(() {
+                                    _data.medicalConditions.add(_conditionController.text.trim());
+                                    _conditionController.clear();
+                                  });
+                                }
+                              },
+                              child: const Text(
+                                "Add",
+                                style: TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold),
+                              ),
+                            )
+                                : null,
+                          ),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 30),
+
+                  /// Counter
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.edit_note, size: 16, color: Color(0xFFF2544D)),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${_data.medicalConditions.length}/$maxItems",
+                          style: const TextStyle(
+                            color: Color(0xFFF2544D),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
