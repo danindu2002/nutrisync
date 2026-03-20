@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../services/DietPlanService.dart';
@@ -106,7 +107,6 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
   }
 
   void _showEditMealPopup(Map<String, dynamic> meal, int groupIndex, int mealIndex) {
-    // Controllers initialized with current meal values
     final TextEditingController nameController = TextEditingController(text: meal["recipeName"] ?? meal["name"] ?? "");
     final TextEditingController prepTimeController = TextEditingController(text: (meal["prepTimeMin"] ?? 15).toString());
     final TextEditingController kcalController = TextEditingController(text: (meal["calories"] ?? meal["kcal"] ?? 0).toString());
@@ -134,7 +134,6 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -147,7 +146,6 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Image Section
                     Center(
                       child: GestureDetector(
                         onTap: () async {
@@ -175,15 +173,12 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                     const Center(child: Text("Tap image to change", style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600))),
                     const SizedBox(height: 24),
 
-                    // Disabled Meal Type
                     _buildPopupTextField("Meal Type", TextEditingController(text: mealType), isEnabled: false),
                     const SizedBox(height: 16),
 
-                    // Name
                     _buildPopupTextField("Recipe Name", nameController),
                     const SizedBox(height: 16),
 
-                    // Macros Row 1
                     Row(
                       children: [
                         Expanded(child: _buildPopupTextField("Prep Time (min)", prepTimeController, isNumeric: true)),
@@ -193,7 +188,6 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Macros Row 2
                     Row(
                       children: [
                         Expanded(child: _buildPopupTextField("Protein (g)", proteinController, isNumeric: true)),
@@ -205,7 +199,6 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Swap Button
                     SizedBox(
                       width: double.infinity, height: 50,
                       child: ElevatedButton(
@@ -215,9 +208,7 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                           elevation: 0,
                         ),
                         onPressed: () {
-                          // Update DTO locally without BE call
                           setState(() {
-                            // Find the correct weekly plan list
                             List<dynamic> weeklyPlan = [];
                             if (_planData!['weeklyPlan'] != null) {
                               weeklyPlan = _planData!['weeklyPlan'];
@@ -225,9 +216,8 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                               weeklyPlan = _planData!['generatedPlan']['weeklyPlan'];
                             }
 
-                            // Replace values in the specific meal
                             weeklyPlan[groupIndex]['meals'][mealIndex] = {
-                              ...meal, // Keep existing IDs or structure
+                              ...meal,
                               "recipeName": nameController.text.trim(),
                               "prepTimeMin": int.tryParse(prepTimeController.text) ?? 15,
                               "calories": int.tryParse(kcalController.text) ?? 0,
@@ -309,7 +299,8 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
             _buildHeader(),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+              // UPDATED: Use the new animated AI loader here
+                  ? const MealPlanAILoadingState()
                   : _planData == null || weeklyPlan.isEmpty
                   ? const Center(child: Text("No meals found for this plan."))
                   : ListView(
@@ -319,7 +310,6 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                   if (!widget.isReadOnly) const SizedBox(height: 24),
                   if (!widget.isReadOnly) _buildNameInput(),
                   if (!widget.isReadOnly) const SizedBox(height: 32),
-                  // Generate meal groups with indexing
                   ...List.generate(weeklyPlan.length, (gIndex) => _buildMealGroup(weeklyPlan[gIndex], gIndex)),
                 ],
               ),
@@ -459,7 +449,6 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
                 ],
               ),
             ),
-            // Edit Button (Hidden if read only)
             if (!widget.isReadOnly)
               Container(
                 decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
@@ -501,6 +490,109 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
               Icon(Icons.check_circle_outline, color: Colors.white),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------
+// AI Loading Widget for Meal Plan Generation
+// ---------------------------------------------------------
+class MealPlanAILoadingState extends StatefulWidget {
+  const MealPlanAILoadingState({super.key});
+
+  @override
+  State<MealPlanAILoadingState> createState() => _MealPlanAILoadingStateState();
+}
+
+class _MealPlanAILoadingStateState extends State<MealPlanAILoadingState> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  Timer? _textTimer;
+  int _textIndex = 0;
+
+  final List<String> _loadingPhrases = [
+    "Analyzing your dietary preferences...",
+    "Calculating optimal macronutrients...",
+    "Curating delicious, healthy recipes...",
+    "Balancing your daily calorie goals...",
+    "Generating your personalized meal plan...",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Creates a continuous smooth scaling/pulsing effect
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    // Cycles the text every 2.5 seconds
+    _textTimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
+      if (mounted) {
+        setState(() {
+          _textIndex = (_textIndex + 1) % _loadingPhrases.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _textTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 60.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Pulsing Icon (Food / Meal Generation)
+            ScaleTransition(
+              scale: Tween<double>(begin: 0.85, end: 1.15).animate(
+                CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+              ),
+              child: Icon(
+                Icons.fastfood_rounded,
+                size: 90,
+                color: AppColors.primary.withOpacity(0.85),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // Custom Styled Progress Indicator
+            const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Animated Text Switcher for AI Phrases
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Text(
+                _loadingPhrases[_textIndex],
+                key: ValueKey<int>(_textIndex),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSub,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
       ),
     );
