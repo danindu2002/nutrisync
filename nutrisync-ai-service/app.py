@@ -68,6 +68,7 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
+# This endpoint generates a personalized 7-day meal plan based on the user's health profile and goals
 @app.route('/generate-meal-plan', methods=['POST'])
 def generate_meal_plan():
     user_data = request.json
@@ -135,13 +136,19 @@ def generate_meal_plan():
         print(f"LLM Error: {e}")
         return {"error": "Failed to generate meal plan"}, 500
 
+# This endpoint simulates the health impact of the user's current metrics and their active diet plan over a specified future period
 @app.route('/simulate-impact', methods=['POST'])
 def simulate_impact():
     user_data = request.json
 
+    # Extract and format the diet plan
+    raw_diet_plan = user_data.get('dietPlan', {})
+    diet_plan_text = format_diet_plan_for_prompt(raw_diet_plan)
+
+    # Inject the text into the prompt
     prompt = f"""
     You are an expert AI health and fitness predictive engine. 
-    The user is starting a new diet and workout plan. Calculate a realistic health projection for {user_data.get('months', 6)} months in the future.
+    Calculate a realistic health projection for {user_data.get('months', 6)} months in the future based on the user's current metrics AND their active diet plan.
 
     Current User Profile:
     - Age: {user_data.get('age')}
@@ -152,7 +159,11 @@ def simulate_impact():
     - Target Daily Calories: {user_data.get('dailyCalorieGoal')} kcal
     - Current Body Fat: {user_data.get('bodyFatPercent', 27)}%
 
+    Active Diet Plan Provided to User:
+    {diet_plan_text}
+
     STRICT RULES:
+    1. Diet Analysis: Analyze the provided "Active Diet Plan". Look at the daily calories and macros.
     1. Calculate realistic weight loss based on standard safe medical guidelines (e.g., losing 0.5 to 1 kg per week).
     2. Recalculate the future BMI based on the projected future weight and their current height.
     3. Calculate the difference (change) between current and projected metrics.
@@ -183,7 +194,36 @@ def simulate_impact():
     except Exception as e:
         print(f"LLM Error: {e}")
         return {"error": "Failed to simulate health impact"}, 500
+
+# Helper function to convert the diet plan JSON into a clean text block for the prompt
+def format_diet_plan_for_prompt(diet_plan_dict):
+    """Converts the diet plan JSON into a clean, token-efficient text block."""
+    if not diet_plan_dict:
+        return "No active diet plan provided."
+    
+    plan_name = diet_plan_dict.get("dietPlanName", "Custom Plan")
+    formatted_text = f"Diet Plan: {plan_name}\n\n"
+    
+    for day_plan in diet_plan_dict.get("weeklyPlan", []):
+        day = day_plan.get("day", "Unknown Day")
+        formatted_text += f"{day}\n"
         
+        for meal in day_plan.get("meals", []):
+            meal_type = meal.get("mealType", "Meal").upper()
+            name = meal.get("recipeName", "Unknown Recipe")
+            cals = meal.get("calories", 0)
+            protein = meal.get("proteinG", 0)
+            carbs = meal.get("carbsG", 0)
+            fat = meal.get("fatG", 0)
+            
+            # Formatting nicely for the LLM
+            formatted_text += f"- {meal_type}: {name} ({cals} kcal | {protein}g Protein | {carbs}g Carbs | {fat}g Fat)\n"
+        
+        formatted_text += "\n"
+        
+    return formatted_text.strip()
+
+# This endpoint analyzes the user's health profile and logged meals to predict potential future health risks
 @app.route('/risk-prediction', methods=['POST'])
 def risk_prediction():
     user_data = request.json
@@ -448,6 +488,7 @@ def risk_prediction():
         print(f"LLM Error: {e}")
         return {"error": "Failed to predict risk"}, 500
 
+# Helper function to format meal logs into a clean text block for the prompt
 def format_meal_logs(meal_logs):
     formatted = ""
 

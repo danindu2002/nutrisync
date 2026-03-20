@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface MealPlanRepository extends JpaRepository<MealPlan, Long> {
     List<MealPlan> findAllByUser_UserIdAndIsActiveTrue(Long userId);
     Optional<MealPlan> findByPlanIdAndIsActiveTrue(Long planId);
+    Optional<MealPlan> findTopByUser_UserIdAndIsActiveTrueOrderByStartDateDesc(Long userId);
 }
