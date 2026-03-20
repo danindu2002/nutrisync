@@ -64,43 +64,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            HomeHeader(
-              userName: _firstName,
-              profileImageData: _profileImage,
-              score: _score,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Calories",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  _CaloriesLineChart(
-                    selectedRange: selectedRange,
-                    onRangeChanged: onRangeChanged,
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "Nutrition",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  _NutritionsBarChart(
-                    selectedRange: selectedRange,
-                  ),
-                  const SizedBox(height: 30),
-                ],
+      body: RefreshIndicator(
+        onRefresh: _loadUserData,
+        color: AppColors.primary,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              HomeHeader(
+                userName: _firstName,
+                profileImageData: _profileImage,
+                score: _score,
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Calories",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    _CaloriesLineChart(
+                      selectedRange: selectedRange,
+                      onRangeChanged: onRangeChanged,
+                    ),
+                    const SizedBox(height: 30),
+                    const Text(
+                      "Nutrition",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    _NutritionsBarChart(
+                      selectedRange: selectedRange,
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

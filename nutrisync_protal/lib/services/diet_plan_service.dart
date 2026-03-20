@@ -1,7 +1,7 @@
 import 'dart:convert';
 import '../core/constants.dart';
 import '../widgets/common_widgets.dart';
-import 'PexelsImageService.dart'; // Import the new service!
+import 'pexels_image_service.dart'; // Import the new service!
 
 class DietPlanService {
 

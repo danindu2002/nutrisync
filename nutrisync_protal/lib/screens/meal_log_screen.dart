@@ -109,50 +109,55 @@ class _MealLogScreenState extends State<MealLogScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _buildHeader(context),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildMealTypeSelector(),
-                  const SizedBox(height: 25),
+      body: RefreshIndicator(
+        onRefresh: _fetchMealLogs,
+        color: AppColors.primary,
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildMealTypeSelector(),
+                    const SizedBox(height: 25),
 
-                  // Display Loading, Empty State, or Meal Cards
-                  if (_isLoading)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 50),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.redAccent,
+                    // Display Loading, Empty State, or Meal Cards
+                    if (_isLoading)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 50),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.redAccent,
+                          ),
                         ),
-                      ),
-                    )
-                  else if (displayedMeals.isEmpty)
-                    _buildNoMealsView()
-                  else
-                    ...displayedMeals.map((meal) {
-                      return MealCard(
-                        logId: meal['logId'],
-                        title: meal['foodName']?.toString() ?? "",
-                        calories: "${meal['totalCalories'] ?? 0} kcal",
-                        protein: "${meal['totalProtein'] ?? 0}g",
-                        carbs: "${meal['totalCarbs'] ?? 0}g",
-                        fats: "${meal['totalFats'] ?? 0}g",
-                        base64Image: meal['image'],
-                        onDeleteSuccess: () {
-                          _fetchMealLogs();
-                        },
-                      );
-                    }).toList(),
-                ],
+                      )
+                    else if (displayedMeals.isEmpty)
+                      _buildNoMealsView()
+                    else
+                      ...displayedMeals.map((meal) {
+                        return MealCard(
+                          logId: meal['logId'],
+                          title: meal['foodName']?.toString() ?? "",
+                          calories: "${meal['totalCalories'] ?? 0} kcal",
+                          protein: "${meal['totalProtein'] ?? 0}g",
+                          carbs: "${meal['totalCarbs'] ?? 0}g",
+                          fats: "${meal['totalFats'] ?? 0}g",
+                          base64Image: meal['image'],
+                          onDeleteSuccess: () {
+                            _fetchMealLogs();
+                          },
+                        );
+                      }).toList(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

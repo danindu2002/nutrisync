@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
-import '../services/DietPlanService.dart';
-import '../services/FirebaseImageService.dart';
+import '../services/diet_plan_service.dart';
+import '../services/firebase_image_service.dart';
 import '../widgets/common_widgets.dart';
 import 'meal_plan_preview_screen.dart';
 

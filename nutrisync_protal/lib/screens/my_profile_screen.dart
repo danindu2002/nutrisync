@@ -142,134 +142,139 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       ),
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F8F8),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              /// ===== HEADER (Black Gradient) =====
-              Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.black, Color(0xFF2B2B2B)],
+        body: RefreshIndicator(
+          onRefresh: _loadProfile,
+          color: AppColors.primary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                /// ===== HEADER (Black Gradient) =====
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.black, Color(0xFF2B2B2B)],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(40),
+                      bottomRight: Radius.circular(40),
+                    ),
                   ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
-                  ),
-                ),
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 30),
-                    child: Column(
-                      children: [
-                        /// Profile Picture
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white24, width: 2),
-                          ),
-                          child: CircleAvatar(
-                            radius: 45,
-                            backgroundColor: Colors.grey.shade800,
-                            // 4. Hooked up the helper method here!
-                            backgroundImage: _getProfileImage(),
-                            // Show a default icon if there is no image
-                            child: _getProfileImage() == null
-                                ? const Icon(
-                                    Icons.person,
-                                    size: 45,
-                                    color: Colors.white,
-                                  )
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          "${user?["firstName"] ?? ""} ${user?["lastName"] ?? ""}",
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const EditProfileScreen(),
-                              ),
-                            );
-                            if (result == true) _loadProfile();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 30),
+                      child: Column(
+                        children: [
+                          /// Profile Picture
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white24, width: 2),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 30,
-                              vertical: 12,
+                            child: CircleAvatar(
+                              radius: 45,
+                              backgroundColor: Colors.grey.shade800,
+                              // 4. Hooked up the helper method here!
+                              backgroundImage: _getProfileImage(),
+                              // Show a default icon if there is no image
+                              child: _getProfileImage() == null
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 45,
+                                      color: Colors.white,
+                                    )
+                                  : null,
                             ),
                           ),
-                          child: const Text(
-                            "Edit Profile",
-                            style: TextStyle(
-                              color: Colors.white,
+                          const SizedBox(height: 15),
+                          Text(
+                            "${user?["firstName"] ?? ""} ${user?["lastName"] ?? ""}",
+                            style: const TextStyle(
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const EditProfileScreen(),
+                                ),
+                              );
+                              if (result == true) _loadProfile();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 12,
+                              ),
+                            ),
+                            child: const Text(
+                              "Edit Profile",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 25),
+                const SizedBox(height: 25),
 
-              /// Profile Details
-              _buildProfileTile("Username", user?["userName"] ?? ""),
-              _buildProfileTile("First Name", user?["firstName"] ?? ""),
-              _buildProfileTile("Last Name", user?["lastName"] ?? ""),
-              _buildProfileTile("Email", user?["email"] ?? ""),
-              _buildProfileTile(
-                "Date of Birth",
-                user?["dateOfBirth"]?.substring(0, 10) ?? "",
-              ),
+                /// Profile Details
+                _buildProfileTile("Username", user?["userName"] ?? ""),
+                _buildProfileTile("First Name", user?["firstName"] ?? ""),
+                _buildProfileTile("Last Name", user?["lastName"] ?? ""),
+                _buildProfileTile("Email", user?["email"] ?? ""),
+                _buildProfileTile(
+                  "Date of Birth",
+                  user?["dateOfBirth"]?.substring(0, 10) ?? "",
+                ),
 
-              const SizedBox(height: 25),
+                const SizedBox(height: 25),
 
-              /// Logout Button
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ElevatedButton(
-                  onPressed: _showLogoutDialog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                /// Logout Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ElevatedButton(
+                    onPressed: _showLogoutDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      minimumSize: const Size(double.infinity, 55),
                     ),
-                    minimumSize: const Size(double.infinity, 55),
-                  ),
-                  child: const Text(
-                    "Logout",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      "Logout",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),

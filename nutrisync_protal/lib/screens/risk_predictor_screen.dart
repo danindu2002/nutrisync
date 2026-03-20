@@ -7,7 +7,7 @@ import '../core/constants.dart';
 import '../models/risk_model.dart';
 import '../models/contributing_meal_model.dart';
 import '../models/meal_swap_model.dart';
-import '../services/PexelsImageService.dart';
+import '../services/pexels_image_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class RiskPredictorScreen extends StatefulWidget {

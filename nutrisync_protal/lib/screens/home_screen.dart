@@ -115,71 +115,76 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          HomeHeader(
-            userName: firstName,
-            profileImageData: profileImageData,
-            score: score,
-          ),
-
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    const _SectionTitle(title: "Your Metrics"),
-                    const SizedBox(height: 12),
-
-                    // --- UPDATED: Pass the fetched metrics down ---
-                    _MetricsRow(
-                      score: score,
-                      calories: dailyCalorieGoal,
-                      challenges: activeChallenges,
-                    ),
-
-                    const SizedBox(height: 24),
-                    const _SectionTitle(title: "Meal Log"),
-                    const SizedBox(height: 12),
-                    _MealLogCard(onTap: widget.onMealLogTap),
-                    const SizedBox(height: 24),
-                    const _SectionTitle(title: "Challenges & Rewards"),
-                    const SizedBox(height: 12),
-                    _ChallengesRow(onRewardsTap: _navigateToRewards),
-                    const SizedBox(height: 24),
-
-                    // --- PREMIUM SECTIONS ---
-                    const _SectionTitle(title: "Generate Meal Plans"),
-                    const SizedBox(height: 12),
-                    _MealPlanCard(
-                      isPremiumLocked: !isPremium,
-                      onTap: () {
-                        if (!isPremium) {
-                          _navigateToPremium();
-                        } else {
-                          _navigateToMealPlan();
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    const _SectionTitle(title: "Health Risks & Impacts"),
-                    const SizedBox(height: 12),
-                    _NutritionRow(
-                      isPremiumLocked: !isPremium,
-                      onLockedTap: _navigateToPremium,
-                    ),
-
-                    const SizedBox(height: 32),
-                  ],
+      body: RefreshIndicator(
+        onRefresh: _initializeData,
+        color: AppColors.primary,
+        child: Column(
+          children: [
+            HomeHeader(
+              userName: firstName,
+              profileImageData: profileImageData,
+              score: score,
+            ),
+        
+            Expanded(
+              child: SafeArea(
+                top: false,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      const _SectionTitle(title: "Your Metrics"),
+                      const SizedBox(height: 12),
+        
+                      // --- UPDATED: Pass the fetched metrics down ---
+                      _MetricsRow(
+                        score: score,
+                        calories: dailyCalorieGoal,
+                        challenges: activeChallenges,
+                      ),
+        
+                      const SizedBox(height: 24),
+                      const _SectionTitle(title: "Meal Log"),
+                      const SizedBox(height: 12),
+                      _MealLogCard(onTap: widget.onMealLogTap),
+                      const SizedBox(height: 24),
+                      const _SectionTitle(title: "Challenges & Rewards"),
+                      const SizedBox(height: 12),
+                      _ChallengesRow(onRewardsTap: _navigateToRewards),
+                      const SizedBox(height: 24),
+        
+                      // --- PREMIUM SECTIONS ---
+                      const _SectionTitle(title: "Generate Meal Plans"),
+                      const SizedBox(height: 12),
+                      _MealPlanCard(
+                        isPremiumLocked: !isPremium,
+                        onTap: () {
+                          if (!isPremium) {
+                            _navigateToPremium();
+                          } else {
+                            _navigateToMealPlan();
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      const _SectionTitle(title: "Health Risks & Impacts"),
+                      const SizedBox(height: 12),
+                      _NutritionRow(
+                        isPremiumLocked: !isPremium,
+                        onLockedTap: _navigateToPremium,
+                      ),
+        
+                      const SizedBox(height: 32),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -213,11 +218,26 @@ class _MetricsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _MetricCard(title: "Score", value: "$score%", color: Colors.red),
-        const SizedBox(width: 12),
-        _MetricCard(title: "Calorie Goal", value: "$calories", color: Colors.blue),
-        const SizedBox(width: 12),
-        _MetricCard(title: "Challenges", value: "$challenges", color: Colors.black54),
+        _MetricCard(
+          title: "Health Score",
+          value: "$score%",
+          color: Colors.red,
+          icon: Icons.local_fire_department,
+        ),
+        const SizedBox(width: 10), // Slightly reduced gap for small screens
+        _MetricCard(
+          title: "Calorie Goal",
+          value: "$calories",
+          color: Colors.blueGrey,
+          icon: Icons.gps_fixed_outlined,
+        ),
+        const SizedBox(width: 10), // Slightly reduced gap
+        _MetricCard(
+          title: "Active Challenges",
+          value: "$challenges",
+          color: Colors.black38,
+          icon: Icons.directions_run_sharp,
+        ),
       ],
     );
   }
@@ -227,22 +247,88 @@ class _MetricCard extends StatelessWidget {
   final String title;
   final String value;
   final Color color;
+  final IconData? icon;
 
-  const _MetricCard({required this.title, required this.value, required this.color});
+  const _MetricCard({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.color,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
         height: 110,
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(18)),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          // Clean, simplistic gradient without extra background shapes
+          gradient: LinearGradient(
+            colors: [
+              color.withOpacity(0.75), // Slightly softer start color
+              color,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: const TextStyle(color: Colors.white70, fontSize: 13.5)),
-            const Spacer(),
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Pushes icon to the right
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.1,
+                      height: 1.2,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // Icon moved to the right side
+                if (icon != null) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    icon,
+                    color: Colors.white.withOpacity(0.6), // Slightly faded so it doesn't distract from the value
+                    size: 20,
+                  ),
+                ],
+              ],
+            ),
+
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 25, // Made the value bigger (was 22)
+                  fontWeight: FontWeight.w900, // Made it thicker (w900 is max thickness)
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -317,7 +403,7 @@ class _MealPlanCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           image: const DecorationImage(
-              image: AssetImage("assets/images/dashboard/workout.png"),
+              image: AssetImage("assets/images/dashboard/meal_plan.jpg"),
               fit: BoxFit.cover
           ),
           boxShadow: [
@@ -405,7 +491,7 @@ class _ChallengesRow extends StatelessWidget {
       children: [
         _NutritionCard(
           title: "Daily Challenges", subtitle: "Take healthy goals",
-          imagePath: "assets/images/dashboard/daily_challenges.png",
+          imagePath: "assets/images/dashboard/challenges.jpg",
           isPremiumLocked: false,
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChallengesScreen())),
         ),
@@ -433,7 +519,7 @@ class _NutritionRow extends StatelessWidget {
       children: [
         _NutritionCard(
           title: "Health Risk Predictor", subtitle: "Check Your Risk Factors",
-          imagePath: "assets/images/dashboard/risk_predictor.png",
+          imagePath: "assets/images/dashboard/risk_predictor.jpg",
           isPremiumLocked: isPremiumLocked,
           onTap: () {
             if (isPremiumLocked) {
@@ -446,7 +532,7 @@ class _NutritionRow extends StatelessWidget {
         const SizedBox(width: 12),
         _NutritionCard(
           title: "Health Impact Simulator", subtitle: "Personal Health Insights",
-          imagePath: "assets/images/dashboard/impact_simulator.png",
+          imagePath: "assets/images/dashboard/health_impact_sim.jpg",
           isPremiumLocked: isPremiumLocked,
           onTap: () {
             if (isPremiumLocked) {
