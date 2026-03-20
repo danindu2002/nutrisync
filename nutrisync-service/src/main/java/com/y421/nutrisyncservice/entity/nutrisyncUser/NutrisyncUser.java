@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,12 @@ public class NutrisyncUser extends AuditModel implements Serializable {
 
     @Column(name = "USER_NAME", nullable = false)
     private String userName;
+
+    @Column(name = "POINTS", nullable = false)
+    private Integer points = 0;
+
+    @Column(name = "PREMIUM_EXPIRE_DATE")
+    private LocalDateTime premiumExpireDate;
 
     // todo: add other fields as necessary
 }
