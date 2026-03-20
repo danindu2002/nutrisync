@@ -109,4 +109,91 @@ void main() {
 
     expect(find.byType(MealPlanScreen), findsOneWidget);
   });
+
+  /// -----------------------------------------------------------
+  /// Test 6: Render Impact Simulation Screen
+  /// -----------------------------------------------------------
+  testWidgets('Test 6: Render Impact Simulation screen',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Verify Scaffold exists
+    expect(find.byType(Scaffold), findsOneWidget);
+  });
+
+  /// -----------------------------------------------------------
+  /// Test 7: Verify AppBar UI elements
+  /// -----------------------------------------------------------
+  testWidgets('Test 7: Display AppBar elements',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pump();
+
+    // Check title
+    expect(find.text('Impact Simulation'), findsOneWidget);
+
+    // Check back button icon
+    expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
+  });
+
+  /// -----------------------------------------------------------
+  /// Test 8: Loading state shows AI loader
+  /// -----------------------------------------------------------
+  testWidgets('Test 8: Shows AI loading state initially',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Initially loading → AI loader should appear
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    // Check one of loading texts
+    expect(find.textContaining('Analyzing'), findsOneWidget);
+  });
+
+  /// -----------------------------------------------------------
+  /// Test 9: Verify "Now" section displays BMI
+  /// -----------------------------------------------------------
+  testWidgets('Test 9: Displays current BMI value',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pump();
+
+    // "Now" label
+    expect(find.text('Now'), findsOneWidget);
+
+    // BMI label
+    expect(find.text('BMI'), findsWidgets);
+
+    // BMI value (25.0)
+    expect(find.text('25.0'), findsOneWidget);
+  });
+
+  /// -----------------------------------------------------------
+  /// Test 10: Verify "After 6 Months" section
+  /// -----------------------------------------------------------
+  testWidgets('Test 10: Displays After section',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pump();
+
+    expect(find.text('After'), findsOneWidget);
+    expect(find.text('6 Months'), findsOneWidget);
+  });
+
+  /// -----------------------------------------------------------
+  /// Test 11: Verify silhouette widget renders
+  /// -----------------------------------------------------------
+  testWidgets('Test 11: DynamicBodySilhouette renders',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pump();
+
+    expect(find.byType(DynamicBodySilhouette), findsWidgets);
+  });
 }
