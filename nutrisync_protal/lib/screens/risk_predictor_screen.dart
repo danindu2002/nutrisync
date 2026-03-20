@@ -7,6 +7,7 @@ import '../models/risk_model.dart';
 import '../models/contributing_meal_model.dart';
 import '../models/meal_swap_model.dart';
 import '../services/PexelsImageService.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -97,12 +98,17 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
             );
           }
 
+          String iconStr = r['icon'] ?? 'other';
+          if (iconStr == 'null' || iconStr.isEmpty) {
+            iconStr = 'other';
+          }
+
           fetchedRisks.add(
             RiskModel(
               name: r['predictedRisk'] ?? 'Unknown Risk',
               description: r['reasonTitle'] ?? '',
               riskLevel: riskLvl,
-              icon: Icons.health_and_safety,
+              icon: iconStr,
               subtitle: 'Based on recent activity & meals',
               warningText: r['warning'] ?? '',
               contributingMeals: cMeals,
@@ -686,14 +692,13 @@ class RiskCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(14),
+            SizedBox(
+              width: 75,
+              height: 75,
+              child: SvgPicture.asset(
+                'assets/icons/${risk.icon}.svg',
+                fit: BoxFit.contain,
               ),
-              child: Icon(risk.icon, color: AppColors.secondary),
             ),
             const SizedBox(width: 12),
 
