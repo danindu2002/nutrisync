@@ -34,7 +34,7 @@ class MealDetailScreen extends StatelessWidget {
             top: 0,
             left: 0,
             right: 0,
-            height: MediaQuery.of(context).size.height * 0.45,
+            height: MediaQuery.of(context).size.height * 0.4,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -84,7 +84,7 @@ class MealDetailScreen extends StatelessWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.62, // Slightly increased to fit 3 lines of title safely
+              height: MediaQuery.of(context).size.height * 0.58,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: const BorderRadius.only(
@@ -130,7 +130,7 @@ class MealDetailScreen extends StatelessWidget {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 13),
 
                     // Meal Type Chip (Under the name)
                     Container(

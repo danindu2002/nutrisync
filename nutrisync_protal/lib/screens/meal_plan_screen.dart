@@ -24,26 +24,38 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
   }
 
   Future<void> _fetchPlans() async {
-    setState(() => _isLoading = true);
-    final response = await DietPlanService.getDietPlans(widget.userId);
+    if (!mounted) return;
 
-    if (mounted) {
-      if (response.success) {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await DietPlanService.getDietPlans(widget.userId);
+
+      if (mounted) {
+        if (response.success) {
+          setState(() {
+            _mealPlans = response.data ?? [];
+          });
+        } else if (response.status == 404) {
+          setState(() {
+            _mealPlans = [];
+          });
+        } else {
+          debugPrint("Meal Plan Error: ${response.message}");
+          showModernToast(context, 'Failed to load meal plans', type: 'error');
+          setState(() {
+            _mealPlans = [];
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Exception in _fetchPlans: $e");
+    } finally {
+      if (mounted) {
         setState(() {
-          _mealPlans = response.data ?? [];
-          _isLoading = false; // Add this!
-        });
-      } else if (response.status == 404) {
-        // 404 means no active plans found, which is fine, just show empty state
-        setState(() {
-          _mealPlans = [];
-          _isLoading = false; // Add this!
-        });
-      } else {
-        Logger.error(response.message);
-        showModernToast(context, 'Failed to load meal plans', type: 'error');
-        setState(() {
-          _isLoading = false; // Add this!
+          _isLoading = false;
         });
       }
     }
@@ -516,56 +528,60 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Top Bar
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, size: 18),
-                    color: AppColors.textMain,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Meal Plan',
-                    style: AppTextStyles.header,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              Text(
-                'Stay on track with smart, personalized meal plans built for your goals.',
-                style: AppTextStyles.subHeader.copyWith(
-                  height: 1.4,
+      body: RefreshIndicator(
+        onRefresh: _fetchPlans,
+        color: AppColors.primary,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Top Bar
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, size: 18),
+                      color: AppColors.textMain,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Meal Plan',
+                      style: AppTextStyles.header,
+                    ),
+                  ],
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 12),
 
-              if (_isLoading)
-                const Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.primary)))
-              else if (hasMealPlans)
-                _buildMealPlanListState()
-              else
-                _buildEmptyState(),
+                Text(
+                  'Stay on track with smart, personalized meal plans built for your goals.',
+                  style: AppTextStyles.subHeader.copyWith(
+                    height: 1.4,
+                  ),
+                ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-              PrimaryButton(
-                onTap: () => _goToMealPlanPreview(),
-                text: 'Create Meal Plan',
-                isRed: true,
-              ),
-            ],
+                if (_isLoading)
+                  const Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.primary)))
+                else if (hasMealPlans)
+                  _buildMealPlanListState()
+                else
+                  _buildEmptyState(),
+
+                const SizedBox(height: 20),
+
+                PrimaryButton(
+                  onTap: () => _goToMealPlanPreview(),
+                  text: 'Create Meal Plan',
+                  isRed: true,
+                ),
+              ],
+            ),
           ),
         ),
       ),

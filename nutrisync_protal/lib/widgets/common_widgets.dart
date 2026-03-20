@@ -1176,7 +1176,7 @@ class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProvi
         child: Material( // Material is required for text styling and shadows in Overlay
           color: Colors.transparent,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
