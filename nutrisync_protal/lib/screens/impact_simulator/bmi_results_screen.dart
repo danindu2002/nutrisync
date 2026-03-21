@@ -7,7 +7,7 @@ import 'package:NutriSync/core/theme.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 import '../../core/constants.dart';
 import '../../services/simulation_service.dart';
-import '../meal_plan_screen.dart';
+import '../meal_plan/meal_plan_screen.dart';
 
 class BmiResultsScreen extends StatefulWidget {
   const BmiResultsScreen({super.key});
@@ -79,7 +79,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Color(0xFFFFFFFF),
       // Only show the body if we are done loading so we don't flash default data
       body: _isLoading
           ? const SizedBox()
@@ -169,7 +169,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 22,
-              color: AppTheme.textPrimary,
+              color: Color(0xFF1A1A1A),
             ),
           ),
           const SizedBox(width: 14),
@@ -179,7 +179,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
               style: GoogleFonts.poppins(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
+                color: Color(0xFF1A1A1A),
               ),
             ),
           ),
@@ -274,7 +274,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
             style: GoogleFonts.poppins(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: AppTheme.textSecondary,
+              color: Color(0xFF6B6B6B),
               height: 1.5,
             ),
           ),
@@ -327,7 +327,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -341,7 +341,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.textSecondary,
+                    color: Color(0xFF6B6B6B),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -350,7 +350,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                   style: GoogleFonts.poppins(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                    color: Color(0xFF1A1A1A),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -461,7 +461,7 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
                             vertical: 10,
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.primary,
+                            color: Color(0xFFE14B4B),
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: Row(
@@ -502,21 +502,21 @@ class _BmiResultsScreenState extends State<BmiResultsScreen>
       width: double.infinity,
       height: 300,
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(28),
       ),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.bar_chart_rounded, size: 56, color: AppTheme.textLight),
+            Icon(Icons.bar_chart_rounded, size: 56, color: Color(0xFFAAAAAA)),
             const SizedBox(height: 12),
             Text(
               'Histogram View',
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: AppTheme.textLight,
+                color: Color(0xFFAAAAAA),
               ),
             ),
           ],
@@ -759,3 +759,14 @@ class _BmiGaugePainter extends CustomPainter {
   @override
   bool shouldRepaint(_BmiGaugePainter old) => old.bmi != bmi;
 }
+
+// BMI zone colours
+const Color bmiUnderweight = Color(0xFF4FC3F7);
+const Color bmiNormal = Color(0xFF66BB6A);
+const Color bmiOverweight = Color(0xFFFFCA28);
+const Color bmiObese = Color(0xFFFF7043);
+const Color bmiExtreme = Color(0xFFE53935);
+
+// Status pill colours
+const Color statusCriticalBg = Color(0xFFFFEBEB);
+const Color statusCriticalText = Color(0xFFE14B4B);

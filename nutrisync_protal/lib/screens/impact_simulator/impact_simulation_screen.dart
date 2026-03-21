@@ -115,7 +115,7 @@ class _ImpactSimulationScreenState extends State<ImpactSimulationScreen> {
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 20,
-              color: AppTheme.textPrimary,
+              color: Color(0xFF1A1A1A),
             ),
           ),
           const SizedBox(width: 16),

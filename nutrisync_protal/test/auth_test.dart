@@ -1,8 +1,8 @@
+import 'package:NutriSync/screens/authentication/forgot_password_screen.dart';
+import 'package:NutriSync/screens/authentication/login_screen.dart';
+import 'package:NutriSync/screens/authentication/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:NutriSync/screens/login_screen.dart';
-import 'package:NutriSync/screens/signup_screen.dart';
-import 'package:NutriSync/screens/forgot_password_screen.dart';
 
 // Automated Unit Tests for Authentication
 void main() {

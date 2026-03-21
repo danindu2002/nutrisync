@@ -1,10 +1,9 @@
-import 'package:NutriSync/screens/main_navigation_screen.dart';
-import 'package:NutriSync/screens/splash_screen.dart';
+import 'package:NutriSync/screens/home/main_navigation_screen.dart';
+import 'package:NutriSync/screens/home/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'core/constants.dart';
-import 'firebase_options.dart';
+import 'config/firebase_options.dart';
+import 'core/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,13 +25,7 @@ class NutriSyncApp extends StatelessWidget {
     return MaterialApp(
       title: 'NutriSync',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.background,
-        textTheme: GoogleFonts.workSansTextTheme(),
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.theme,
       navigatorKey: NavigationService.navigatorKey,
       home: const SplashScreen(),
     );
