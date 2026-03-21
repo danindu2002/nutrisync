@@ -10,10 +10,7 @@ import com.y421.nutrisyncservice.request.nutrisyncUser.*;
 import com.y421.nutrisyncservice.response.email.EmailDetailsDTO;
 import com.y421.nutrisyncservice.response.nutrisyncUser.LoginResDto;
 import com.y421.nutrisyncservice.response.nutrisyncUser.UserDetailsDTO;
-import com.y421.nutrisyncservice.util.EmailService;
-import com.y421.nutrisyncservice.util.EmailTemplate;
-import com.y421.nutrisyncservice.util.KeycloakRealmChanger;
-import com.y421.nutrisyncservice.util.YamlConfig;
+import com.y421.nutrisyncservice.util.*;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
@@ -46,6 +43,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
     private final UserChallengeRepository userChallengeRepository;
     private final EmailTemplate emailTemplate;
     private final EmailService emailService;
+    private final AesEncryptionConverter aesEncryptionConverter;
 
     @Value("${rest.nutrisync-service.realm}")
     private String serviceName;
@@ -78,6 +76,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
                 String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
                 clearUserRequiredActions(userId, serviceName);
 
+                dto.setPassword(aesEncryptionConverter.convertToDatabaseColumn(dto.getPassword()));
                 NutrisyncUser user = nutrisyncUserMapper.toEntity(dto);
                 user.setKeycloakUserId(userId);
                 userRepository.save(user);
@@ -86,8 +85,6 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
             }
             System.out.println(response.getStatusInfo().getStatusCode());
             return new ResponseEntity<>("User Creation Failed", HttpStatus.BAD_REQUEST);
-
-//            return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error occurred during onboarding", HttpStatus.BAD_REQUEST);
