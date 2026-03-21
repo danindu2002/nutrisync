@@ -6,18 +6,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../screens/login_screen.dart';
-import '../screens/main_navigation_screen.dart';
-
-// A centralized class to manage all app colors for consistency across the app
-class AppColors {
-  static const Color primary = Color(0xFFEF4444); // Red
-  static const Color secondary = Color(0xFF393C43); // Dark Grey
-  static const Color background = Color(0xFFFFFFFF); // White
-  static const Color cardBg = Color(0xFFF4F4F4); // Light grey
-  static const Color textMain = Color(0xFF1F2937);
-  static const Color textSub = Color(0xFF6B7280);
-}
+import '../screens/authentication/login_screen.dart';
+import '../screens/home/main_navigation_screen.dart';
 
 // API Constants to handle different environments (web, Android, iOS)
 class ApiConstants {
@@ -52,6 +42,7 @@ class ApiClient {
     return headers;
   }
 
+  /// Handle token expiration by clearing stored credentials and navigating to login screen
   static Future<void> _handleTokenExpired() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -199,6 +190,16 @@ class ApiResponse {
   }
 
   bool get success => status >= 200 && status < 300;
+}
+
+// A centralized class to manage all app colors for consistency across the app
+class AppColors {
+  static const Color primary = Color(0xFFEF4444); // Red
+  static const Color secondary = Color(0xFF393C43); // Dark Grey
+  static const Color background = Color(0xFFFFFFFF); // White
+  static const Color cardBg = Color(0xFFF4F4F4); // Light grey
+  static const Color textMain = Color(0xFF1F2937);
+  static const Color textSub = Color(0xFF6B7280);
 }
 
 // A centralized class to manage all text styles for consistency across the app
