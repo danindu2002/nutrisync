@@ -131,7 +131,7 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
 
   DashboardCaloriesChartDto? chartData;
 
-  final int userId = 1;
+  late final int userId;
 
   @override
   void initState() {
@@ -153,6 +153,10 @@ class _CaloriesLineChartState extends State<_CaloriesLineChart> {
       isLoading = true;
       errorMessage = null;
     });
+    final prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("userId");
+
+    if (userId == null) return;
 
     try {
       final response = await DashboardService.getCaloriesChart(
@@ -389,7 +393,7 @@ class _NutritionsBarChartState extends State<_NutritionsBarChart> {
   String? errorMessage;
   DashboardNutritionChartDto? chartData;
 
-  final int userId = 1;
+  late final int userId;
 
   @override
   void initState() {
@@ -411,6 +415,10 @@ class _NutritionsBarChartState extends State<_NutritionsBarChart> {
       isLoading = true;
       errorMessage = null;
     });
+    final prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("userId");
+
+    if (userId == null) return;
 
     try {
       final response = await DashboardService.getNutritionChart(
