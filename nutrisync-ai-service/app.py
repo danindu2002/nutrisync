@@ -98,11 +98,13 @@ def generate_meal_plan():
     2. Diverse but Simple Cuisine: Mix familiar Sri Lankan staples (like Red Rice, Dhal, String Hoppers, Fish Curry) with simple, easy-to-prep foods from other cultures (like Oatmeal, Greek Salad, Grilled Chicken Wraps, or Pasta).
     3. Realistic Naming: Keep recipe names very short and realistic (e.g., "String Hoppers with Dhal", "Grilled Chicken Salad", "Oats with Banana"). Do NOT prefix meals with "Sri Lankan" or use fancy, exaggerated names.
     4. Accurate Math: Ensure the mathematical values for calories and macronutrients are 100% realistic for a single human meal (e.g., 300 to 800 calories per meal). The sum of the daily meals MUST roughly match the Target Calories.
-    5. Simplified Search Terms (Meal Focused): Provide a "imageSearchTerm" for each meal.
-       - Rule: Use 1-3 generic nouns followed ALWAYS by the word "Meal" or "Dish" to ensure the image API returns prepared food rather than raw ingredients.
+    5. Simplified Search Terms (Food-Only Focus): Provide a "imageSearchTerm" for each meal.
+       - Rule: Use 1-3 generic nouns followed ALWAYS by the word "Meal" or "Dish".
+       - Visual Purity: The term MUST NOT imply the presence of people, animals, or hands. Ensure the term describes only the edible portion on a plate or bowl.
        - Formatting: Remove all quantities, cooking methods, or specific adjectives.
-       - Good: "Pasta Meal", "Chicken Dish", "Oatmeal Bowl", "Dhal Curry", "Salad Plate".
-       - Bad: "Pasta with Meat Sauce" (too specific), "Pasta" (returns raw noodles), "Boiled Chicken" (unappealing).
+       - Examples:
+          - Good: "String Hoppers Dish", "Fish Curry Plate", "Oatmeal Bowl", "Pasta Meal", "Chicken Dish", "Dhal Curry".
+          - Bad: "Man eating String Hoppers", "Fishing for Curry", "Raw Oats", "Pasta with Meat Sauce" (too specific), "Pasta" (returns raw noodles), "Boiled Chicken" (unappealing).
 
     You MUST return ONLY a valid JSON object matching this exact schema:
     {{
