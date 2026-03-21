@@ -60,8 +60,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: srinathdanindu@gmail.com
-    password: nvyh gkhe gzle azzu 9000
+    username: nutrisync.marketing@gmail.com
+    password: bcty akws tzov fian
     properties:
       mail:
         smtp:
@@ -97,3 +97,4 @@ new-login-pwd:
   length: 8
 
 python-service-url: http://nutrisync-ai-service:5000
+aes-secret-key: mySecretKey1234567890221

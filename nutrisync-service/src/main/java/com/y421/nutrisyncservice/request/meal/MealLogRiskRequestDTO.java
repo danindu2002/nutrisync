@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class MealLogRiskRequestDTO {
 
+    private Integer predictionPeriod;
     private String gender;
     private int age;
     private double heightCm;

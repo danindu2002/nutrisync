@@ -17,7 +17,7 @@ public interface MealLogController {
     ResponseEntity<Object> identifyMeal(@RequestParam("image") MultipartFile image);
 
     @PostMapping(value = "/log", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> logMeal(
+    ResponseEntity<Object> logMeal(
             @RequestPart("data") String dataString,
             @RequestPart(value = "image", required = false) MultipartFile image) throws IOException;
 
@@ -26,7 +26,7 @@ public interface MealLogController {
             @RequestParam("userId") Long userId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
 
-    @DeleteMapping("/delete/logId")
-    ResponseEntity<Object> deleteLog(@RequestPart("logId") Long logId);
+    @DeleteMapping("/delete/{logId}")
+    ResponseEntity<Object> deleteLog(@PathVariable("logId") Long logId);
 
 }
