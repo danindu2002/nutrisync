@@ -163,8 +163,6 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
             }
             NutrisyncUser appUser = user.get();
             if(dto.getOtp() != null && dto.getOtp().equals(appUser.getForgotPwdOtp())) {
-                appUser.setForgotPwdOtp(null);
-                userRepository.save(appUser);
                 return new ResponseEntity<>("OTP Correct", HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("OTP Wrong", HttpStatus.NOT_FOUND);

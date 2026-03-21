@@ -26,7 +26,7 @@ public interface MealLogController {
             @RequestParam("userId") Long userId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date);
 
-    @DeleteMapping("/delete/logId")
-    ResponseEntity<Object> deleteLog(@RequestPart("logId") Long logId);
+    @DeleteMapping("/delete/{logId}")
+    ResponseEntity<Object> deleteLog(@PathVariable("logId") Long logId);
 
 }
