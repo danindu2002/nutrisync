@@ -17,7 +17,7 @@ import json
 load_dotenv()
 app = Flask(__name__)
 
-# 1. Load the model from your folder
+# Load the model from your folder
 MODEL_PATH = 'model/Food_Vision_Model.h5'
 try:
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
@@ -26,10 +26,11 @@ except Exception as e:
     print(f"CRITICAL ERROR: Failed to load model: {e}")
     sys.exit(1)
 
-# 2. Load the classes from text file
+# Load the classes from text file
 with open('classes.txt', 'r') as f:
     class_names = [line.strip() for line in f.readlines()]
 
+# Preprocess the image to match the model's expected input
 def preprocess_image(image_bytes):
     # Convert bytes to PIL Image and ensure it's RGB
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
@@ -43,6 +44,7 @@ def preprocess_image(image_bytes):
     # Add a 'batch' dimension (TensorFlow expects [1, 224, 224, 3])
     return np.expand_dims(img_array, axis=0)
 
+# This endpoint receives an image file, processes it, and returns the predicted food
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'file' not in request.files:
@@ -73,7 +75,7 @@ client = genai.Client(api_key=api_key)
 def generate_meal_plan():
     user_data = request.json
 
-# Construct a highly specific prompt for the LLM to generate a meal plan based on the user's profile.
+    # Construct a highly specific prompt for the LLM to generate a meal plan based on the user's profile.
     prompt = f"""
     You are an expert nutritionist AI. Generate a realistic 7-day meal plan (Breakfast, Lunch, Dinner)
     for the following user profile:
