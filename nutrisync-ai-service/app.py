@@ -17,7 +17,7 @@ import json
 load_dotenv()
 app = Flask(__name__)
 
-# 1. Load the model from your folder
+# Load the model from your folder
 MODEL_PATH = 'model/Food_Vision_Model.h5'
 try:
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
@@ -26,10 +26,11 @@ except Exception as e:
     print(f"CRITICAL ERROR: Failed to load model: {e}")
     sys.exit(1)
 
-# 2. Load the classes from text file
+# Load the classes from text file
 with open('classes.txt', 'r') as f:
     class_names = [line.strip() for line in f.readlines()]
 
+# Preprocess the image to match the model's expected input
 def preprocess_image(image_bytes):
     # Convert bytes to PIL Image and ensure it's RGB
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
@@ -43,6 +44,7 @@ def preprocess_image(image_bytes):
     # Add a 'batch' dimension (TensorFlow expects [1, 224, 224, 3])
     return np.expand_dims(img_array, axis=0)
 
+# This endpoint receives an image file, processes it, and returns the predicted food
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'file' not in request.files:
@@ -73,7 +75,7 @@ client = genai.Client(api_key=api_key)
 def generate_meal_plan():
     user_data = request.json
 
-# Construct a highly specific prompt for the LLM to generate a meal plan based on the user's profile.
+    # Construct a highly specific prompt for the LLM to generate a meal plan based on the user's profile.
     prompt = f"""
     You are an expert nutritionist AI. Generate a realistic 7-day meal plan (Breakfast, Lunch, Dinner)
     for the following user profile:
@@ -98,11 +100,14 @@ def generate_meal_plan():
     2. Diverse but Simple Cuisine: Mix familiar Sri Lankan staples (like Red Rice, Dhal, String Hoppers, Fish Curry) with simple, easy-to-prep foods from other cultures (like Oatmeal, Greek Salad, Grilled Chicken Wraps, or Pasta).
     3. Realistic Naming: Keep recipe names very short and realistic (e.g., "String Hoppers with Dhal", "Grilled Chicken Salad", "Oats with Banana"). Do NOT prefix meals with "Sri Lankan" or use fancy, exaggerated names.
     4. Accurate Math: Ensure the mathematical values for calories and macronutrients are 100% realistic for a single human meal (e.g., 300 to 800 calories per meal). The sum of the daily meals MUST roughly match the Target Calories.
-    5. Simplified Search Terms (Meal Focused): Provide a "imageSearchTerm" for each meal.
-       - Rule: Use 1-3 generic nouns followed ALWAYS by the word "Meal" or "Dish" to ensure the image API returns prepared food rather than raw ingredients.
+    5. Simplified Search Terms (Food-Only Focus): Provide a "imageSearchTerm" for each meal.
+       - Rule: Use 1-3 generic nouns followed ALWAYS by the word "Meal" or "Dish".
+       - Visual Purity: The term MUST NOT imply the presence of people, animals, or hands. Ensure the term describes only the edible portion on a plate or bowl.
        - Formatting: Remove all quantities, cooking methods, or specific adjectives.
-       - Good: "Pasta Meal", "Chicken Dish", "Oatmeal Bowl", "Dhal Curry", "Salad Plate".
-       - Bad: "Pasta with Meat Sauce" (too specific), "Pasta" (returns raw noodles), "Boiled Chicken" (unappealing).
+       - Examples:
+          - Good: "String Hoppers Dish", "Fish Curry Plate", "Oatmeal Bowl", "Pasta Meal", "Chicken Dish", "Dhal Curry".
+          - Bad: "Man eating String Hoppers", "Fishing for Curry", "Raw Oats", "Pasta with Meat Sauce" (too specific), "Pasta" (returns raw noodles), "Boiled Chicken" (unappealing).
+          - if meals contain String Hoppers → imageSearchTerm: "String Hoppers Curry"
 
     You MUST return ONLY a valid JSON object matching this exact schema:
     {{
