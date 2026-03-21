@@ -114,5 +114,4 @@ public class NutrisyncUser extends AuditModel implements Serializable {
     @Column(name = "PREMIUM_EXPIRE_DATE")
     private LocalDateTime premiumExpireDate;
 
-    // todo: add other fields as necessary
 }
