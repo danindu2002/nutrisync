@@ -14,7 +14,7 @@ class OnboardingDTO {
   double? bmi;
   String? activityLevel;
   String? goalSpeed;
-  String? dietaryPreference;
+  List<String>? dietaryPreference;
   List<String> allergies = [];
   Map<String, String> mealTimes; // e.g. {"breakfast": "08:00"}
   List<String> medicalConditions = [];
@@ -38,7 +38,7 @@ class OnboardingDTO {
     this.bmi,
     this.activityLevel,
     this.goalSpeed,
-    this.dietaryPreference,
+    this.dietaryPreference  = const [],
     this.allergies = const [],
     this.mealTimes = const {},
     this.medicalConditions = const [],
