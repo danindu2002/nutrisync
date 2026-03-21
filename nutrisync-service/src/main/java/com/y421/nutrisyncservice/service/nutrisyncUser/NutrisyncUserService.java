@@ -11,7 +11,7 @@ public interface NutrisyncUserService {
     ResponseEntity<Object> forgotPassword(String email);
     ResponseEntity<Object> validateForgotPwdOtp(ResetPwdValidationDto dto);
     ResponseEntity<Object> resetForgotPwd(ResetPwdDto dto);
-    ResponseEntity<Object> updateProfile(Long userId);
+    ResponseEntity<Object> updateProfile(Long userId, UpdateProfileRequestDto dto);
     ResponseEntity<Object> getProfile(Long userId);
     ResponseEntity<Object> deleteAccount();
     ResponseEntity<Object> calculateBMI();

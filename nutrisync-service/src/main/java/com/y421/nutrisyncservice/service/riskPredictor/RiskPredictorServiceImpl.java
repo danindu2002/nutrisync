@@ -7,13 +7,14 @@ import com.y421.nutrisyncservice.repository.foodMaster.FoodMasterRepository;
 import com.y421.nutrisyncservice.repository.mealLog.MealLogRepository;
 import com.y421.nutrisyncservice.repository.nutrisyncUser.NutrisyncUserRepository;
 import com.y421.nutrisyncservice.request.meal.MealLogRiskRequestDTO;
+import com.y421.nutrisyncservice.response.riskPredictor.AIRiskPredictorResDTO;
 import com.y421.nutrisyncservice.response.riskPredictor.MealRiskContributionResDTO;
-import com.y421.nutrisyncservice.response.riskPredictor.RiskPredictorResponseDTO;
 import com.y421.nutrisyncservice.service.ai.AIServiceClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,21 +31,29 @@ public class RiskPredictorServiceImpl implements RiskPredictorService {
     private final AIServiceClient aiServiceClient;
 
     @Override
-    public ResponseEntity<Object> predictRisk(Long userId) {
+    public ResponseEntity<Object> predictRisk(Long userId, Integer years) {
         try {
+            if (years == null) {
+                return new ResponseEntity<>("Prediction Period Cannot Be Empty", HttpStatus.NOT_FOUND);
+            }
+
             Optional<NutrisyncUser> user = userRepository.findByUserIdAndIsDeletedFalse(userId);
             if (user.isEmpty()) {
                 return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
             }
+
             List<MealLog> mealLog = mealLogRepository.findByUserAndIsDeletedFalse(user.get());
             if (mealLog.isEmpty()) {
                 return new ResponseEntity<>("Meal Logs Not Found", HttpStatus.NOT_FOUND);
             }
+
             MealLogRiskRequestDTO mealLogRiskRequestDTO = mealLogRiskMapper.toMealLogRiskRequestDTO(user.get(), mealLog);
-            RiskPredictorResponseDTO riskPrediction = aiServiceClient.predictRisk(mealLogRiskRequestDTO);
+            mealLogRiskRequestDTO.setPredictionPeriod(years);
+            AIRiskPredictorResDTO riskPrediction = aiServiceClient.predictRisk(mealLogRiskRequestDTO);
             if (riskPrediction == null) {
                 return new ResponseEntity<>("Error Predicting Risk", HttpStatus.CONFLICT);
             }
+
             riskPrediction.getRiskPredictionList().stream().forEach(prediction -> {
                 List<MealRiskContributionResDTO> processedDTOList = new ArrayList<>();
                 prediction.getMealRiskContributionList().stream().forEach(mealContribution -> {
@@ -56,6 +65,9 @@ public class RiskPredictorServiceImpl implements RiskPredictorService {
                 prediction.setMealRiskContributionList(null);
             });
             return new ResponseEntity<>(riskPrediction, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            // This catches the 429 Too Many Requests from the Rate Limiter
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error Occurred", HttpStatus.INTERNAL_SERVER_ERROR);

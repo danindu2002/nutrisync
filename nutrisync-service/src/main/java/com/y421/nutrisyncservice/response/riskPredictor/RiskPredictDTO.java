@@ -18,6 +18,7 @@ public class RiskPredictDTO {
     private String reasonTitle;
     private String probability;
     private String warning;
+    private String icon;
     @JsonProperty("contributedMeals")
     private List<MealRiskContributionDTO> mealRiskContributionList;
     private List<MealRiskContributionResDTO> contibutedMealList;

@@ -68,6 +68,7 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
+# This endpoint generates a personalized 7-day meal plan based on the user's health profile and goals
 @app.route('/generate-meal-plan', methods=['POST'])
 def generate_meal_plan():
     user_data = request.json
@@ -97,7 +98,11 @@ def generate_meal_plan():
     2. Diverse but Simple Cuisine: Mix familiar Sri Lankan staples (like Red Rice, Dhal, String Hoppers, Fish Curry) with simple, easy-to-prep foods from other cultures (like Oatmeal, Greek Salad, Grilled Chicken Wraps, or Pasta).
     3. Realistic Naming: Keep recipe names very short and realistic (e.g., "String Hoppers with Dhal", "Grilled Chicken Salad", "Oats with Banana"). Do NOT prefix meals with "Sri Lankan" or use fancy, exaggerated names.
     4. Accurate Math: Ensure the mathematical values for calories and macronutrients are 100% realistic for a single human meal (e.g., 300 to 800 calories per meal). The sum of the daily meals MUST roughly match the Target Calories.
-    5. Search Terms: Provide a simple, generic 'imageSearchTerm' (e.g., "Dhal Curry", "Chicken Wrap", "Pasta Tomato Sauce") for each meal to be used in an image API.
+    5. Simplified Search Terms (Meal Focused): Provide a "imageSearchTerm" for each meal.
+       - Rule: Use 1-3 generic nouns followed ALWAYS by the word "Meal" or "Dish" to ensure the image API returns prepared food rather than raw ingredients.
+       - Formatting: Remove all quantities, cooking methods, or specific adjectives.
+       - Good: "Pasta Meal", "Chicken Dish", "Oatmeal Bowl", "Dhal Curry", "Salad Plate".
+       - Bad: "Pasta with Meat Sauce" (too specific), "Pasta" (returns raw noodles), "Boiled Chicken" (unappealing).
 
     You MUST return ONLY a valid JSON object matching this exact schema:
     {{
@@ -135,6 +140,94 @@ def generate_meal_plan():
         print(f"LLM Error: {e}")
         return {"error": "Failed to generate meal plan"}, 500
 
+# This endpoint simulates the health impact of the user's current metrics and their active diet plan over a specified future period
+@app.route('/simulate-impact', methods=['POST'])
+def simulate_impact():
+    user_data = request.json
+
+    # Extract and format the diet plan
+    raw_diet_plan = user_data.get('dietPlan', {})
+    diet_plan_text = format_diet_plan_for_prompt(raw_diet_plan)
+
+    # Inject the text into the prompt
+    prompt = f"""
+    You are an expert AI health and fitness predictive engine. 
+    Calculate a realistic health projection for {user_data.get('months', 6)} months in the future based on the user's current metrics AND their active diet plan.
+
+    Current User Profile:
+    - Age: {user_data.get('age')}
+    - Gender: {user_data.get('gender')}
+    - Current Weight: {user_data.get('weightKg')} kg
+    - Height: {user_data.get('heightCm')} cm
+    - Current BMI: {user_data.get('bmi')}
+    - Target Daily Calories: {user_data.get('dailyCalorieGoal')} kcal
+    - Current Body Fat: {user_data.get('bodyFatPercent', 27)}%
+
+    Active Diet Plan Provided to User:
+    {diet_plan_text}
+
+    STRICT RULES:
+    1. Diet Analysis: Analyze the provided "Active Diet Plan". Look at the daily calories and macros.
+    1. Calculate realistic weight loss based on standard safe medical guidelines (e.g., losing 0.5 to 1 kg per week).
+    2. Recalculate the future BMI based on the projected future weight and their current height.
+    3. Calculate the difference (change) between current and projected metrics.
+    4. Provide realistic body fat and waist-to-hip ratio improvements.
+
+    You MUST return ONLY a valid JSON object matching this exact schema:
+    {{
+      "projectedBmi": 0.0,
+      "projectedWeightKg": 0.0,
+      "projectedBodyFatPercent": 0,
+      "waistToHipRatio": 0.0,
+      "expectedConsistencyLevel": "String (e.g., High, Medium)",
+      "bmiChange": 0.0,
+      "weightChangeKg": 0.0,
+      "bodyFatChangePercent": 0
+    }}
+    """
+
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            )
+        )
+        return response.text, 200, {'Content-Type': 'application/json'}
+    except Exception as e:
+        print(f"LLM Error: {e}")
+        return {"error": "Failed to simulate health impact"}, 500
+
+# Helper function to convert the diet plan JSON into a clean text block for the prompt
+def format_diet_plan_for_prompt(diet_plan_dict):
+    """Converts the diet plan JSON into a clean, token-efficient text block."""
+    if not diet_plan_dict:
+        return "No active diet plan provided."
+    
+    plan_name = diet_plan_dict.get("dietPlanName", "Custom Plan")
+    formatted_text = f"Diet Plan: {plan_name}\n\n"
+    
+    for day_plan in diet_plan_dict.get("weeklyPlan", []):
+        day = day_plan.get("day", "Unknown Day")
+        formatted_text += f"{day}\n"
+        
+        for meal in day_plan.get("meals", []):
+            meal_type = meal.get("mealType", "Meal").upper()
+            name = meal.get("recipeName", "Unknown Recipe")
+            cals = meal.get("calories", 0)
+            protein = meal.get("proteinG", 0)
+            carbs = meal.get("carbsG", 0)
+            fat = meal.get("fatG", 0)
+            
+            # Formatting nicely for the LLM
+            formatted_text += f"- {meal_type}: {name} ({cals} kcal | {protein}g Protein | {carbs}g Carbs | {fat}g Fat)\n"
+        
+        formatted_text += "\n"
+        
+    return formatted_text.strip()
+
+# This endpoint analyzes the user's health profile and logged meals to predict potential future health risks
 @app.route('/risk-prediction', methods=['POST'])
 def risk_prediction():
     user_data = request.json
@@ -147,20 +240,31 @@ def risk_prediction():
 
     You MUST return the response ONLY in valid JSON format using the following structure:
 
-    [
-      {{
-        "predictedRisk": "",
-        "reasonTitle": "",
-        "probability": "",
-        "warning": "",
-        "contributedMeals": [
+    {{
+        "riskPredictionList":[
           {{
-            "mealLogId": "",
-            "contribution": ""
+            "predictedRisk": "",
+            "reasonTitle": "",
+            "probability": "",
+            "warning": "",
+            "icon": "",
+            "contributedMeals": [
+              {{
+                "mealLogId": "",
+                "contribution": ""
+              }}
+            ]
           }}
+        ],
+        "mealSwapList": [
+            {{
+              "riskyMealName": "",
+              "riskyMealFact": "",
+              "healthyMealName": "",
+              "healthyMealFact": ""
+            }}
         ]
-      }}
-    ]
+    }}
 
     IMPORTANT RULES
 
@@ -173,7 +277,8 @@ def risk_prediction():
     7. probability = estimated likelihood of the risk occurring within the next 1–5 years.
     8. probability must be expressed as a percentage (example: "35%").
     9. warning must clearly explain why the user's current habits increase the risk.
-    10. contributedMeals must list meal logs that contributed to the risk.
+    10. icon should be a matching condition for the risk from the list[cardio, diabetes, obesity, hypertension, calorie_imbalance, other]. If no matching condition for the risk, set condition "other".
+    11. contributedMeals must list meal logs that contributed to the risk.
 
     Meal contribution rules:
     - Insert mealLogId from MealLogDTO's logId to identify contributed meal.
@@ -251,7 +356,7 @@ def risk_prediction():
 
     RISK PREDICTION GUIDELINES
 
-    Predict possible risks within the next 1–5 years if habits continue.
+    Predict possible risks within the next {user_data.get('predictionPeriod')} years if habits continue.
 
     Focus on risks such as:
 
@@ -295,6 +400,83 @@ def risk_prediction():
 
     -----------------------------------------------------
 
+    TOP UNHEALTHY MEAL IDENTIFICATION
+
+    Identify up to 3 most unhealthy meals from MEAL_LOG_ID_TABLE.
+
+    Rank meals based on:
+    - high carbohydrates (especially for diabetes)
+    - high calories vs daily goal
+    - high sugar
+    - high sodium
+    - high fat
+    - mismatch with dietaryPreferences
+    - conflicts with medicalConditions
+
+    Select the TOP 1–3 meals that contribute most to health risks.
+
+    -----------------------------------------------------------------
+
+    HEALTHY SWAP REQUIREMENTS
+
+    The healthy meal must:
+    - reduce at least one major risk factor (carbs, sugar, sodium, fat)
+    - provide better nutrient balance
+    - not introduce new health risks
+
+    -----------------------------------------------------------------
+
+    MEAL SWAP ID RULES
+
+    - riskyMealName MUST match to meal from MEAL_LOGS
+    - Do NOT generate new risky meal names
+    - Only use meals identified as unhealthy
+
+    -----------------------------------------------------------------
+
+    EXPLANATION RULES
+
+    riskyMealFact:
+    - explain why the meal is unhealthy
+
+    healthyMealFact:
+    - explain why the replacement is better
+    - reference improved nutrients (e.g., lower carbs, higher fiber)
+
+    -----------------------------------------------------------------
+
+    MEAL SWAP GENERATION RULES
+
+    For each selected risky meal:
+
+    1. Provide a healthier alternative meal.
+    2. The alternative MUST:
+       - align with dietaryPreferences
+       - respect allergies (strictly avoid allergens)
+       - be suitable for medicalConditions
+       - improve nutritional balance (lower carbs, sugar, sodium, etc.)
+
+    3. Keep swaps realistic (not extreme or unrealistic meals).
+    4. Maintain similar meal context (e.g., lunch → lunch).
+
+    MEAL SWAP TASK
+
+    Based on the identified risks and meal analysis:
+
+    1. Identify top unhealthy meals.
+    2. Generate healthy alternatives.
+
+    -------------------------------------
+
+    OUTPUT REQUIREMENTS
+
+    - Include both:
+      - riskPredictionList
+      - mealSwapList
+    - If no unhealthy meals found, return empty mealSwapList: []
+
+    -------------------------------------
+
     Now analyze the user data and return the JSON response.
     """
 
@@ -312,6 +494,7 @@ def risk_prediction():
         print(f"LLM Error: {e}")
         return {"error": "Failed to predict risk"}, 500
 
+# Helper function to format meal logs into a clean text block for the prompt
 def format_meal_logs(meal_logs):
     formatted = ""
 
@@ -347,6 +530,6 @@ def format_meal_logs(meal_logs):
     {meal.get("notes","")}
     """
     return formatted
-
+        
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
