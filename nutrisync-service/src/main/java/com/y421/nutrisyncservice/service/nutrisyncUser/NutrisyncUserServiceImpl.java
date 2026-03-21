@@ -85,6 +85,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
             }
             System.out.println(response.getStatusInfo().getStatusCode());
             return new ResponseEntity<>("User Creation Failed", HttpStatus.BAD_REQUEST);
+
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error occurred during onboarding", HttpStatus.BAD_REQUEST);
