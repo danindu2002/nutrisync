@@ -79,4 +79,46 @@ void main() {
         expect(find.byType(CircularProgressIndicator), findsWidgets);
       });
 
+
+  /// -----------------------------------------------------------
+  /// Test 6: Verify nutrition chart loading state
+  /// -----------------------------------------------------------
+  testWidgets('Test 6: Nutrition chart loading',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+
+        // Nutrition chart also loads asynchronously,
+        // so loading indicator should be visible
+        expect(find.byType(CircularProgressIndicator), findsWidgets);
+      });
+
+  /// -----------------------------------------------------------
+  /// Test 7: Verify HomeHeader renders
+  /// -----------------------------------------------------------
+  testWidgets('Test 7: Header renders',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+
+        // Verify HomeHeader widget is present
+        expect(find.byType(HomeHeader), findsOneWidget);
+      });
+
+  /// -----------------------------------------------------------
+  /// Test 8: Verify scrolling works
+  /// -----------------------------------------------------------
+  testWidgets('Test 8: Scroll dashboard',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+
+        // Perform upward scroll
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          const Offset(0, -300),
+        );
+        await tester.pump();
+
+        // Verify lower content is still reachable after scroll
+        expect(find.text('Nutrition'), findsOneWidget);
+      });
+
 }
