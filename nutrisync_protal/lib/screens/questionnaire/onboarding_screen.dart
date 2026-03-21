@@ -8,7 +8,6 @@ import '../../models/onboarding_dto.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/common_widgets.dart';
 import 'package:flutter/services.dart';
-import '../home/main_navigation_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final String email;
@@ -78,13 +77,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _prevPage() {
     _hapticLight();
 
-    // if (_currentPage == 0) {
-    //   setState(() {
-    //     _showWelcome = true;
-    //   });
-    //   return;
-    // }
-
     if (_currentPage > 0) {
       _pageController.previousPage(
         duration: const Duration(milliseconds: 300),
@@ -124,15 +116,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         type: response.success ? 'success' : 'error',
       );
 
-      if (response.status == 200 || response.status == 201) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-        );
-      } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        );
-      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
     } catch (e) {
       Logger.error("Error occurred: $e");
     }
@@ -771,6 +757,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         final title = opt["title"] as String;
         final image = opt["image"] as String;
         final icon = opt["icon"] as IconData;
+        final isSelected = _data.dietaryPreferences?.contains(title) ?? false;
 
         return SizedBox(
           height: 230,
@@ -778,8 +765,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             title: title,
             imagePath: image,
             icon: icon,
-            isSelected: _data.dietaryPreference == title,
-            onTap: () => setState(() => _data.dietaryPreference = title),
+            isSelected: isSelected,
+            onTap: () {
+              setState(() {
+                _data.dietaryPreferences = [];
+                isSelected ? _data.dietaryPreferences!.remove(title) : _data.dietaryPreferences!.add(title);
+              });
+            },
           ),
         );
       }).toList(),
@@ -789,164 +781,157 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 // --- Screen 10: Allergies ---
   Widget _buildAllergiesScreen() {
     List<String> presetAllergies = [
-      "Milk",
-      "Eggs",
-      "Peanuts",
-      "Wheat",
-      "Fish",
-      "Shellfish",
-      "Mustard",
-      "Corn",
-      "Pork",
-      "Beef",
-      "Chicken",
-      "Mushrooms",
-      "Tomatoes",
+      "Milk", "Eggs", "Peanuts", "Wheat", "Fish",
+      "Shellfish", "Mustard", "Corn", "Pork",
+      "Beef", "Chicken", "Mushrooms", "Tomatoes",
     ];
 
     const maxItems = 10;
-    final TextEditingController _controller = TextEditingController();
+    // Note: Make sure you don't declare a new controller here if you are
+    // relying on `_allergyController` down below in your TextField.
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 20),
-          const Text(
-            "Do you have any\nallergic foods?",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Color(0xFF2D3142)),
-          ),
-          const SizedBox(height: 30),
+    // 1. ADD SingleChildScrollView HERE 👇
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              "Do you have any\nallergic foods?",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Color(0xFF2D3142)),
+            ),
+            const SizedBox(height: 30),
 
-          /// Preset Filter Chips
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            alignment: WrapAlignment.center,
-            children: presetAllergies.map((allergy) {
-              final isSelected = _data.allergies.contains(allergy);
-              return ChoiceChip(
-                label: Text(allergy),
-                selected: isSelected,
-                onSelected: (val) {
-                  setState(() {
-                    // Ensure we are working with a growable list
-                    List<String> mutableList = List<String>.from(_data.allergies);
-                    if (val) {
-                      if (!mutableList.contains(allergy) && mutableList.length < maxItems) {
-                        mutableList.add(allergy);
+            /// Preset Filter Chips
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.center,
+              children: presetAllergies.map((allergy) {
+                final isSelected = _data.allergies.contains(allergy);
+                return ChoiceChip(
+                  label: Text(allergy),
+                  selected: isSelected,
+                  onSelected: (val) {
+                    setState(() {
+                      List<String> mutableList = List<String>.from(_data.allergies);
+                      if (val) {
+                        if (!mutableList.contains(allergy) && mutableList.length < maxItems) {
+                          mutableList.add(allergy);
+                        }
+                      } else {
+                        mutableList.remove(allergy);
                       }
-                    } else {
-                      mutableList.remove(allergy);
-                    }
-                    _data.allergies = mutableList;
-                  });
-                },
-                backgroundColor: const Color(0xFFF2F2F2),
-                selectedColor: const Color(0xFFF2544D),
-                labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                side: BorderSide.none,
-                showCheckmark: false,
-              );
-            }).toList(),
-          ),
+                      _data.allergies = mutableList;
+                    });
+                  },
+                  backgroundColor: const Color(0xFFF2F2F2),
+                  selectedColor: const Color(0xFFF2544D),
+                  labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  side: BorderSide.none,
+                  showCheckmark: false,
+                );
+              }).toList(),
+            ),
 
-          const SizedBox(height: 40),
+            const SizedBox(height: 40),
 
-          /// Selection Container
-          /// 02. Selection Container (Input Area)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                  color: const Color(0xFFF2544D).withOpacity(0.5),
-                  width: 1.5
+            /// Selection Container
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                    color: const Color(0xFFF2544D).withOpacity(0.5),
+                    width: 1.5
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      // Selected Tags
+                      ..._data.allergies.map((item) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2544D).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(item, style: const TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () => setState(() => _data.allergies.remove(item)),
+                                child: const Icon(Icons.close, size: 14, color: Color(0xFFF2544D)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+
+                      // Optimized Input Field
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 120,
+                        ),
+                        child: TextField(
+                          controller: _allergyController,
+                          onChanged: (val) {
+                            if (val.length <= 1) setState(() {});
+                          },
+                          decoration: InputDecoration(
+                            hintText: _data.allergies.isEmpty
+                                ? "No allergies selected. Pick from above or type here..."
+                                : "Add food...",
+                            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                            border: InputBorder.none,
+                            isDense: true,
+                            suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                            suffixIcon: _allergyController.text.isNotEmpty
+                                ? TextButton(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {
+                                if (_allergyController.text.trim().isNotEmpty) {
+                                  setState(() {
+                                    _data.allergies.add(_allergyController.text.trim());
+                                    _allergyController.clear();
+                                  });
+                                }
+                              },
+                              child: const Text("Add", style: TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
+                            )
+                                : null,
+                          ),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                  // ... (Counter code)
+                ],
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    // Selected Tags
-                    ..._data.allergies.map((item) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF2544D).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(item, style: const TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 4),
-                            GestureDetector(
-                              onTap: () => setState(() => _data.allergies.remove(item)),
-                              child: const Icon(Icons.close, size: 14, color: Color(0xFFF2544D)),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
 
-                    // Optimized Input Field
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        // If list is empty, take full width. If typing, give enough space.
-                        minWidth: _data.allergies.isEmpty ? MediaQuery.of(context).size.width - 80 : 120,
-                      ),
-                      child: TextField(
-                        controller: _allergyController, // Using the class-level controller
-                        onChanged: (val) {
-                          // Only rebuild to show the "Add" button if we transition from empty to text
-                          if (val.length <= 1) setState(() {});
-                        },
-                        decoration: InputDecoration(
-                          hintText: _data.allergies.isEmpty
-                              ? "No allergies selected. Pick from above or type here to add..."
-                              : "Add food...",
-                          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                          border: InputBorder.none,
-                          isDense: true,
-                          suffixIconConstraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                          suffixIcon: _allergyController.text.isNotEmpty
-                              ? TextButton(
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            onPressed: () {
-                              if (_allergyController.text.trim().isNotEmpty) {
-                                setState(() {
-                                  _data.allergies.add(_allergyController.text.trim());
-                                  _allergyController.clear();
-                                });
-                              }
-                            },
-                            child: const Text("Add", style: TextStyle(color: Color(0xFFF2544D), fontWeight: FontWeight.bold)),
-                          )
-                              : null,
-                        ),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                // ... (Counter code)
-              ],
-            ),
-          ),
-        ],
+            // Add a little bottom padding so it scrolls completely above the keyboard
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
@@ -1154,18 +1139,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // --- Screen 12: Medical Conditions ---
   Widget _buildMedicalConditionScreen() {
     final List<String> presetConditions = [
-      "Diabetes",
-      "Hypertension",
-      "High Cholesterol",
-      "Heart Disease",
-      "Asthma",
-      "Arthritis",
-      "Thyroid Disorder",
-      "Fatty Liver",
-      "Anemia",
-      "Kidney Disease",
-      "Gastritis",
-      "Migraine",
+      "Diabetes", "Hypertension", "High Cholesterol", "Heart Disease",
+      "Asthma", "Arthritis", "Thyroid Disorder", "Fatty Liver",
+      "Anemia", "Kidney Disease", "Gastritis", "Migraine",
     ];
 
     const maxItems = 10;
@@ -1547,64 +1523,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
-
-  // // --- Screen 15: Completion / Ready to Sync ---
-  // Widget _buildCompletionScreen() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 30.0),
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         const Spacer(flex: 2), // Push content slightly upwards
-  //
-  //         // 1. Hero Image
-  //         // Make sure to add a 'success.png' or 'finish.png' to your assets
-  //         Container(
-  //           height: 280,
-  //           decoration: BoxDecoration(
-  //             color: AppColors.primary.withOpacity(0.05), // Subtle background blob
-  //             shape: BoxShape.circle,
-  //           ),
-  //           padding: const EdgeInsets.all(40),
-  //           child: Image.asset(
-  //             'assets/images/questionnaire/finish.png',
-  //             fit: BoxFit.contain,
-  //           ),
-  //         ),
-  //
-  //         const SizedBox(height: 40),
-  //
-  //         // 2. Headline
-  //         const Text(
-  //           "You're All Set!",
-  //           style: TextStyle(
-  //             fontSize: 28,
-  //             fontWeight: FontWeight.w900,
-  //             color: Colors.black87,
-  //             letterSpacing: -0.5,
-  //           ),
-  //           textAlign: TextAlign.center,
-  //         ),
-  //
-  //         const SizedBox(height: 16),
-  //
-  //         // 3. Subtitle
-  //         Text(
-  //           "We've personalized your plan based on your goals and preferences. Let's start your journey!",
-  //           style: TextStyle(
-  //             fontSize: 16,
-  //             height: 1.5,
-  //             color: Colors.grey.shade600,
-  //             fontWeight: FontWeight.w500,
-  //           ),
-  //           textAlign: TextAlign.center,
-  //         ),
-  //
-  //         const Spacer(flex: 3), // Leave space for the bottom button
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildProgressBar() {
     final progress = (_currentPage + 1) / _totalSteps;

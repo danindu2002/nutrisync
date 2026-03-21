@@ -72,24 +72,16 @@ class MealService {
   // This method deletes a meal log by its logId
   static Future<ApiResponse> deleteMealLog(int logId) async {
     try {
+      // Pass the ID directly in the URL path
       final response = await ApiClient.delete(
-        "/meal/delete",
-        data: {
-          "logId": logId,
-        },
+        "/meal/delete/$logId",
       );
 
       final body = jsonDecode(response.body);
-      Logger.info("Delete Meal Log Response: $body");
-
       return ApiResponse.fromJson(body);
     } catch (e) {
       Logger.error("An error occurred deleting meal: $e");
-      return ApiResponse(
-        status: 500,
-        message: "Unexpected error occurred",
-        data: null,
-      );
+      return ApiResponse(status: 500, message: "Unexpected error");
     }
   }
     

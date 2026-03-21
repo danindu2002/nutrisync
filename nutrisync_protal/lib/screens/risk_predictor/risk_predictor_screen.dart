@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:NutriSync/services/risk_service.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,55 @@ import '../../models/contributing_meal_model.dart';
 import '../../models/meal_swap_model.dart';
 import '../../services/pexels_image_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+// =========================================================
+// Safely handles Network, Base64, and Local Assets
+// =========================================================
+Widget buildSafeImage(String imagePath, double width, double height, String fallbackAsset) {
+  if (imagePath.isEmpty || imagePath == 'null') {
+    return Image.asset(fallbackAsset, width: width, height: height, fit: BoxFit.cover);
+  }
+
+  // 1. Is it a network image?
+  if (imagePath.startsWith('http')) {
+    return Image.network(
+      imagePath,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) =>
+          Image.asset(fallbackAsset, width: width, height: height, fit: BoxFit.cover),
+    );
+  }
+
+  // 2. Is it a Base64 image? (Base64 strings are massive, local paths are short)
+  if (imagePath.length > 200) {
+    try {
+      final cleanBase64 = imagePath.contains(',') ? imagePath.split(',').last : imagePath;
+      final decodedBytes = base64Decode(cleanBase64.replaceAll(RegExp(r'\s+'), ''));
+      return Image.memory(
+        decodedBytes,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            Image.asset(fallbackAsset, width: width, height: height, fit: BoxFit.cover),
+      );
+    } catch (e) {
+      return Image.asset(fallbackAsset, width: width, height: height, fit: BoxFit.cover);
+    }
+  }
+
+  // 3. Otherwise, it must be a valid local asset path
+  return Image.asset(
+    imagePath,
+    width: width,
+    height: height,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) =>
+        Image.asset(fallbackAsset, width: width, height: height, fit: BoxFit.cover),
+  );
+}
 
 class RiskPredictorScreen extends StatefulWidget {
   const RiskPredictorScreen({super.key});
@@ -213,7 +263,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
               /// Red Card Container
               Container(
                 width: double.infinity,
-                height: 90,
+                height: 100,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(24),
@@ -242,7 +292,7 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
                             const SizedBox(height: 8),
                             Container(
                               height: 28,
-                              width: 133,
+                              constraints: const BoxConstraints(maxWidth: 140), // FIXED: Prevents right-side overflow on small screens
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                               ),
@@ -331,7 +381,6 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
 
               const SizedBox(height: 24),
 
-              // UPDATED: Use the new animated AI loader here
               if (isLoading)
                 const RiskPredictorAILoadingState()
               else if (risks.isEmpty && mealSwaps.isEmpty)
@@ -397,9 +446,6 @@ class _RiskPredictorScreenState extends State<RiskPredictorScreen> {
   }
 }
 
-// ---------------------------------------------------------
-// AI Loading Widget for Risk Predictor
-// ---------------------------------------------------------
 class RiskPredictorAILoadingState extends StatefulWidget {
   const RiskPredictorAILoadingState({super.key});
 
@@ -423,13 +469,11 @@ class _RiskPredictorAILoadingStateState extends State<RiskPredictorAILoadingStat
   @override
   void initState() {
     super.initState();
-    // Creates a continuous smooth scaling/pulsing effect
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
 
-    // Cycles the text every 2.5 seconds
     _textTimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
       if (mounted) {
         setState(() {
@@ -454,7 +498,6 @@ class _RiskPredictorAILoadingStateState extends State<RiskPredictorAILoadingStat
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Pulsing Icon (Health & Safety)
             ScaleTransition(
               scale: Tween<double>(begin: 0.85, end: 1.15).animate(
                 CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
@@ -467,7 +510,6 @@ class _RiskPredictorAILoadingStateState extends State<RiskPredictorAILoadingStat
             ),
             const SizedBox(height: 40),
 
-            // Custom Styled Progress Indicator
             const SizedBox(
               height: 24,
               width: 24,
@@ -478,7 +520,6 @@ class _RiskPredictorAILoadingStateState extends State<RiskPredictorAILoadingStat
             ),
             const SizedBox(height: 24),
 
-            // Animated Text Switcher for AI Phrases
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 500),
               child: Text(
@@ -550,33 +591,17 @@ class _MealSwapCardState extends State<MealSwapCard> {
             },
             defaultVerticalAlignment: TableCellVerticalAlignment.top,
             children: [
-              /// IMAGES & SWAP AREA
               TableRow(
                 children: [
                   Column(
                     children: [
+                      // FIXED: Using buildSafeImage helper
                       ClipOval(
-                        child:
-                            widget.swap.currentMealImagePath.startsWith('http')
-                            ? Image.network(
-                                widget.swap.currentMealImagePath,
-                                height: 70,
-                                width: 70,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Image.asset(
-                                      'assets/images/risk_predictor/burgerSwap.png',
-                                      height: 70,
-                                      width: 70,
-                                      fit: BoxFit.cover,
-                                    ),
-                              )
-                            : Image.asset(
-                                widget.swap.currentMealImagePath,
-                                height: 70,
-                                width: 70,
-                                fit: BoxFit.cover,
-                              ),
+                        child: buildSafeImage(
+                            widget.swap.currentMealImagePath,
+                            70, 70,
+                            'assets/images/risk_predictor/burgerSwap.png'
+                        ),
                       ),
                     ],
                   ),
@@ -619,37 +644,18 @@ class _MealSwapCardState extends State<MealSwapCard> {
                   ),
                   Column(
                     children: [
+                      // FIXED: Using buildSafeImage helper
                       ClipOval(
-                        child:
-                            widget.swap.suggestedMealImagePath.startsWith(
-                              'http',
-                            )
-                            ? Image.network(
-                                widget.swap.suggestedMealImagePath,
-                                height: 70,
-                                width: 70,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Image.asset(
-                                      'assets/images/risk_predictor/quinoa_bowl.png',
-                                      height: 70,
-                                      width: 70,
-                                      fit: BoxFit.cover,
-                                    ),
-                              )
-                            : Image.asset(
-                                widget.swap.suggestedMealImagePath,
-                                height: 70,
-                                width: 70,
-                                fit: BoxFit.cover,
-                              ),
+                        child: buildSafeImage(
+                            widget.swap.suggestedMealImagePath,
+                            70, 70,
+                            'assets/images/risk_predictor/quinoa_bowl.png'
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
-
-              /// GAP
               const TableRow(
                 children: [
                   SizedBox(height: 8),
@@ -661,7 +667,6 @@ class _MealSwapCardState extends State<MealSwapCard> {
           ),
           const SizedBox(height: 12),
 
-          /// NAMES
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -694,7 +699,6 @@ class _MealSwapCardState extends State<MealSwapCard> {
           ),
           const SizedBox(height: 12),
 
-          /// METRICS
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -850,43 +854,50 @@ class RiskDetailSheet extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// top handle + close
-                Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Container(
-                          width: 48,
-                          height: 5,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
+                /// Top handle (Centered)
+                Center(
+                  child: Container(
+                    width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 12),
-                        child: Icon(Icons.close, color: AppColors.textMain),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
 
                 const SizedBox(height: 20),
 
-                /// title block
-                Text(
-                  "Predicted Risk:",
-                  style: AppTextStyles.subHeader.copyWith(
-                    color: AppColors.textSub,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 22,
-                  ),
+                /// Title block + Close Button (NEW LAYOUT)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Predicted Risk:",
+                      style: AppTextStyles.subHeader.copyWith(
+                        color: AppColors.textSub,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 22,
+                      ),
+                    ),
+
+                    // Close button aligned to the right corner
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(6), // Larger touch target
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200, // Light background for modern look
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, size: 20, color: AppColors.textMain),
+                      ),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 6),
@@ -967,30 +978,11 @@ class RiskDetailSheet extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: meal.imagePath.startsWith('http')
-                                ? Image.network(
-                                    meal.imagePath,
-                                    width: 56,
-                                    height: 56,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (
-                                          context,
-                                          error,
-                                          stackTrace,
-                                        ) => Image.asset(
-                                          'assets/images/risk_predictor/burger.png',
-                                          width: 56,
-                                          height: 56,
-                                          fit: BoxFit.cover,
-                                        ),
-                                  )
-                                : Image.asset(
-                                    meal.imagePath,
-                                    width: 56,
-                                    height: 56,
-                                    fit: BoxFit.cover,
-                                  ),
+                            child: buildSafeImage(
+                                meal.imagePath,
+                                56, 56,
+                                'assets/images/risk_predictor/burger.png'
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(

@@ -100,7 +100,7 @@ class AuthService {
 
   static Future<ApiResponse> resetPassword(dynamic data) async {
     try {
-      final response = await ApiClient.post("/user/resetForgotPwd", data);
+      final response = await ApiClient.post("/user/resetForgotPwd", data, requiresAuth: false);
 
       final body = jsonDecode(response.body);
       Logger.info("Response: $body");
