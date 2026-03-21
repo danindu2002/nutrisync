@@ -107,6 +107,7 @@ def generate_meal_plan():
        - Examples:
           - Good: "String Hoppers Dish", "Fish Curry Plate", "Oatmeal Bowl", "Pasta Meal", "Chicken Dish", "Dhal Curry".
           - Bad: "Man eating String Hoppers", "Fishing for Curry", "Raw Oats", "Pasta with Meat Sauce" (too specific), "Pasta" (returns raw noodles), "Boiled Chicken" (unappealing).
+          - if meals contain String Hoppers → imageSearchTerm: "String Hoppers Curry"
 
     You MUST return ONLY a valid JSON object matching this exact schema:
     {{
