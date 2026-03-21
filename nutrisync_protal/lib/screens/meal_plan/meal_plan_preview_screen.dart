@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-import '../services/diet_plan_service.dart';
-import '../services/firebase_image_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/diet_plan_service.dart';
+import '../../services/firebase_image_service.dart';
+import '../../widgets/common_widgets.dart';
 import 'meal_detail_screen.dart';
 
 class MealPlanPreviewScreen extends StatefulWidget {

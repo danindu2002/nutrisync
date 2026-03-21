@@ -1,14 +1,14 @@
-import 'package:NutriSync/screens/rewards_screen.dart';
-import 'package:NutriSync/screens/risk_predictor_screen.dart';
+import 'package:NutriSync/screens/challenges/rewards_screen.dart';
+import 'package:NutriSync/screens/risk_predictor/risk_predictor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
-import 'challenges_screen.dart';
-import 'impact_simulator/bmi_results_screen.dart';
+import '../../core/constants.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
+import '../challenges/challenges_screen.dart';
+import '../impact_simulator/bmi_results_screen.dart';
 import 'premium_subscription_screen.dart';
-import 'meal_plan_screen.dart';
+import '../meal_plan/meal_plan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onMealLogTap;

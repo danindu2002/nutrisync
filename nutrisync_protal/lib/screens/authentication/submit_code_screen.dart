@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../core/constants.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
 import 'reset_password_screen.dart';
 
 class SubmitCodeScreen extends StatefulWidget {

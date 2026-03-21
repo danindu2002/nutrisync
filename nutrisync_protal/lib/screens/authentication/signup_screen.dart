@@ -1,6 +1,6 @@
-import 'package:NutriSync/screens/onboarding_screen.dart';
+import 'package:NutriSync/screens/questionnaire/onboarding_screen.dart';
 import 'package:flutter/material.dart';
-import '../widgets/common_widgets.dart';
+import '../../widgets/common_widgets.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {

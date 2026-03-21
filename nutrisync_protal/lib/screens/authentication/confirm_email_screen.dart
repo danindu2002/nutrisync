@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
 import 'submit_code_screen.dart';
 
 class ConfirmEmailScreen extends StatefulWidget {

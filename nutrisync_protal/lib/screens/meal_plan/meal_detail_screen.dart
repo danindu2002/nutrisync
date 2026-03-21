@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../core/constants.dart';
+import '../../core/constants.dart';
 
 class MealDetailScreen extends StatelessWidget {
   final Map<String, dynamic> mealData;

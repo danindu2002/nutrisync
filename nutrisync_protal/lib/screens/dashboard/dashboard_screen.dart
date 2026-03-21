@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
+import '../../core/constants.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../services/auth_service.dart';
-import '../services/dashboard_service.dart';
-import '../widgets/common_widgets.dart';
-import '../models/dashboard_calories_chart_dto.dart';
-import '../models/dashboard_nutrition_chart_dto.dart';
+import '../../services/auth_service.dart';
+import '../../services/dashboard_service.dart';
+import '../../widgets/common_widgets.dart';
+import '../../models/dashboard_calories_chart_dto.dart';
+import '../../models/dashboard_nutrition_chart_dto.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:NutriSync/services/meal_service.dart';
 import 'package:flutter/material.dart';
-import 'package:NutriSync/screens/add_meal_screen.dart';
+import 'package:NutriSync/screens/scan_meal/add_meal_screen.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
-import '../core/constants.dart';
+import '../../core/constants.dart';
 
 class BriefScreen extends StatefulWidget {
   final File imageFile;

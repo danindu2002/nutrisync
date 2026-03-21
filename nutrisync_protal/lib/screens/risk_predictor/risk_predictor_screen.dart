@@ -3,11 +3,11 @@ import 'package:NutriSync/services/risk_service.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import '../models/risk_model.dart';
-import '../models/contributing_meal_model.dart';
-import '../models/meal_swap_model.dart';
-import '../services/pexels_image_service.dart';
+import '../../core/constants.dart';
+import '../../models/risk_model.dart';
+import '../../models/contributing_meal_model.dart';
+import '../../models/meal_swap_model.dart';
+import '../../services/pexels_image_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class RiskPredictorScreen extends StatefulWidget {

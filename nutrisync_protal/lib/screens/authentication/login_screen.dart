@@ -1,12 +1,12 @@
-import 'package:NutriSync/screens/signup_screen.dart';
+import 'package:NutriSync/screens/authentication/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import '../models/login_dto.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../models/login_dto.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
 import 'forgot_password_screen.dart';
-import 'main_navigation_screen.dart';
+import '../home/main_navigation_screen.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginScreen extends StatefulWidget {

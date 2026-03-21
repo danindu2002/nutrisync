@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class PremiumSubscriptionScreen extends StatefulWidget {
   const PremiumSubscriptionScreen({super.key});

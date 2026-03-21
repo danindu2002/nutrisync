@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import '../models/log_meal_dto.dart';
-import '../services/meal_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../models/log_meal_dto.dart';
+import '../../services/meal_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class AddMealScreen extends StatefulWidget {
   final bool isManual;

@@ -1,10 +1,10 @@
-import 'package:NutriSync/screens/main_navigation_screen.dart';
+import 'package:NutriSync/screens/home/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import 'login_screen.dart';
-import 'welcome_screen.dart';
-import 'onboarding_screen.dart';
+import '../../core/constants.dart';
+import '../authentication/login_screen.dart';
+import '../questionnaire/onboarding_screen.dart';
+import 'main_navigation_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

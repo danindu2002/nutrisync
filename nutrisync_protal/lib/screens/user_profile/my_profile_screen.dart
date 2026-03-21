@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
 import 'edit_profile_screen.dart';
-import 'login_screen.dart';
+import '../authentication/login_screen.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});

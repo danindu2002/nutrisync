@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});

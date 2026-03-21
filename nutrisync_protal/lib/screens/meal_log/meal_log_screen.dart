@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:NutriSync/screens/scan_meal_screen.dart';
+import 'package:NutriSync/screens/scan_meal/scan_meal_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
-import '../services/meal_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../services/meal_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class MealLogScreen extends StatefulWidget {
   const MealLogScreen({super.key});

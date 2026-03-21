@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-import 'dashboard_screen.dart';
+import '../../core/constants.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../scan_meal/scan_meal_screen.dart';
 import 'home_screen.dart';
-import 'meal_log_screen.dart';
-import 'my_profile_screen.dart';
-import 'scan_meal_screen.dart';
+import '../meal_log/meal_log_screen.dart';
+import '../user_profile/my_profile_screen.dart';
 
 class NavigationService {
   static final GlobalKey<NavigatorState> navigatorKey =

@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../core/constants.dart';
 import 'brief_screen.dart';
-import '../core/constants.dart';
 
 class ScanMealScreen extends StatefulWidget {
   const ScanMealScreen({super.key});

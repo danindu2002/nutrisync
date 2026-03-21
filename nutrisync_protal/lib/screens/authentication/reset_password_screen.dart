@@ -1,45 +1,69 @@
-import 'package:NutriSync/screens/submit_code_screen.dart';
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
-import 'confirm_email_screen.dart';
+import '../../core/constants.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
+import 'login_screen.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class ResetPasswordScreen extends StatefulWidget {
+  String email;
+  String code;
+
+  ResetPasswordScreen({
+    super.key,
+    required this.email,
+    required this.code,
+  });
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final TextEditingController _emailController = TextEditingController();
+class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
-  Future<void> _sendResetLink() async {
+  Future<void> _changePassword() async {
     FocusScope.of(context).unfocus();
 
-    if (_emailController.text.trim().isEmpty) {
-      showModernToast(context, "Please enter your email", type: 'error');
+    final newPass = _newPasswordController.text.trim();
+    final confirmPass = _confirmPasswordController.text.trim();
+
+    if (newPass.isEmpty || confirmPass.isEmpty) {
+      showModernToast(context, "Please fill all fields", type: 'error');
+      return;
+    }
+
+    if (newPass != confirmPass) {
+      showModernToast(context, "Passwords do not match", type: 'error');
       return;
     }
 
     try {
       LoadingIndicator.show(context);
 
-      final ApiResponse response = await AuthService.sendPasswordResetLink(
-        _emailController.text.trim(),
-      );
+      dynamic payload = {
+        "email": widget.email.trim(),
+        "otp": widget.code.trim(),
+        "newPassword": newPass,
+      };
 
-      if(mounted) LoadingIndicator.hide(context);
+      final ApiResponse response = await AuthService.resetPassword(payload);
+
+      if (mounted) LoadingIndicator.hide(context);
 
       if (response.status == 200) {
         showModernToast(context, response.message, type: 'success');
 
-        Navigator.push(
+        showModernToast(
+          context,
+          "Password changed successfully!",
+          type: 'success',
+        );
+
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                SubmitCodeScreen(email: _emailController.text.trim()),
+            builder: (_) => const LoginScreen(),
           ),
         );
       } else {
@@ -52,7 +76,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -71,8 +96,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+
                     const Text(
-                      "Forgot\nPassword",
+                      "Reset\nPassword",
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -85,22 +111,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const SizedBox(height: 16),
 
                     const Text(
-                      "Enter the email address you used to register",
+                      "Enter the new password for your account",
                       style: TextStyle(color: Colors.grey),
                     ),
 
                     const SizedBox(height: 24),
 
-                    const InputLabel("Email"),
+                    const InputLabel("New Password"),
                     InputField(
-                      controller: _emailController,
-                      icon: Icons.email_outlined,
+                      controller: _newPasswordController,
+                      icon: Icons.lock_outline,
+                      isPassword: true,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    const InputLabel("Confirm New Password"),
+                    InputField(
+                      controller: _confirmPasswordController,
+                      icon: Icons.lock_outline,
+                      isPassword: true,
                     ),
 
                     const SizedBox(height: 24),
 
                     ElevatedButton(
-                      onPressed: _sendResetLink,
+                      onPressed: _changePassword,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         minimumSize: const Size(double.infinity, 54),
@@ -109,23 +145,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                       ),
                       child: const Text(
-                        "Send Reset Link",
+                        "Change Password",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Center(
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          "Back to Login",
-                          style: TextStyle(color: Colors.red),
                         ),
                       ),
                     ),

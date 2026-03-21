@@ -1,14 +1,14 @@
-import 'package:NutriSync/screens/login_screen.dart';
+import 'package:NutriSync/screens/authentication/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../core/constants.dart';
-import '../models/onboarding_dto.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
+import '../../core/constants.dart';
+import '../../models/onboarding_dto.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
 import 'package:flutter/services.dart';
-import 'main_navigation_screen.dart';
+import '../home/main_navigation_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final String email;

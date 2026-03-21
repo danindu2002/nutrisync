@@ -1,69 +1,45 @@
+import 'package:NutriSync/screens/authentication/submit_code_screen.dart';
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-import '../services/auth_service.dart';
-import '../widgets/common_widgets.dart';
-import 'login_screen.dart';
+import '../../core/constants.dart';
+import '../../services/auth_service.dart';
+import '../../widgets/common_widgets.dart';
+import 'confirm_email_screen.dart';
 
-class ResetPasswordScreen extends StatefulWidget {
-  String email;
-  String code;
-
-  ResetPasswordScreen({
-    super.key,
-    required this.email,
-    required this.code,
-  });
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final TextEditingController _emailController = TextEditingController();
 
-  Future<void> _changePassword() async {
+  Future<void> _sendResetLink() async {
     FocusScope.of(context).unfocus();
 
-    final newPass = _newPasswordController.text.trim();
-    final confirmPass = _confirmPasswordController.text.trim();
-
-    if (newPass.isEmpty || confirmPass.isEmpty) {
-      showModernToast(context, "Please fill all fields", type: 'error');
-      return;
-    }
-
-    if (newPass != confirmPass) {
-      showModernToast(context, "Passwords do not match", type: 'error');
+    if (_emailController.text.trim().isEmpty) {
+      showModernToast(context, "Please enter your email", type: 'error');
       return;
     }
 
     try {
       LoadingIndicator.show(context);
 
-      dynamic payload = {
-        "email": widget.email.trim(),
-        "otp": widget.code.trim(),
-        "newPassword": newPass,
-      };
+      final ApiResponse response = await AuthService.sendPasswordResetLink(
+        _emailController.text.trim(),
+      );
 
-      final ApiResponse response = await AuthService.resetPassword(payload);
-
-      if (mounted) LoadingIndicator.hide(context);
+      if(mounted) LoadingIndicator.hide(context);
 
       if (response.status == 200) {
         showModernToast(context, response.message, type: 'success');
 
-        showModernToast(
-          context,
-          "Password changed successfully!",
-          type: 'success',
-        );
-
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const LoginScreen(),
+            builder: (_) =>
+                SubmitCodeScreen(email: _emailController.text.trim()),
           ),
         );
       } else {
@@ -76,8 +52,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   void dispose() {
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -96,9 +71,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     const Text(
-                      "Reset\nPassword",
+                      "Forgot\nPassword",
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -111,32 +85,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     const SizedBox(height: 16),
 
                     const Text(
-                      "Enter the new password for your account",
+                      "Enter the email address you used to register",
                       style: TextStyle(color: Colors.grey),
                     ),
 
                     const SizedBox(height: 24),
 
-                    const InputLabel("New Password"),
+                    const InputLabel("Email"),
                     InputField(
-                      controller: _newPasswordController,
-                      icon: Icons.lock_outline,
-                      isPassword: true,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    const InputLabel("Confirm New Password"),
-                    InputField(
-                      controller: _confirmPasswordController,
-                      icon: Icons.lock_outline,
-                      isPassword: true,
+                      controller: _emailController,
+                      icon: Icons.email_outlined,
                     ),
 
                     const SizedBox(height: 24),
 
                     ElevatedButton(
-                      onPressed: _changePassword,
+                      onPressed: _sendResetLink,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         minimumSize: const Size(double.infinity, 54),
@@ -145,11 +109,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                       ),
                       child: const Text(
-                        "Change Password",
+                        "Send Reset Link",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Center(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          "Back to Login",
+                          style: TextStyle(color: Colors.red),
                         ),
                       ),
                     ),
