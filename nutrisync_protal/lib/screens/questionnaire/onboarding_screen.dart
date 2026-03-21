@@ -103,8 +103,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _data.dateOfBirth = convertDateFormat(widget.dob);
     _data.regDate = DateTime.now().toIso8601String();
 
-    Logger.info("dietary: $_data.dietaryPreference");
-
     try {
       LoadingIndicator.show(context);
 
@@ -759,7 +757,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         final title = opt["title"] as String;
         final image = opt["image"] as String;
         final icon = opt["icon"] as IconData;
-        final isSelected = _data.dietaryPreference?.contains(title) ?? false;
+        final isSelected = _data.dietaryPreferences?.contains(title) ?? false;
 
         return SizedBox(
           height: 230,
@@ -770,8 +768,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             isSelected: isSelected,
             onTap: () {
               setState(() {
-                _data.dietaryPreference = [];
-                isSelected ? _data.dietaryPreference!.remove(title) : _data.dietaryPreference!.add(title);
+                _data.dietaryPreferences = [];
+                isSelected ? _data.dietaryPreferences!.remove(title) : _data.dietaryPreferences!.add(title);
               });
             },
           ),
