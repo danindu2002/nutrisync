@@ -1,0 +1,30 @@
+# Flutter/Dart build & tool files - NEVER commit these!
+.dart_tool/
+build/
+coverage/
+lib/generated_plugin_registrant.dart   # sometimes generated
+
+# Android-specific extras (even though android/.gitignore exists, reinforce)
+android/app/build/
+android/.gradle/
+android/local.properties
+android/key.properties
+**/*.keystore
+**/*.jks
+
+# iOS (if you have it)
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Generated.xcconfig
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Pods/
+ios/Podfile.lock
+
+# General junk
+*.g.dart
+*.freezed.dart
+.DS_Store
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock   # ← optional: many teams commit it, but if you get conflicts often → ignore it
