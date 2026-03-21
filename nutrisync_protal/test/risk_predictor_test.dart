@@ -1,4 +1,4 @@
-import 'package:NutriSync/screens/risk_predictor_screen.dart';
+import 'package:NutriSync/screens/risk_predictor/risk_predictor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,6 +1,6 @@
+import 'package:NutriSync/screens/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:NutriSync/screens/dashboard_screen.dart';
 import 'package:NutriSync/widgets/common_widgets.dart';
 
 void main() {

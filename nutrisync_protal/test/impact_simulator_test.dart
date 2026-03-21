@@ -1,10 +1,8 @@
 import 'package:NutriSync/screens/impact_simulator/bmi_results_screen.dart';
+import 'package:NutriSync/screens/meal_plan/meal_plan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:NutriSync/screens/impact_simulator/impact_simulation_screen.dart';
-import 'package:NutriSync/screens/meal_plan_screen.dart';
-
-
 
 // Automated Unit Tests for BMI Results Screen
 void main() {
