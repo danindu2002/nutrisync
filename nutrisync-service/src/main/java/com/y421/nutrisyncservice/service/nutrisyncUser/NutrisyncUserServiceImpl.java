@@ -99,6 +99,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
                         .realm(serviceName)
                         .username(dto.getUserName())
                         .password(dto.getPassword())
+                        .grantType("password")
                         .clientId(yamlConfig.getNutrisyncService().getClientId())
                         .build()
         ) {
@@ -420,7 +421,6 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
         CredentialRepresentation passwordCredentials = new CredentialRepresentation();
         passwordCredentials.setTemporary(false);
         passwordCredentials.setType(CredentialRepresentation.PASSWORD);
-//        String password = RandomStringUtils.random(newLoginPwdLength, newLoginPwdLetters, newLoginPwdNumbers);
         passwordCredentials.setValue(userCreateDTO.getPassword());
 
         userKeycloak.setCredentials(List.of(passwordCredentials));
