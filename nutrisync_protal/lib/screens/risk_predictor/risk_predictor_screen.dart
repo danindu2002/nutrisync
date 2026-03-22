@@ -11,9 +11,8 @@ import '../../models/meal_swap_model.dart';
 import '../../services/pexels_image_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-// =========================================================
-// Safely handles Network, Base64, and Local Assets
-// =========================================================
+
+
 Widget buildSafeImage(String imagePath, double width, double height, String fallbackAsset) {
   if (imagePath.isEmpty || imagePath == 'null') {
     return Image.asset(fallbackAsset, width: width, height: height, fit: BoxFit.cover);
