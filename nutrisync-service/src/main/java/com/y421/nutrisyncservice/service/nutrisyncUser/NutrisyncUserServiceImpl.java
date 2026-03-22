@@ -99,6 +99,7 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
                         .realm(serviceName)
                         .username(dto.getUserName())
                         .password(dto.getPassword())
+                        .grantType("password")
                         .clientId(yamlConfig.getNutrisyncService().getClientId())
                         .build()
         ) {
