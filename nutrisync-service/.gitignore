@@ -1,0 +1,52 @@
+# .gitignore for a Maven Java project (nutrisync-service)
+
+# Maven build output
+/target/
+
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+# Maven specific
+pom.xml.tag
+pom.xml.releaseBackup
+release.properties
+.flattened-pom.xml
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+*.iws
+*.ipr
+/out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Java
+*.class
+*.log
+*.ctxt
+
+# Build folders
+bin/
+build/
+dist/
+
+# Other
+*.swp
+*.swo
+*~

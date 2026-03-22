@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  nutrisync-service:
+    image: ghcr.io/danindu2002/y421-nutrisync-service:latest
+    container_name: nutrisync-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    networks:
+      - nutrisync-network
+      - core-net
+
+  nutrisync-ai-service:
+    image: ghcr.io/danindu2002/y421-nutrisync-ai-service:latest
+    container_name: nutrisync-ai-service
+    restart: unless-stopped
+    networks:
+      - nutrisync-network
+
+networks:
+  nutrisync-network:
+    driver: bridge
+
+  core-net:
+    external: true

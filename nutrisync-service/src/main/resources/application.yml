@@ -1,0 +1,100 @@
+server:
+  port: 8081
+  max-http-request-header-size: 20000
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/nutrisync-service
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+      client:
+        registration:
+          google:
+#            change google credentials
+            client-id: 62284283188-f170448eprk8q7lsc7febdd4cqr729de.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+            scope: email, profile, https://www.googleapis.com/auth/gmail.readonly, https://www.googleapis.com/auth/gmail.send, openid
+
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
+  application:
+    name: NUTRISYNC-SERVICE
+
+  datasource:
+    url: jdbc:mysql://172.17.0.1:3306/nutrisync?createDatabaseIfNotExist=true
+    username: adminusr
+    password: Aegis@1212
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 20
+      connection-timeout: 10000
+      idle-timeout: 300000
+      max-lifetime: 900000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Calcutta
+        format_sql: true
+      org:
+        hibernate:
+          envers:
+            audit_table_suffix: _HISTORY
+            revision_field_name: REVISION
+            revision_type_field_name: REVISION_TYPE
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    generate-ddl: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nutrisync.marketing@gmail.com
+    password: bcty akws tzov fian
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        transport:
+          protocol: smtp
+
+logging:
+  level:
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
+    org.hibernate.search: INFO
+    org.hibernate.search.backend.lucene: INFO
+
+rest:
+  nutrisync-service:
+    realm: nutrisync-service
+    admin_id: admin-user
+    admin_secret: tWVFOc5zMbZvzLLzKz5z1lqBfHpB7zjq
+    client_id: client-user
+    jwk_set_uri: ${rest.service.url}realms/${rest.nutrisync-service.realm}/${rest.service.jwk_path}
+  service:
+    url: http://keycloak:8080/
+    username: admin
+    password: Admin@1212
+    jwk_path: protocol/openid-connect/certs
+
+new-login-pwd:
+  letters: true
+  numbers: true
+  length: 8
+
+python-service-url: http://nutrisync-ai-service:5000
+aes-secret-key: mySecretKey1234567890221
