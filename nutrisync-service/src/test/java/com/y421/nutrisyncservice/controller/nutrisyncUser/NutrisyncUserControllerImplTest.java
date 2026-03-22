@@ -78,4 +78,59 @@ class NutrisyncUserControllerImplTest {
  
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
+    @Test
+    void login_InvalidCredentials() {
+    // Arrange
+    LoginDto loginDto = new LoginDto();
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Credentials Incorrect", HttpStatus.BAD_REQUEST);
+
+    when(userService.login(any(LoginDto.class)))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            userController.login(loginDto);
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void register_UserAlreadyExists() {
+    // Arrange
+    NutrisyncUserRequestDto request = new NutrisyncUserRequestDto();
+
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("User already exist with given E-mail", HttpStatus.CONFLICT);
+
+    when(userService.register(any(NutrisyncUserRequestDto.class)))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            userController.register(request);
+
+    // Assert
+    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    }
+
+    @Test
+    void getUserDetails_Success() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("UserDetails", HttpStatus.OK);
+
+    when(userService.getUserDetails(1L))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            userController.getUserDetails(1L);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
 }
