@@ -170,4 +170,56 @@ class MealLogControllerImplTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
+
+    @Test
+    void identifyMeal_EmptyFile() {
+    // Arrange
+    MockMultipartFile emptyFile =
+            new MockMultipartFile("image", "", "image/png", new byte[0]);
+
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Invalid image", HttpStatus.BAD_REQUEST);
+
+    when(mealService.identifyFood(any(MultipartFile.class)))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            mealLogController.identifyMeal(emptyFile);
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void logMeal_WithoutImage_Success() throws Exception {
+    // Arrange
+    String validJsonString = "{ \"userId\": 1, \"foodName\": \"Rice\", \"mealTime\": \"LUNCH\" }";
+
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Meal Logged", HttpStatus.OK);
+
+    when(mealService.saveMealLog(any(MealLogRequestDTO.class), any()))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            mealLogController.logMeal(validJsonString, null);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getLogs_InvalidDateFormat() {
+    // This simulates controller-level validation failure scenario
+    when(mealService.getDailyLogs(anyLong(), any(LocalDate.class)))
+            .thenThrow(new RuntimeException("Invalid date format"));
+
+    ResponseEntity<Object> response =
+            mealLogController.getLogs(1L, LocalDate.now());
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
 }

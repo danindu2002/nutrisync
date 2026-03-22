@@ -93,26 +93,29 @@ public class NutrisyncUserServiceImpl implements NutrisyncUserService {
 
     @Override
     public ResponseEntity<Object> login(LoginDto dto) {
-        try (
-                Keycloak keycloak = KeycloakBuilder.builder()
-                        .serverUrl(yamlConfig.getService().getUrl())
-                        .realm(serviceName)
-                        .username(dto.getUserName())
-                        .password(dto.getPassword())
-                        .grantType("password")
-                        .clientId(yamlConfig.getNutrisyncService().getClientId())
-                        .build()
-        ) {
+        try {
+            Keycloak keycloak = KeycloakBuilder.builder()
+                    .serverUrl(yamlConfig.getService().getUrl())
+                    .realm(serviceName)
+                    .username(dto.getUserName())
+                    .password(dto.getPassword())
+                    .grantType("password")
+                    .clientId(yamlConfig.getNutrisyncService().getClientId())
+                    .build();
+
             AccessTokenResponse accessToken = keycloak.tokenManager().getAccessToken();
+
             Optional<NutrisyncUser> user = userRepository.findByUserNameAndIsDeletedFalse(dto.getUserName());
             if (user.isEmpty()) {
                 return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
             }
+
             LoginResDto loginResDto = new LoginResDto(accessToken, user.get().getUserId());
             return new ResponseEntity<>(loginResDto, HttpStatus.OK);
+
         } catch (Exception e) {
             String message = e.getMessage();
-            if (e.getMessage().contains("401")) {
+            if (e.getMessage() != null && e.getMessage().contains("401")) {
                 message = "Credentials Incorrect";
             }
             return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
