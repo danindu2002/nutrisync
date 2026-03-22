@@ -558,74 +558,76 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ? displayVal.toStringAsFixed(0)
         : displayVal.toStringAsFixed(1);
 
-    return Column(
-      children: [
-        const SizedBox(height: 30),
-        UnitSwitch(
-          isLeftSelected: _isKg,
-          leftLabel: "kg",
-          rightLabel: "lbs",
-          onLeftTap: () => setState(() => _isKg = true),
-          onRightTap: () => setState(() => _isKg = false),
-        ),
-
-        const SizedBox(height: 60), // Spacing before the number
-        // Large Weight Value
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              weightString,
-              style: const TextStyle(
-                fontSize: 100,
-                fontWeight: FontWeight.w900,
-                color: AppColors.secondary,
-                letterSpacing: -2,
-                height: 1.0,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              _isKg ? "kg" : "lbs",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 60),
-
-        // Ruler Area
-        SizedBox(
-          height: 130, // Defined height for the scale area
-          child: WeightRuler(
-            key: ValueKey(_isKg),
-            initialWeight: displayVal,
-            minWeight: minVal,
-            maxWeight: maxVal,
-            onChanged: (val) {
-              setState(() {
-                if (_isKg) {
-                  _data.weightKg = val;
-                } else {
-                  _data.weightKg = val / 2.20462;
-                }
-
-                double h = _data.heightCm ?? 1.0;
-                // BMI Formula: weight (kg) / height (m)^2
-                _data.bmi = val / (h * h * 0.0001);
-              });
-            },
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 30),
+          UnitSwitch(
+            isLeftSelected: _isKg,
+            leftLabel: "kg",
+            rightLabel: "lbs",
+            onLeftTap: () => setState(() => _isKg = true),
+            onRightTap: () => setState(() => _isKg = false),
           ),
+
+          const SizedBox(height: 60), // Spacing before the number
+          // Large Weight Value
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                weightString,
+                style: const TextStyle(
+                  fontSize: 100,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.secondary,
+                  letterSpacing: -2,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _isKg ? "kg" : "lbs",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 60),
+
+          // Ruler Area
+          SizedBox(
+            height: 130, // Defined height for the scale area
+            child: WeightRuler(
+              key: ValueKey(_isKg),
+              initialWeight: displayVal,
+              minWeight: minVal,
+              maxWeight: maxVal,
+              onChanged: (val) {
+                setState(() {
+                  if (_isKg) {
+                    _data.weightKg = val;
+                  } else {
+                    _data.weightKg = val / 2.20462;
+                  }
+
+                  double h = _data.heightCm ?? 1.0;
+                  // BMI Formula: weight (kg) / height (m)^2
+                  _data.bmi = val / (h * h * 0.0001);
+                });
+              },
+            ),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
   // --- Screen 7: Activity Level ---
   Widget _buildActivityScreen() {

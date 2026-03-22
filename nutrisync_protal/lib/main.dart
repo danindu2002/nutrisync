@@ -23,6 +23,8 @@ class NutriSyncApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
       title: 'NutriSync',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,

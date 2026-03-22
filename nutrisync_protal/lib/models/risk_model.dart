@@ -12,9 +12,11 @@ class RiskModel {
   final List<ContributingMealModel> contributingMeals;
 
   RiskModel({
-    required this.name,
-    required this.description,
-    required this.riskLevel,
+    required this.predictedRisk,
+    required this.reasonTitle,
+    required this.probability,
+    required this.warning,
+    required this.contibutedMealList,
     required this.icon,
     required this.subtitle,
     required this.warningText,

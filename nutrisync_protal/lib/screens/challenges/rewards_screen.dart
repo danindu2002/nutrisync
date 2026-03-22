@@ -74,17 +74,23 @@ class _RewardsScreenState extends State<RewardsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Rewards",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
         centerTitle: false,
-        actions: [
-          _buildPointsBadge(),
-        ],
+        actions: [_buildPointsBadge()],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.redAccent))
@@ -121,7 +127,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
           ],
         ),
         child: Row(
@@ -170,7 +176,11 @@ class RewardCard extends StatelessWidget {
         // Blue border for unavailable items as seen in Figma
         border: !hasEnoughPoints ? Border.all(color: const Color(0xFF3B82F6), width: 1) : null,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -179,7 +189,8 @@ class RewardCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                height: 45, width: 45,
+                height: 45,
+                width: 45,
                 decoration: BoxDecoration(
                   color: iconColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
@@ -191,7 +202,13 @@ class RewardCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     Text(
                       "${points.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} points",
                       style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
@@ -216,12 +233,17 @@ class RewardCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: hasEnoughPoints ? AppColors.primary : AppColors.secondary,
                 disabledBackgroundColor: AppColors.secondary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
               child: Text(
                 hasEnoughPoints ? "Claim Reward" : "Not Enough Points",
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

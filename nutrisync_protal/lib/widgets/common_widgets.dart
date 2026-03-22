@@ -12,7 +12,12 @@ class PrimaryButton extends StatelessWidget {
   final String text;
   final bool isRed;
 
-  const PrimaryButton({super.key, required this.onTap, this.text = "Continue", required this.isRed});
+  const PrimaryButton({
+    super.key,
+    required this.onTap,
+    this.text = "Continue",
+    required this.isRed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +27,16 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: isRed ? AppColors.primary : AppColors.secondary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 0,
         ),
         onPressed: onTap,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(text, style: AppTextStyles.buttonText,),
+            Text(text, style: AppTextStyles.buttonText),
             const SizedBox(width: 8),
             const Icon(Icons.arrow_forward, color: Colors.white),
           ],
@@ -137,15 +144,15 @@ class OptionCardOld extends StatelessWidget {
                 ),
                 child: isSelected
                     ? Center(
-                  child: Container(
-                    height: 10,
-                    width: 10,
-                    decoration: BoxDecoration(
-                      color: activeColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                )
+                        child: Container(
+                          height: 10,
+                          width: 10,
+                          decoration: BoxDecoration(
+                            color: activeColor,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      )
                     : null,
               ),
             ),
@@ -164,7 +171,7 @@ class SelectionIndicator extends StatelessWidget {
   const SelectionIndicator({
     super.key,
     required this.isSelected,
-    required this.activeColor
+    required this.activeColor,
   });
 
   @override
@@ -181,15 +188,15 @@ class SelectionIndicator extends StatelessWidget {
       ),
       child: isSelected
           ? Center(
-        child: Container(
-          height: 10,
-          width: 10,
-          decoration: BoxDecoration(
-            color: activeColor,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      )
+              child: Container(
+                height: 10,
+                width: 10,
+                decoration: BoxDecoration(
+                  color: activeColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            )
           : null,
     );
   }
@@ -229,12 +236,12 @@ class OptionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: isSelected
               ? [
-            BoxShadow(
-              color: activeColor.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ]
+                  BoxShadow(
+                    color: activeColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
               : [],
         ),
         child: Row(
@@ -271,9 +278,7 @@ class OptionCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         // Selected: Slightly transparent White. Unselected: Grey.
-                        color: isSelected
-                            ? Colors.white
-                            : Colors.grey.shade600,
+                        color: isSelected ? Colors.white : Colors.grey.shade600,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -322,14 +327,20 @@ class OnboardingHeader extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.cardBg,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   "$currentStep of $totalSteps",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -425,7 +436,9 @@ class UnitSwitch extends StatelessWidget {
           AnimatedAlign(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
-            alignment: isLeftSelected ? Alignment.centerLeft : Alignment.centerRight,
+            alignment: isLeftSelected
+                ? Alignment.centerLeft
+                : Alignment.centerRight,
             child: Container(
               width: 150, // Half of the container width
               height: 50,
@@ -518,13 +531,14 @@ class ImageOptionCard extends StatelessWidget {
             color: isSelected ? activeColor : Colors.transparent,
             width: 3,
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: activeColor.withOpacity(0.3),
-              blurRadius: 3,
-              offset: const Offset(0, 5),
-            ),
-          ]
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: activeColor.withOpacity(0.3),
+                    blurRadius: 3,
+                    offset: const Offset(0, 5),
+                  ),
+                ]
               : [],
         ),
         // ClipRRect ensures image respects the rounded corners
@@ -532,12 +546,7 @@ class ImageOptionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: Stack(
             children: [
-              Positioned.fill(
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              Positioned.fill(child: Image.asset(imagePath, fit: BoxFit.cover)),
 
               Positioned.fill(
                 child: Container(
@@ -546,7 +555,9 @@ class ImageOptionCard extends StatelessWidget {
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        Colors.black.withOpacity(0.7), // Darker on left for text
+                        Colors.black.withOpacity(
+                          0.7,
+                        ), // Darker on left for text
                         Colors.black.withOpacity(0.5),
                         Colors.transparent,
                       ],
@@ -566,11 +577,7 @@ class ImageOptionCard extends StatelessWidget {
                     Row(
                       children: [
                         if (icon != null) ...[
-                          Icon(
-                            icon,
-                            size: 22,
-                            color: Colors.white,
-                          ),
+                          Icon(icon, size: 22, color: Colors.white),
                           const SizedBox(width: 10),
                         ],
                         Text(
@@ -603,15 +610,15 @@ class ImageOptionCard extends StatelessWidget {
                           ),
                           child: isSelected
                               ? Center(
-                            child: Container(
-                              height: 14,
-                              width: 14,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: activeColor, // Red Fill
-                              ),
-                            ),
-                          )
+                                  child: Container(
+                                    height: 14,
+                                    width: 14,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: activeColor, // Red Fill
+                                    ),
+                                  ),
+                                )
                               : null,
                         ),
                       ],
@@ -660,7 +667,8 @@ class _WeightRulerState extends State<WeightRuler> {
   @override
   Widget build(BuildContext context) {
     int totalTicks = ((widget.maxWeight - widget.minWeight) * 10).round();
-    double paddingOffset = MediaQuery.of(context).size.width / 2 - (tickWidth / 2);
+    double paddingOffset =
+        MediaQuery.of(context).size.width / 2 - (tickWidth / 2);
 
     return Stack(
       alignment: Alignment.topCenter,
@@ -686,7 +694,11 @@ class _WeightRulerState extends State<WeightRuler> {
                 double index = offset / tickWidth;
                 double value = widget.minWeight + (index / 10);
 
-                value = double.parse(value.clamp(widget.minWeight, widget.maxWeight).toStringAsFixed(1));
+                value = double.parse(
+                  value
+                      .clamp(widget.minWeight, widget.maxWeight)
+                      .toStringAsFixed(1),
+                );
 
                 if (value != widget.initialWeight) {
                   widget.onChanged(value);
@@ -730,18 +742,18 @@ class _WeightRulerState extends State<WeightRuler> {
                       height: 20,
                       child: isInteger
                           ? OverflowBox(
-                        maxWidth: 60,
-                        minWidth: 40,
-                        child: Text(
-                          value.toInt().toString(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      )
+                              maxWidth: 60,
+                              minWidth: 40,
+                              child: Text(
+                                value.toInt().toString(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            )
                           : null,
                     ),
                   ],
@@ -787,12 +799,17 @@ class _SnapScrollPhysics extends ScrollPhysics {
 
   @override
   _SnapScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return _SnapScrollPhysics(itemSize: itemSize, parent: buildParent(ancestor));
+    return _SnapScrollPhysics(
+      itemSize: itemSize,
+      parent: buildParent(ancestor),
+    );
   }
 
   @override
   Simulation? createBallisticSimulation(
-      ScrollMetrics position, double velocity) {
+    ScrollMetrics position,
+    double velocity,
+  ) {
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);
@@ -814,7 +831,10 @@ class _SnapScrollPhysics extends ScrollPhysics {
   }
 
   double _getTargetPixels(
-      ScrollMetrics position, Tolerance tolerance, double velocity) {
+    ScrollMetrics position,
+    Tolerance tolerance,
+    double velocity,
+  ) {
     double page = position.pixels / itemSize;
     if (velocity < -tolerance.velocity) {
       page -= 0.5;
@@ -836,12 +856,17 @@ class _MomentumSnapPhysics extends ScrollPhysics {
 
   @override
   _MomentumSnapPhysics applyTo(ScrollPhysics? ancestor) {
-    return _MomentumSnapPhysics(itemSize: itemSize, parent: buildParent(ancestor));
+    return _MomentumSnapPhysics(
+      itemSize: itemSize,
+      parent: buildParent(ancestor),
+    );
   }
 
   @override
   Simulation? createBallisticSimulation(
-      ScrollMetrics position, double velocity) {
+    ScrollMetrics position,
+    double velocity,
+  ) {
     // If we are out of bounds (overscroll), use default spring
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
@@ -876,7 +901,10 @@ class _MomentumSnapPhysics extends ScrollPhysics {
   }
 
   double _getTargetPixels(
-      ScrollMetrics position, Tolerance tolerance, double velocity) {
+    ScrollMetrics position,
+    Tolerance tolerance,
+    double velocity,
+  ) {
     double page = position.pixels / itemSize;
     // If we have a little velocity, bias the snap in that direction
     if (velocity < -tolerance.velocity) {
@@ -927,7 +955,6 @@ class _HeightRulerState extends State<HeightRuler> {
     if (oldWidget.initialHeight != widget.initialHeight ||
         oldWidget.isCm != widget.isCm ||
         oldWidget.minHeight != widget.minHeight) {
-
       // Re-calculate offset because the scale (cm vs in) or range changed
       double offset = (widget.initialHeight - widget.minHeight) * tickHeight;
 
@@ -1012,7 +1039,9 @@ class _HeightRulerState extends State<HeightRuler> {
                         // Feet/Inch Logic:
                         // Use epsilon for double comparison safety
                         double remainder = value % 12;
-                        bool isFoot = (remainder).abs() < 0.1 || (12 - remainder).abs() < 0.1;
+                        bool isFoot =
+                            (remainder).abs() < 0.1 ||
+                            (12 - remainder).abs() < 0.1;
                         bool isHalfFoot = (value % 6).abs() < 0.1;
 
                         isMajor = isFoot;
@@ -1034,7 +1063,9 @@ class _HeightRulerState extends State<HeightRuler> {
                             width: isMajor ? 60 : (isMedium ? 40 : 25),
                             color: isMajor
                                 ? Colors.grey.shade600
-                                : (isMedium ? Colors.grey.shade400 : Colors.grey.shade300),
+                                : (isMedium
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade300),
                             margin: const EdgeInsets.only(right: 10),
                           ),
                           if (isMajor)
@@ -1113,7 +1144,8 @@ class _TopToastWidget extends StatefulWidget {
   State<_TopToastWidget> createState() => _TopToastWidgetState();
 }
 
-class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProviderStateMixin {
+class _TopToastWidgetState extends State<_TopToastWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   Timer? _timer;
@@ -1212,8 +1244,7 @@ class AuthHeader extends StatelessWidget {
   const AuthHeader({
     super.key,
     this.height = 300,
-    this.imagePath =
-    "assets/images/authentication/login_bg.png",
+    this.imagePath = "assets/images/authentication/login_bg.png",
   });
 
   @override
@@ -1275,10 +1306,7 @@ class InputLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(fontWeight: FontWeight.w600),
-    );
+    return Text(text, style: const TextStyle(fontWeight: FontWeight.w600));
   }
 }
 
@@ -1287,7 +1315,8 @@ class InputField extends StatefulWidget {
   final bool isPassword;
   final TextEditingController controller;
 
-  const InputField({super.key,
+  const InputField({
+    super.key,
     required this.icon,
     required this.controller,
     this.isPassword = false,
@@ -1309,11 +1338,9 @@ class InputFieldState extends State<InputField> {
         prefixIcon: Icon(widget.icon),
         suffixIcon: widget.isPassword
             ? IconButton(
-          icon: Icon(
-            _obscure ? Icons.visibility_off : Icons.visibility,
-          ),
-          onPressed: () => setState(() => _obscure = !_obscure),
-        )
+                icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                onPressed: () => setState(() => _obscure = !_obscure),
+              )
             : null,
         filled: true,
         fillColor: Colors.grey.shade100,
@@ -1444,7 +1471,10 @@ class HomeHeader extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             formattedDate,
-                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),

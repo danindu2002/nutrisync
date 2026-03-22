@@ -96,7 +96,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     const Text(
                       "Reset\nPassword",
                       style: TextStyle(
