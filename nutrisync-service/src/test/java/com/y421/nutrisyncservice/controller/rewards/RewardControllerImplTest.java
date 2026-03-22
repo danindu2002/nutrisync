@@ -65,4 +65,58 @@ class RewardControllerImplTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
+
+    @Test
+    void claimReward_UserOrRewardNotFound() {
+    // Arrange
+    ClaimRewardDTO dto = new ClaimRewardDTO();
+
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("User or Reward not found", HttpStatus.NOT_FOUND);
+
+    when(rewardService.claimReward(any(ClaimRewardDTO.class)))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            rewardController.claimReward(dto);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void getAllRewards_Exception_ReturnsBadRequest() {
+    // Arrange
+    when(rewardService.getAllRewards())
+            .thenThrow(new RuntimeException("DB error"));
+
+    // Act
+    ResponseEntity<Object> response =
+            rewardController.getAllRewards();
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void claimReward_MultipleCalls_SameUser() {
+    // Arrange
+    ClaimRewardDTO dto = new ClaimRewardDTO();
+
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Reward claimed successfully", HttpStatus.OK);
+
+    when(rewardService.claimReward(any(ClaimRewardDTO.class)))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response1 = rewardController.claimReward(dto);
+    ResponseEntity<Object> response2 = rewardController.claimReward(dto);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response1.getStatusCode());
+    assertEquals(HttpStatus.OK, response2.getStatusCode());
+    }
+
 }

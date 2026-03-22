@@ -63,4 +63,41 @@ class RiskPredictorControllerImplTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
+
+    @Test
+    void predictRisk_Success_WithBodyValidation() {
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("DetailedRiskData", HttpStatus.OK);
+
+    when(riskPredictorService.predictRisk(1L, 3)).thenReturn(serviceResponse);
+
+    ResponseEntity<Object> response = riskPredictorController.predictRisk(1L, 3);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("DetailedRiskData", response.getBody());
+    }
+
+    @Test
+    void predictRisk_EdgeCase_InvalidYears() {
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Invalid prediction period", HttpStatus.BAD_REQUEST);
+
+    when(riskPredictorService.predictRisk(1L, 0)).thenReturn(serviceResponse);
+
+    ResponseEntity<Object> response = riskPredictorController.predictRisk(1L, 0);
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void predictRisk_EdgeCase_NullResponse() {
+    when(riskPredictorService.predictRisk(anyLong(), anyInt())).thenReturn(null);
+
+    ResponseEntity<Object> response = riskPredictorController.predictRisk(1L, 5);
+
+    // Depends on your controller implementation
+    // If you handle null → BAD_REQUEST or INTERNAL_SERVER_ERROR
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
 }
