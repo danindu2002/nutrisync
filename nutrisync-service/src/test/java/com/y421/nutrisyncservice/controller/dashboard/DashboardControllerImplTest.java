@@ -77,4 +77,39 @@ class DashboardControllerImplTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
+    @Test
+    void getCaloriesChart_DayRange_Success() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("dayData", HttpStatus.OK);
+
+    when(dashboardService.getCaloriesChart(1L, "day"))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            dashboardController.getCaloriesChart(1L, "day");
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getNutritionChart_ExceptionThrown_ReturnsBadRequest() {
+    // Arrange
+    when(dashboardService.getNutritionChart(anyLong(), anyString()))
+            .thenThrow(new RuntimeException("Error"));
+
+    // Act
+    ResponseEntity<Object> response =
+            dashboardController.getNutritionChart(1L, "week");
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+
+
 }
