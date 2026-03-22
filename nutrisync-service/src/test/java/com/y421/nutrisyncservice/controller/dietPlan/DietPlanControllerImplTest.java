@@ -107,4 +107,59 @@ class DietPlanControllerImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
     }
+
+    @Test
+    void getAllDietPlansByUser_Success() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("planList", HttpStatus.OK);
+
+    when(dietPlanService.getAllDietPlansByUser(1L))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            dietPlanController.getAllDietPlansByUser(1L);
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void deleteDietPlan_Success() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Deleted", HttpStatus.OK);
+
+    when(dietPlanService.deleteDietPlan(1L))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            dietPlanController.deleteDietPlan(1L);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void deleteDietPlan_NotFound() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
+
+    when(dietPlanService.deleteDietPlan(999L))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            dietPlanController.deleteDietPlan(999L);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+
+
 }

@@ -89,4 +89,63 @@ class ChallengeControllerImplTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
+    @Test
+    void getAvailableChallenges_Success() {
+    // Arrange
+    Long userId = 1L;
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("availableChallenges", HttpStatus.OK);
+
+    when(challengeService.getAvailableChallenges(userId))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            challengeController.getAvailableChallenges(userId);
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getActiveChallenges_Success() {
+    // Arrange
+    Long userId = 1L;
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("activeChallenges", HttpStatus.OK);
+
+    when(challengeService.getActiveChallenges(userId))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            challengeController.getActiveChallenges(userId);
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getUserPoints_Success() {
+    // Arrange
+    Long userId = 1L;
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>(100, HttpStatus.OK);
+
+    when(challengeService.getUserPoints(userId))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            challengeController.getUserPoints(userId);
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+
 }

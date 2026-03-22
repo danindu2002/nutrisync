@@ -78,4 +78,56 @@ class ImpactSimulatorControllerImplTest {
  
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
+
+    @Test
+    void simulateImpact_UserNotFound() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+
+    when(impactSimulatorService.simulateImpact(1L, 3))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            impactSimulatorController.simulateImpact(1L, 3);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void simulateImpact_NoActivePlan() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("No Active Diet Plan Found", HttpStatus.NOT_FOUND);
+
+    when(impactSimulatorService.simulateImpact(2L, 3))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            impactSimulatorController.simulateImpact(2L, 3);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void simulateImpact_RateLimitExceeded() {
+    // Arrange
+    ResponseEntity<Object> serviceResponse =
+            new ResponseEntity<>("Rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS);
+
+    when(impactSimulatorService.simulateImpact(1L, 6))
+            .thenReturn(serviceResponse);
+
+    // Act
+    ResponseEntity<Object> response =
+            impactSimulatorController.simulateImpact(1L, 6);
+
+    // Assert
+    assertEquals(HttpStatus.TOO_MANY_REQUESTS, response.getStatusCode());
+    }
+
 }
