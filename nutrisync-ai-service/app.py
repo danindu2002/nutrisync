@@ -537,4 +537,4 @@ def format_meal_logs(meal_logs):
     return formatted
         
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)

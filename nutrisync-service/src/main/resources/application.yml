@@ -96,5 +96,5 @@ new-login-pwd:
   numbers: true
   length: 8
 
-python-service-url: http://nutrisync-ai-service:5000
+python-service-url: http://nutrisync-ai-service:5002
 aes-secret-key: mySecretKey1234567890221
