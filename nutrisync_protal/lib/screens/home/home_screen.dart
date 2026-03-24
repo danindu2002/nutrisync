@@ -224,14 +224,14 @@ class _MetricsRow extends StatelessWidget {
           color: Colors.red,
           icon: Icons.local_fire_department,
         ),
-        const SizedBox(width: 10), // Slightly reduced gap for small screens
+        const SizedBox(width: 6), // Slightly reduced gap for small screens
         _MetricCard(
           title: "Calorie Goal",
           value: "$calories",
           color: Colors.blueGrey,
           icon: Icons.gps_fixed_outlined,
         ),
-        const SizedBox(width: 10), // Slightly reduced gap
+        const SizedBox(width: 6), // Slightly reduced gap
         _MetricCard(
           title: "Active Challenges",
           value: "$challenges",
@@ -261,7 +261,7 @@ class _MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        height: 110,
+        height: 112,
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           // Clean, simplistic gradient without extra background shapes

@@ -393,7 +393,7 @@ class _AILoadingStateState extends State<AILoadingState> with SingleTickerProvid
     "Evaluating NutriSync diet plan...",
     "Simulating metabolic changes...",
     "Projecting 6 months into the future...",
-    "Finalizing health predictions...",
+    "Visualizing your transformation..."
   ];
 
   @override

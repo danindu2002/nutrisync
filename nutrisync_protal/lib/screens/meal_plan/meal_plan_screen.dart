@@ -84,7 +84,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
               final res = await DietPlanService.deleteDietPlan(planId);
 
-              LoadingIndicator.hide(context);
+              if (mounted) LoadingIndicator.hide(context);
 
               if (res.success) {
                 showModernToast(context, 'Plan deleted', type: 'success');
@@ -299,7 +299,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
                             final res = await DietPlanService.updatePlanMetadata(plan['planId'], payload);
 
-                            LoadingIndicator.hide(context);
+                            if (mounted) LoadingIndicator.hide(context);
 
                             if (res.success) {
                               showModernToast(context, 'Meal plan updated successfully', type: 'success');
@@ -336,33 +336,43 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
   Widget _buildEmptyState() {
     return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/meal_plan/MealPlan.png',
-            height: 220,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'No Meal Plans Yet',
-            style: AppTextStyles.header.copyWith(fontSize: 24),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Create personalized meal plans tailored to your goals and nutrition needs.',
-            style: AppTextStyles.subHeader,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          _buildFeaturePoint(Icons.schedule, 'Full Daily Coverage'),
-          const SizedBox(height: 12),
-          _buildFeaturePoint(Icons.flag, 'Goal-Oriented'),
-          const SizedBox(height: 12),
-          _buildFeaturePoint(Icons.local_dining, 'Nutrient Dense'),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/meal_plan/MealPlan.png',
+              height: 220,
+              fit: BoxFit.contain,
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'No Meal Plans Yet',
+              style: AppTextStyles.header.copyWith(fontSize: 24),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              'Create personalized meal plans tailored to your goals and nutrition needs.',
+              style: AppTextStyles.subHeader,
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 24),
+
+            _buildFeaturePoint(Icons.schedule, 'Full Daily Coverage'),
+            const SizedBox(height: 12),
+            _buildFeaturePoint(Icons.flag, 'Goal-Oriented'),
+            const SizedBox(height: 12),
+            _buildFeaturePoint(Icons.local_dining, 'Nutrient Dense'),
+
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

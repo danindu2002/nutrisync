@@ -6,6 +6,7 @@ import '../../core/constants.dart';
 import '../../models/log_meal_dto.dart';
 import '../../services/meal_service.dart';
 import '../../widgets/common_widgets.dart';
+import '../home/main_navigation_screen.dart';
 
 class AddMealScreen extends StatefulWidget {
   final bool isManual;
@@ -142,7 +143,10 @@ class _AddMealScreenState extends State<AddMealScreen> {
 
       if (response.success) {
         showModernToast(context, "Meal added successfully!", type: 'success');
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+              (route) => false,
+        );
       } else {
         showModernToast(context, response.message.isNotEmpty ? response.message : "Failed to add meal", type: 'error');
       }
