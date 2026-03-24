@@ -19,6 +19,6 @@ RUN pip install --no-cache-dir \
     python-dotenv \
     google-genai
 
-EXPOSE 5000
+EXPOSE 5002
 
 CMD ["python", "app.py"]
