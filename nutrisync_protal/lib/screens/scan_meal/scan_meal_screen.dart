@@ -27,8 +27,8 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
   void _showPickerOptions() {
     showModalBottomSheet(
       context: context,
-      isDismissible: false,
-      enableDrag: false,
+      isDismissible: true,
+      enableDrag: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

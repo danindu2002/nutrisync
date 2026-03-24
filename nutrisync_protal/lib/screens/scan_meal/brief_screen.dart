@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:NutriSync/services/meal_service.dart';
 import 'package:flutter/material.dart';
@@ -67,16 +68,7 @@ class _BriefScreenState extends State<BriefScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: Colors.redAccent),
-            SizedBox(height: 16),
-            Text("Analyzing Meal...", style: TextStyle(fontWeight: FontWeight.w600)),
-          ],
-        ),
-      )
+          ? ScanMealAILoadingState()
           : _mealData == null
           ? _buildIdentifyFailedView()
           : SingleChildScrollView(
@@ -273,6 +265,100 @@ class _BriefScreenState extends State<BriefScreen> {
         color: microItems[index]['color'] as Color,
         isMicro: true,
         microLabel: microItems[index]['label'] as String,
+      ),
+    );
+  }
+}
+
+class ScanMealAILoadingState extends StatefulWidget {
+  const ScanMealAILoadingState({super.key});
+
+  @override
+  State<ScanMealAILoadingState> createState() => _ScanMealAILoadingState();
+}
+
+class _ScanMealAILoadingState extends State<ScanMealAILoadingState> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  Timer? _textTimer;
+  int _textIndex = 0;
+
+  final List<String> _loadingPhrases = [
+    "Scanning your meal...",
+    "Identifying ingredients...",
+    "Estimating calories...",
+    "Analyzing nutrients...",
+    "Preparing your meal insights...",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _textTimer = Timer.periodic(const Duration(milliseconds: 2500), (timer) {
+      if (mounted) {
+        setState(() {
+          _textIndex = (_textIndex + 1) % _loadingPhrases.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _textTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 60.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ScaleTransition(
+              scale: Tween<double>(begin: 0.85, end: 1.15).animate(
+                CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+              ),
+              child: Icon(
+                Icons.restaurant_menu_rounded,
+                size: 90,
+                color: AppColors.primary.withOpacity(0.85),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Text(
+                _loadingPhrases[_textIndex],
+                key: ValueKey<int>(_textIndex),
+                style: AppTextStyles.subHeader.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSub,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

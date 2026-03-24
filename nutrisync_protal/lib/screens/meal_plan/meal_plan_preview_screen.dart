@@ -96,7 +96,7 @@ class _MealPlanPreviewScreenState extends State<MealPlanPreviewScreen> {
 
     final response = await DietPlanService.saveDietPlan(payload);
 
-    LoadingIndicator.hide(context);
+    if (mounted) LoadingIndicator.hide(context);
 
     if (response.success) {
       showModernToast(context, 'Plan saved successfully!', type: 'success');

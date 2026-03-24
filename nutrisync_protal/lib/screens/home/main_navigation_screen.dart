@@ -21,7 +21,7 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  // 1. Create unique GlobalKeys for each tab's Navigator
+  // Create unique GlobalKeys for each tab's Navigator
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
     GlobalKey<NavigatorState>(), // Home
     GlobalKey<NavigatorState>(), // Analytics
@@ -48,7 +48,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 3. Use PopScope to handle the Android hardware back button
     // This ensures back button pops nested screens before closing the app
     return PopScope(
       canPop: false,
@@ -91,7 +90,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  // 4. Helper method to wrap each tab in a nested Navigator
+  // Helper method to wrap each tab in a nested Navigator
   Widget _buildTabNavigator(int index, Widget rootPage) {
     return Navigator(
       key: _navigatorKeys[index],
