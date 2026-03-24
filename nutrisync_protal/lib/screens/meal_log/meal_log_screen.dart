@@ -217,20 +217,7 @@ class _MealLogScreenState extends State<MealLogScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    onPressed: () => Navigator.of(context, rootNavigator: true).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ScanMealScreen(),
-                      ),
-                    ), // Navigate to AddMealScreen here if needed
-                  ),
-                ),
+                const SizedBox(width: 48),
               ],
             ),
           ),

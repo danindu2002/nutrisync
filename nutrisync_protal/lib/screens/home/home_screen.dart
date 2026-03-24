@@ -219,21 +219,21 @@ class _MetricsRow extends StatelessWidget {
     return Row(
       children: [
         _MetricCard(
-          title: "Health Score",
+          title: "Health\nScore",
           value: "$score%",
           color: Colors.red,
           icon: Icons.local_fire_department,
         ),
         const SizedBox(width: 6), // Slightly reduced gap for small screens
         _MetricCard(
-          title: "Calorie Goal",
+          title: "Calorie\nGoal",
           value: "$calories",
           color: Colors.blueGrey,
           icon: Icons.gps_fixed_outlined,
         ),
         const SizedBox(width: 6), // Slightly reduced gap
         _MetricCard(
-          title: "Active Challenges",
+          title: "Active\nChallenges",
           value: "$challenges",
           color: Colors.black38,
           icon: Icons.directions_run_sharp,
@@ -262,7 +262,7 @@ class _MetricCard extends StatelessWidget {
     return Expanded(
       child: Container(
         height: 112,
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
           // Clean, simplistic gradient without extra background shapes
           gradient: LinearGradient(
@@ -295,7 +295,7 @@ class _MetricCard extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       color: Colors.white70,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.1,
                       height: 1.2,

@@ -61,15 +61,15 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     }
   }
 
-  void _showDeleteConfirmation(int planId) {
+  void _showDeleteConfirmation(BuildContext parentContext, int planId) {
     showDialog(
-      context: context,
+      context: parentContext,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Delete Plan?', style: AppTextStyles.header.copyWith(fontSize: 20)),
         content: Text(
-          'Are you sure you want to delete this meal plan? This action cannot be undone.',
+          'Are you sure you want to delete this meal plan?',
           style: AppTextStyles.subHeader,
         ),
         actions: [
@@ -80,17 +80,14 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context); // Close dialog
-              LoadingIndicator.show(context);
 
               final res = await DietPlanService.deleteDietPlan(planId);
 
-              if (mounted) LoadingIndicator.hide(context);
-
               if (res.success) {
-                showModernToast(context, 'Plan deleted', type: 'success');
+                showModernToast(parentContext, 'Meal Plan deleted', type: 'success');
                 _fetchPlans(); // Refresh the list
               } else {
-                showModernToast(context, 'Failed to delete plan', type: 'error');
+                showModernToast(parentContext, 'Failed to delete meal plan', type: 'error');
               }
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
@@ -113,7 +110,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     ).then((_) => _fetchPlans()); // Refresh list when returning
   }
 
-  void _showEditMealPlanPopup(Map<String, dynamic> plan) {
+  void _showEditMealPlanPopup(BuildContext parentContext, Map<String, dynamic> plan) {
     final TextEditingController nameController =
     TextEditingController(text: plan['dietPlanName'] ?? '');
     final TextEditingController descriptionController =
@@ -124,7 +121,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     bool isUploadingImage = false;
 
     showDialog(
-      context: context,
+      context: parentContext,
       barrierDismissible: true,
       builder: (context) {
         return Dialog(
@@ -288,8 +285,6 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                           ),
                           onPressed: () async {
                             Navigator.pop(context); // Close dialog
-                            LoadingIndicator.show(context); // Show full-screen loader
-
                             // Send the updated URL to Spring Boot
                             final payload = {
                               "dietPlanName": nameController.text.trim(),
@@ -299,13 +294,11 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
                             final res = await DietPlanService.updatePlanMetadata(plan['planId'], payload);
 
-                            if (mounted) LoadingIndicator.hide(context);
-
                             if (res.success) {
-                              showModernToast(context, 'Meal plan updated successfully', type: 'success');
+                              showModernToast(parentContext, 'Meal plan updated successfully', type: 'success');
                               _fetchPlans(); // Refresh the list screen to show new data
                             } else {
-                              showModernToast(context, 'Failed to update plan', type: 'error');
+                              showModernToast(parentContext, 'Failed to update plan', type: 'error');
                             }
                           },
                           child: Text(
@@ -482,7 +475,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
             // Middle: Edit Button
             GestureDetector(
-              onTap: () => _showEditMealPlanPopup(plan),
+              onTap: () => _showEditMealPlanPopup(context, plan),
               child: Container(
                 width: 48,
                 color: AppColors.primary,
@@ -492,7 +485,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
             // Right: Delete Button
             GestureDetector(
-              onTap: () => _showDeleteConfirmation(planId),
+              onTap: () => _showDeleteConfirmation(context, planId),
               child: Container(
                 width: 48,
                 decoration: const BoxDecoration(
