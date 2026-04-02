@@ -11,16 +11,20 @@ import '../screens/home/main_navigation_screen.dart';
 
 // API Constants to handle different environments (web, Android, iOS)
 class ApiConstants {
+  static const String _localhostUrl = "http://localhost:8081/api/v1";
+  static const String _emulatorUrl = "http://10.0.2.2:8081/api/v1";
+  static const String _prodBaseUrl = "http://213.35.115.255:8081/api/v1";
+
   static String get baseUrl {
     if (kIsWeb) {
-      /// Local Environment Base URL
-      return "http://localhost:8081/api/v1";
-      /// Production Environment Base URL
-      // return "http://213.35.115.255:8081/api/v1";
+      return _localhostUrl;
+      // return _prodBaseUrl;
     } else if (Platform.isAndroid) {
-      return "http://10.0.2.2:8081/api/v1";
+      return _emulatorUrl;
+      // return _prodBaseUrl;
     } else {
-      return "http://localhost:8081/api/v1";
+      return _localhostUrl;
+      // return _prodBaseUrl;
     }
   }
 }
