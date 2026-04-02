@@ -60,8 +60,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: nutrisync.marketing@gmail.com
-    password: bcty akws tzov fian
+    username: nutrisync.support@gmail.com
+    password: sbmr ovto rztf amht
     properties:
       mail:
         smtp:
